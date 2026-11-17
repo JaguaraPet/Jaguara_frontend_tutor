@@ -1,0 +1,30 @@
+name: CI
+
+# Só em pull requests: a main só recebe código por PR (ADR-008), e assim o CI não roda duas vezes.
+on:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    name: Lint, tipos e exportação
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Verificação de tipos
+        run: npm run typecheck
+      - name: Auditoria de dependências
+        # Alertas altos sem correção e sem risco no aparelho ficam em .auditoria-permitida.json, com motivo e prazo.
+        run: node scripts/auditar.mjs
+      - name: Exportação do bundle (garante que o app compila)
+        run: npx expo export --platform android --output-dir dist
