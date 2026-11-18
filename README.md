@@ -22,6 +22,20 @@ src/
   hooks/        hooks compartilhados
 ```
 
+## Design e componentes base
+
+Os tokens do UX-02 (cores, tipografia Inter, espaçamento de 4 px, raio de 8 px e área de toque de 44 px) ficam em `src/tema/tokens.ts`, arquivo idêntico ao da web Enterprise. Os componentes base ficam em `src/componentes`:
+
+| Componente | Estados e acessibilidade |
+|---|---|
+| `Botao` | Variantes primária, secundária, perigo e texto; pressionado, foco, desabilitado e carregando; área mínima de 44 px |
+| `Campo` | Rótulo sempre visível, ajuda, foco, desabilitado e erro anunciado pelo leitor de tela |
+| `Cartao` | Agrupa informações sobre a cor de superfície; pode ser tocável |
+| `Alerta` | Sucesso, alerta, erro e informação, com cor, ícone e texto (a cor nunca é o único indicador) |
+| `Texto` | Títulos, corpo e legenda; acompanha a fonte ampliada do sistema |
+
+Em desenvolvimento, a tela inicial tem o atalho "Ver componentes", que abre o catálogo com todos os estados. Os testes (`npm test`) usam Jest com React Testing Library (TST-01).
+
 ## Dependências
 
 - Gerenciador: **npm** (versão 11 ou maior), com o `package-lock.json` versionado. Instale com `npm ci` para reproduzir exatamente as versões do lock.
