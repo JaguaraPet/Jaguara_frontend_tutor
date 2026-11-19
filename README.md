@@ -2,6 +2,9 @@
 
 App mobile do tutor, em React Native com Expo e Expo Router (ADR-007).
 
+
+Novo no projeto? O [guia do ambiente de desenvolvimento (ENT-05)](https://github.com/JaguaraPet/Jaguara_doc/blob/main/docs/07-entrega/ENT-05-guia-do-ambiente.md) mostra como subir API, web e app juntos, do zero.
+
 ## Rodar
 
 ```bash
@@ -46,6 +49,14 @@ npm run api:gerar      # gera src/api/esquema.ts
 ```
 
 Use o cliente de `src/api/cliente.ts` (openapi-fetch); o endereço vem de `EXPO_PUBLIC_API_URL` (no celular, use o IP do computador): rotas, parâmetros e respostas são conferidos pelo TypeScript. O CI falha se `src/api/esquema.ts` não estiver igual ao gerado a partir de `api/openapi.yaml`.
+
+## Problemas comuns
+
+| Sintoma | Solução |
+|---|---|
+| O app no celular não acessa a API | Use o IP do computador em `EXPO_PUBLIC_API_URL` (arquivo `.env`) e a mesma rede Wi-Fi |
+| O Expo Go não abre o projeto | Celular e computador precisam estar na mesma rede; tente `npx expo start --tunnel` |
+| CI falha em "Cliente da API igual ao contrato" | Rode `npm run api:gerar` e versione o `src/api/esquema.ts` |
 
 ## Dependências
 
