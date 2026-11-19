@@ -19,6 +19,8 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - name: Cliente da API igual ao contrato
+        run: npm run api:gerar && git diff --exit-code -- src/api/esquema.ts
       - name: Lint
         run: npm run lint
       - name: Verificação de tipos
