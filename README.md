@@ -31,6 +31,8 @@ src/
 
 As abas Início, Pets, Agenda, Serviços e Perfil (UX-01, seção 3) ficam em `src/app/(abas)` e exigem login: sem sessão, o app abre as boas-vindas, com os botões Entrar e Criar conta. O access token fica só em memória e o refresh token no armazenamento seguro do aparelho (`expo-secure-store`). Ao abrir o app, a sessão é restaurada pelo refresh token, e o cliente da API renova o token e repete a requisição quando recebe 401. Só contas de tutor entram no app; empresas usam a web Enterprise.
 
+A tela Entrar (`src/app/entrar.tsx`, UC-02) pede e-mail e senha e explica cada recusa da API: senha incorreta, conta bloqueada por tentativas (RN03), e-mail não confirmado (RN02) e conta de empresa.
+
 ## Busca de empresas e catálogo (UC-33)
 
 A aba Serviços busca empresas com serviços ativos pelo nome ou por um serviço (`GET /empresas`) e filtra por categoria. Tocar numa empresa abre `/empresa/[empresaId]`, com o perfil público e o catálogo: nome, descrição, preço e duração de cada serviço ativo. Os rótulos e formatos ficam em `src/catalogo/catalogo.ts`.
