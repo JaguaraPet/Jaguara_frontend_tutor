@@ -21,6 +21,11 @@ export default function Inicio() {
           aoTocar={() => router.push('/agenda')}
         />
         <Cartao
+          titulo="Assistente virtual"
+          subtitulo="Dúvidas do dia a dia do seu pet (PANTERA)"
+          aoTocar={() => router.push('/assistente')}
+        />
+        <Cartao
           titulo="Serviços"
           subtitulo="Encontre clínicas, pet shops e hotéis"
           aoTocar={() => router.push('/servicos')}
