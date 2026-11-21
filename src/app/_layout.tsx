@@ -2,7 +2,8 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { sessao } from '../sessao/sessao';
 import { fontesInter } from '../tema/fontes';
 import { cores } from '../tema/tokens';
 
@@ -10,13 +11,19 @@ void SplashScreen.preventAutoHideAsync();
 
 export default function LayoutRaiz() {
   const [fontesCarregadas, erroFontes] = useFonts(fontesInter);
+  const [sessaoPronta, setSessaoPronta] = useState(false);
 
+  // Restaura a sessão pelo refresh token guardado antes de decidir a primeira tela.
   useEffect(() => {
-    if (fontesCarregadas || erroFontes) void SplashScreen.hideAsync();
-  }, [fontesCarregadas, erroFontes]);
+    void sessao.renovar().finally(() => setSessaoPronta(true));
+  }, []);
 
-  // Sem a fonte, segue com a do sistema em vez de travar na abertura.
-  if (!fontesCarregadas && !erroFontes) return null;
+  const pronto = (fontesCarregadas || !!erroFontes) && sessaoPronta;
+  useEffect(() => {
+    if (pronto) void SplashScreen.hideAsync();
+  }, [pronto]);
+
+  if (!pronto) return null;
 
   return (
     <>
