@@ -19,11 +19,17 @@ Abra no celular com o Expo Go (mesma rede Wi-Fi) ou num emulador.
 ```text
 src/
   app/          telas e rotas (Expo Router)
+    (abas)/     abas do tutor logado: Início, Pets, Agenda, Serviços e Perfil
+  sessao/       sessão do tutor (tokens e usuário logado)
   componentes/  componentes de interface
   tema/         tokens do UX-02
   api/          cliente da API
   hooks/        hooks compartilhados
 ```
+
+## Navegação e sessão
+
+As abas Início, Pets, Agenda, Serviços e Perfil (UX-01, seção 3) ficam em `src/app/(abas)` e exigem login: sem sessão, o app abre as boas-vindas, com os botões Entrar e Criar conta. O access token fica só em memória e o refresh token no armazenamento seguro do aparelho (`expo-secure-store`). Ao abrir o app, a sessão é restaurada pelo refresh token, e o cliente da API renova o token e repete a requisição quando recebe 401. Só contas de tutor entram no app; empresas usam a web Enterprise.
 
 ## Design e componentes base
 
