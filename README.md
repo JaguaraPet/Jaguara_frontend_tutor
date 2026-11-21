@@ -33,6 +33,10 @@ As abas Início, Pets, Agenda, Serviços e Perfil (UX-01, seção 3) ficam em `s
 
 A tela Entrar (`src/app/entrar.tsx`, UC-02) pede e-mail e senha e explica cada recusa da API: senha incorreta, conta bloqueada por tentativas (RN03), e-mail não confirmado (RN02) e conta de empresa.
 
+## Cadastro e edição do pet (UC-04)
+
+Na aba Pets, "Cadastrar pet" abre `/pets/novo`; a edição fica em `/pets/[petId]/editar`. O formulário (`src/pets/FormularioPet.tsx`) traz espécies e raças do catálogo (`GET /especies`, RN07), sexo, data de nascimento com máscara DD/MM/AAAA, peso, cor, microchip e castração, e valida no aparelho antes de enviar, dizendo o que corrigir. Quem cadastra fica como responsável principal (RN09).
+
 ## Busca de empresas e catálogo (UC-33)
 
 A aba Serviços busca empresas com serviços ativos pelo nome ou por um serviço (`GET /empresas`) e filtra por categoria. Tocar numa empresa abre `/empresa/[empresaId]`, com o perfil público e o catálogo: nome, descrição, preço e duração de cada serviço ativo. Os rótulos e formatos ficam em `src/catalogo/catalogo.ts`.
