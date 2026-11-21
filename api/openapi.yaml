@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Jaguara API
-  version: 1.12.0
+  version: 1.25.0
   summary: API REST da plataforma Jaguara (tutores e empresas Enterprise).
   description: |
     Contrato da API do Jaguara (tarefa JAG-68). Os recursos seguem o modelo de classes
@@ -363,6 +363,18 @@ paths:
   /pets/{petId}/compartilhamentos:
     parameters:
       - $ref: '#/components/parameters/PetId'
+    get:
+      tags: [Pets]
+      summary: Listar compartilhamentos do pet (UC-11)
+      responses:
+        '200':
+          description: Compartilhamentos com a situação atual (ativo, revogado ou expirado).
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Compartilhamento' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
     post:
       tags: [Pets]
       summary: Compartilhar perfil do pet (UC-11)
@@ -373,10 +385,83 @@ paths:
             schema: { $ref: '#/components/schemas/CompartilhamentoEntrada' }
       responses:
         '201':
-          description: Compartilhamento ativo com os escopos informados (RN15).
+          description: |
+            Compartilhamento ativo com os escopos informados (RN15). Com `destinatarioEmail`, o
+            destinatário recebe por e-mail um link de leitura sem conta; o `link` só aparece nesta
+            resposta. Com `empresaId`, o acesso vale dentro do sistema. Informe um dos dois.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Compartilhamento' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '422': { $ref: '#/components/responses/Validacao' }
+  /compartilhamentos/{compartilhamentoId}/revogacao:
+    parameters:
+      - in: path
+        name: compartilhamentoId
+        required: true
+        schema: { type: string, format: uuid }
+    post:
+      tags: [Pets]
+      summary: Revogar compartilhamento (UC-11)
+      responses:
+        '204': { description: "Acesso revogado na hora." }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+  /compartilhados/{token}:
+    parameters:
+      - in: path
+        name: token
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Pets]
+      summary: Ver o perfil compartilhado por link (UC-11)
+      security: []
+      responses:
+        '200':
+          description: Nome do pet, dados básicos se liberados e as seções compartilhadas.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pet:
+                    type: object
+                    properties:
+                      nome: { type: string }
+                      especie: { type: string }
+                      raca: { type: string }
+                      sexo: { type: string }
+                      castrado: { type: boolean }
+                      idadeAnos: { type: integer }
+                  escopos: { type: array, items: { type: string } }
+                  secoes:
+                    type: array
+                    items: { type: string, enum: [vacinas, exames, medicamentos, alergias] }
+                  dataExpiracao: { type: string, format: date-time }
+        '410': { $ref: '#/components/responses/Expirado' }
+  /compartilhados/{token}/{secao}:
+    parameters:
+      - in: path
+        name: token
+        required: true
+        schema: { type: string }
+      - in: path
+        name: secao
+        required: true
+        schema: { type: string, enum: [vacinas, exames, medicamentos, alergias] }
+    get:
+      tags: [Pets]
+      summary: Ver uma seção do perfil compartilhado (UC-11)
+      security: []
+      responses:
+        '200':
+          description: Registros da seção, só se o escopo foi compartilhado (CT-11-02).
+          content:
+            application/json:
+              schema: { type: array, items: { type: object } }
+        '403': { $ref: '#/components/responses/SemPermissao' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '410': { $ref: '#/components/responses/Expirado' }
   /pets/{petId}/linha-do-tempo:
     parameters:
       - $ref: '#/components/parameters/PetId'
@@ -421,20 +506,45 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Vacinacao' }
+        '403': { $ref: '#/components/responses/SemPermissao' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
         '422': { $ref: '#/components/responses/Validacao' }
   /pets/{petId}/tratamentos:
     parameters:
       - $ref: '#/components/parameters/PetId'
+    get:
+      tags: [Saúde]
+      summary: Listar tratamentos medicamentosos (UC-14)
+      responses:
+        '200':
+          description: Tratamentos do pet, do mais recente para o mais antigo.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Tratamento' }
+        '403': { $ref: '#/components/responses/SemPermissao' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
     post:
       tags: [Saúde]
       summary: Cadastrar tratamento medicamentoso (UC-14)
+      description: |
+        Agenda um lembrete por dose para cada responsável do pet, da primeira dose até o fim do
+        último dia (sem data de fim, os próximos 30 dias; no máximo 120 doses).
       requestBody:
         required: true
         content:
           application/json:
             schema: { $ref: '#/components/schemas/TratamentoEntrada' }
       responses:
-        '201': { description: "Tratamento ativo com lembretes agendados (RN18)." }
+        '201':
+          description: Tratamento ativo com lembretes agendados (RN18).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Tratamento' }
+        '403': { $ref: '#/components/responses/SemPermissao' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '422': { $ref: '#/components/responses/Validacao' }
   /tratamentos/{tratamentoId}/finalizacao:
     parameters:
       - in: path
@@ -446,9 +556,24 @@ paths:
       summary: Finalizar tratamento e cancelar lembretes
       responses:
         '204': { description: "Tratamento finalizado." }
+        '403': { $ref: '#/components/responses/SemPermissao' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
   /pets/{petId}/exames:
     parameters:
       - $ref: '#/components/parameters/PetId'
+    get:
+      tags: [Saúde]
+      summary: Histórico de exames (UC-36)
+      responses:
+        '200':
+          description: Exames válidos, do mais recente para o mais antigo.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Exame' }
+        '403': { $ref: '#/components/responses/SemPermissao' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
     post:
       tags: [Saúde]
       summary: Registrar exame (UC-36)
@@ -458,8 +583,14 @@ paths:
           application/json:
             schema: { $ref: '#/components/schemas/ExameEntrada' }
       responses:
-        '201': { description: "Exame registrado." }
+        '201':
+          description: Exame registrado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Exame' }
         '403': { $ref: '#/components/responses/SemPermissao' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '422': { $ref: '#/components/responses/Validacao' }
   /pets/{petId}/alergias:
     parameters:
       - $ref: '#/components/parameters/PetId'
@@ -508,6 +639,7 @@ paths:
     get:
       tags: [Rotina]
       summary: Listar eventos do calendário (UC-10)
+      description: Eventos do tutor e agendamentos ativos com empresas (origem AGENDAMENTO). Sem período, de agora a 30 dias.
       parameters:
         - in: query
           name: de
@@ -533,14 +665,102 @@ paths:
             schema: { $ref: '#/components/schemas/EventoEntrada' }
       responses:
         '201':
-          description: Evento criado e lembrete agendado.
+          description: Evento criado e lembrete agendado uma hora antes para os responsáveis (RN37).
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Evento' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '409':
+          description: O pet já tem compromisso no horário (RN14_CONFLITO_PET). Evento sem fim ocupa uma hora.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problema' }
+        '422': { $ref: '#/components/responses/Validacao' }
+  /eventos/{eventoId}:
+    parameters:
+      - in: path
+        name: eventoId
+        required: true
+        schema: { type: string, format: uuid }
+    delete:
+      tags: [Rotina]
+      summary: Excluir evento manual e cancelar o lembrete (UC-10)
+      responses:
+        '204': { description: "Evento excluído." }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
         '409': { $ref: '#/components/responses/Conflito' }
+  /pets/{petId}/plano-alimentar:
+    parameters:
+      - $ref: '#/components/parameters/PetId'
+    get:
+      tags: [Rotina]
+      summary: Ver o plano alimentar ativo (UC-08)
+      responses:
+        '200':
+          description: Plano ativo, ou `plano` nulo quando não há.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plano:
+                    oneOf:
+                      - $ref: '#/components/schemas/PlanoAlimentar'
+                      - type: 'null'
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+    put:
+      tags: [Rotina]
+      summary: Definir meta e limite diários (UC-08, RN12)
+      description: Substitui o plano ativo; o anterior fica no histórico.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [alimento, metaDiariaGramas, refeicoesPorDia]
+              properties:
+                alimento: { type: string }
+                metaDiariaGramas: { type: number, exclusiveMinimum: 0 }
+                limiteDiarioGramas:
+                  type: number
+                  exclusiveMinimum: 0
+                  description: Não pode ser menor que a meta.
+                refeicoesPorDia: { type: integer, minimum: 1, maximum: 12 }
+      responses:
+        '200':
+          description: Plano ativo.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlanoAlimentar' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '422': { $ref: '#/components/responses/Validacao' }
   /pets/{petId}/refeicoes:
     parameters:
       - $ref: '#/components/parameters/PetId'
+    get:
+      tags: [Rotina]
+      summary: Refeições do dia com o consumo (UC-08)
+      parameters:
+        - in: query
+          name: data
+          description: Dia em Brasília; padrão, hoje.
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Refeições do dia e o resumo do consumo.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResumoAlimentar'
+                  - type: object
+                    properties:
+                      data: { type: string, format: date }
+                      refeicoes:
+                        type: array
+                        items: { $ref: '#/components/schemas/Refeicao' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
     post:
       tags: [Rotina]
       summary: Registrar refeição (UC-08)
@@ -555,22 +775,105 @@ paths:
                 dataHora: { type: string, format: date-time }
                 alimento: { type: string }
                 quantidadeGramas: { type: number, exclusiveMinimum: 0 }
+                observacao: { type: string, maxLength: 1000 }
       responses:
         '201':
-          description: Refeição registrada; `limiteExcedido` indica alerta (RN12).
+          description: Refeição registrada; `limiteExcedido` indica alerta (RN12, CT-08-02).
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  consumoDoDia: { type: number }
-                  limiteExcedido: { type: boolean }
+                allOf:
+                  - $ref: '#/components/schemas/Refeicao'
+                  - $ref: '#/components/schemas/ResumoAlimentar'
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '422': { $ref: '#/components/responses/Validacao' }
+  /notificacoes:
+    get:
+      tags: [Rotina]
+      summary: Notificações do usuário, enviadas e agendadas (UC-31)
+      responses:
+        '200':
+          description: As 50 mais recentes.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Notificacao' }
+  /notificacoes/configuracoes:
+    get:
+      tags: [Rotina]
+      summary: Preferências de notificação por tipo de compromisso (RN37)
+      responses:
+        '200':
+          description: Uma configuração por tipo, com o padrão onde o usuário não mudou.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ConfiguracaoNotificacao' }
+  /notificacoes/configuracoes/{tipoEvento}:
+    parameters:
+      - in: path
+        name: tipoEvento
+        required: true
+        schema:
+          type: string
+          enum: [CONSULTA, VACINA, MEDICAMENTO, EXAME, CIRURGIA, BANHO_TOSA, HOSPEDAGEM, COMPROMISSO, OUTRO]
+    put:
+      tags: [Rotina]
+      summary: Definir canal, antecedência e liga/desliga de um tipo (RN37, CT-31-01)
+      description: Vale para os lembretes agendados daqui em diante.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [canal, antecedenciaMinutos, ativa]
+              properties:
+                canal: { type: string, enum: [PUSH, EMAIL] }
+                antecedenciaMinutos: { type: integer, minimum: 0, maximum: 10080 }
+                ativa: { type: boolean }
+      responses:
+        '200':
+          description: Configuração salva.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConfiguracaoNotificacao' }
+        '422': { $ref: '#/components/responses/Validacao' }
+  /categorias-despesa:
+    get:
+      tags: [Financeiro]
+      summary: Listar as categorias de despesa (RN10)
+      responses:
+        '200':
+          description: Categorias disponíveis, em ordem alfabética.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: string, format: uuid }
+                    nome: { type: string }
+                    descricao: { type: string }
   /pets/{petId}/despesas:
     parameters:
       - $ref: '#/components/parameters/PetId'
     get:
       tags: [Financeiro]
       summary: Listar despesas (UC-06)
+      parameters:
+        - in: query
+          name: de
+          schema: { type: string, format: date }
+        - in: query
+          name: ate
+          schema: { type: string, format: date }
+        - in: query
+          name: categoriaId
+          schema: { type: string, format: uuid }
       responses:
         '200':
           description: Despesas do pet.
@@ -593,6 +896,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Despesa' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
         '422': { $ref: '#/components/responses/Validacao' }
   /relatorios/despesas:
     get:
@@ -850,7 +1154,15 @@ paths:
                 properties:
                   agendamentos:
                     type: array
-                    items: { $ref: '#/components/schemas/Agendamento' }
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Agendamento'
+                        - type: object
+                          properties:
+                            servicoNome: { type: string }
+                            petNome: { type: string }
+                            profissionalNome: { type: string }
+                            recursoNome: { type: string }
                   solicitacoesPendentes:
                     type: array
                     items: { $ref: '#/components/schemas/Solicitacao' }
@@ -1013,6 +1325,17 @@ paths:
   /agendamentos/{agendamentoId}/atendimento:
     parameters:
       - $ref: '#/components/parameters/AgendamentoId'
+    get:
+      tags: [Atendimentos]
+      summary: Consultar o atendimento de um agendamento (UC-23)
+      responses:
+        '200':
+          description: Atendimento com os itens cobrados.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Atendimento' }
+        '403': { $ref: '#/components/responses/SemPermissao' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
     post:
       tags: [Atendimentos]
       summary: Registrar serviços e atendimento (UC-23)
@@ -1027,6 +1350,13 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Atendimento' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '409':
+          description: Atendimento já registrado (ATENDIMENTO_JA_REGISTRADO), agendamento inativo ou ainda não ocorrido (AGENDAMENTO_NAO_OCORREU).
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problema' }
+        '422': { $ref: '#/components/responses/Validacao' }
         '403': { $ref: '#/components/responses/SemPermissao' }
   /atendimentos/{atendimentoId}:
     parameters:
@@ -1054,6 +1384,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Atendimento' }
+        '403': { $ref: '#/components/responses/SemPermissao' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
         '422': { $ref: '#/components/responses/Validacao' }
 
   /empresas/{empresaId}/funcionarios:
@@ -1326,6 +1658,47 @@ paths:
           content:
             application/problem+json:
               schema: { $ref: '#/components/schemas/Problema' }
+  /assinaturas/atual:
+    get:
+      tags: [Financeiro]
+      summary: Ver o plano do tutor (gratuito ou PANTERA)
+      responses:
+        '200':
+          description: Plano vigente, a assinatura vigente ou pendente e o preço mensal.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plano: { type: string, enum: [GRATUITO, PANTERA] }
+                  vigente: { type: boolean }
+                  assinatura: { $ref: '#/components/schemas/Assinatura' }
+                  precoMensal: { type: number }
+  /assinaturas:
+    post:
+      tags: [Financeiro]
+      summary: Assinar o PANTERA (UC-43, FA1)
+      description: |
+        Cria a assinatura PENDENTE de um mês (ou devolve a que já está pendente). Pague com
+        POST /pagamentos e `assinaturaId`; ela vira ATIVA só com o pagamento confirmado (RN39).
+      responses:
+        '201':
+          description: Assinatura pendente de pagamento.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Assinatura' }
+  /assinaturas/atual/cancelamento:
+    post:
+      tags: [Financeiro]
+      summary: Cancelar a assinatura PANTERA
+      description: O acesso continua até o fim do período já pago.
+      responses:
+        '201':
+          description: Assinatura cancelada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Assinatura' }
+        '409': { $ref: '#/components/responses/Conflito' }
   /pagamentos/{pagamentoId}/reembolsos:
     parameters:
       - in: path
@@ -1572,8 +1945,37 @@ paths:
                   type: string
                   format: password
                   description: Obrigatória para exclusão.
+      description: |
+        Exportação fica pronta na hora (GET /privacidade/exportacao). Exclusão do tutor é
+        imediata: anonimiza a conta, passa os pets divididos a outro responsável, anonimiza os
+        demais e encerra as sessões. Exclusão de conta de empresa e correção ficam ABERTAS para
+        o suporte, com resposta em até 15 dias.
       responses:
-        '202': { description: "Pedido registrado; resposta em até 15 dias." }
+        '202':
+          description: Pedido registrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string, format: uuid }
+                  tipo: { type: string }
+                  status: { type: string, enum: [ABERTA, CONCLUIDA] }
+        '422':
+          description: Senha ausente ou incorreta na exclusão.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problema' }
+  /privacidade/exportacao:
+    get:
+      tags: [Privacidade]
+      summary: Exportar os dados do titular (LGPD art. 18, V)
+      responses:
+        '200':
+          description: Conta, pets, saúde, despesas, agenda, alimentação e consentimentos em JSON.
+          content:
+            application/json:
+              schema: { type: object }
 
   /admin/usuarios/{usuarioId}/status:
     parameters:
@@ -1623,10 +2025,117 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/LogAuditoria' }
+  /admin/integracoes:
+    get:
+      tags: [Administração]
+      summary: Listar integrações (UC-27)
+      responses:
+        '200':
+          description: Integrações, sem as credenciais.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Integracao' }
+        '403': { $ref: '#/components/responses/SemPermissao' }
+    post:
+      tags: [Administração]
+      summary: Criar integração (UC-27, RN33)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nome, tipo, endpointUrl, credenciais]
+              properties:
+                nome: { type: string }
+                tipo: { type: string, enum: [CALENDARIO, PAGAMENTO, PLATAFORMA_VETERINARIA, NOTIFICACAO, OUTRA] }
+                endpointUrl: { type: string, format: uri, pattern: '^https://' }
+                credenciais:
+                  type: string
+                  maxLength: 150
+                  description: Gravadas cifradas e nunca devolvidas.
+                parametros: { type: string }
+      responses:
+        '201':
+          description: Integração salva (CT-27-01).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Integracao' }
+        '403': { $ref: '#/components/responses/SemPermissao' }
+        '422': { $ref: '#/components/responses/Validacao' }
+  /admin/integracoes/{integracaoId}:
+    parameters:
+      - in: path
+        name: integracaoId
+        required: true
+        schema: { type: string, format: uuid }
+    patch:
+      tags: [Administração]
+      summary: Alterar integração (UC-27)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome: { type: string }
+                endpointUrl: { type: string, format: uri }
+                credenciais: { type: string, maxLength: 150 }
+                parametros: { type: string }
+                ativa: { type: boolean }
+      responses:
+        '200':
+          description: Integração alterada e auditada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Integracao' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '422': { $ref: '#/components/responses/Validacao' }
+  /admin/integracoes/{integracaoId}/teste:
+    parameters:
+      - in: path
+        name: integracaoId
+        required: true
+        schema: { type: string, format: uuid }
+    post:
+      tags: [Administração]
+      summary: Testar se o serviço da integração responde (CT-27-01)
+      responses:
+        '200':
+          description: Resultado do teste.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  status: { type: integer }
+                  detalhe: { type: string }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
   /admin/webhooks:
+    get:
+      tags: [Administração]
+      summary: Listar webhooks (UC-30)
+      responses:
+        '200':
+          description: Webhooks, sem o segredo.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Webhook' }
+        '403': { $ref: '#/components/responses/SemPermissao' }
     post:
       tags: [Administração]
       summary: Cadastrar webhook (UC-30)
+      description: |
+        Só URL HTTPS pública com assinatura HMAC-SHA256 (RN36). Sem `segredo`, a API gera um; ele
+        aparece só nesta resposta. Cada envio leva `X-Jaguara-Evento`, `X-Jaguara-Id` e
+        `X-Jaguara-Assinatura: t=<segundos>,v1=<HMAC-SHA256 de t.corpo>`, com até 5 tentativas e
+        espera exponencial (ARQ-03, seção 3.7).
       requestBody:
         required: true
         content:
@@ -1639,12 +2148,47 @@ paths:
                 eventos:
                   type: array
                   minItems: 1
-                  items: { type: string }
+                  items:
+                    type: string
+                    enum: [solicitacao.criada, solicitacao.status_alterado, agendamento.criado, agendamento.cancelado, atendimento.finalizado, pagamento.confirmado]
                 metodoAutenticacao:
                   type: string
                   enum: [HMAC_SHA256]
+                segredo: { type: string, minLength: 16, maxLength: 64 }
+                integracaoId: { type: string, format: uuid }
       responses:
-        '201': { description: "Webhook salvo (RN36)." }
+        '201':
+          description: Webhook salvo (RN36), com o segredo só desta vez.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Webhook' }
+        '403': { $ref: '#/components/responses/SemPermissao' }
+        '422': { $ref: '#/components/responses/Validacao' }
+  /admin/webhooks/{webhookId}:
+    parameters:
+      - in: path
+        name: webhookId
+        required: true
+        schema: { type: string, format: uuid }
+    patch:
+      tags: [Administração]
+      summary: Ativar, desativar ou mudar os eventos do webhook (UC-30)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ativo: { type: boolean }
+                eventos: { type: array, items: { type: string } }
+      responses:
+        '200':
+          description: Webhook alterado e auditado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Webhook' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
         '422': { $ref: '#/components/responses/Validacao' }
   /webhooks/pagamentos:
     post:
@@ -1911,8 +2455,12 @@ components:
         fabricante: { type: string }
         lote: { type: string }
         dataAplicacao: { type: string, format: date }
-        dataProximaDose: { type: string, format: date }
+        dataProximaDose:
+          type: string
+          format: date
+          description: Agenda o lembrete aos responsáveis às 9h do dia anterior (RN37).
         responsavelAplicacao: { type: string, minLength: 1 }
+        observacoes: { type: string, maxLength: 2000 }
     Vacinacao:
       allOf:
         - $ref: '#/components/schemas/VacinacaoEntrada'
@@ -1927,9 +2475,30 @@ components:
         medicamento: { type: string }
         dosagem: { type: string }
         viaAdministracao: { type: string }
-        intervaloHoras: { type: integer, minimum: 1 }
+        intervaloHoras: { type: integer, minimum: 1, maximum: 720 }
         dataInicio: { type: string, format: date }
         dataFim: { type: string, format: date }
+        horaPrimeiraDose:
+          type: string
+          pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$'
+          default: '08:00'
+          description: Hora da primeira dose, em Brasília.
+        observacoes: { type: string, maxLength: 2000 }
+    Tratamento:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        medicamento: { type: string }
+        dosagem: { type: string }
+        viaAdministracao: { type: string }
+        intervaloHoras: { type: integer }
+        dataInicio: { type: string, format: date }
+        dataFim: { type: string, format: date }
+        status: { type: string, enum: [ATIVO, FINALIZADO, SUSPENSO] }
+        observacoes: { type: string }
+        lembretesAgendados:
+          type: integer
+          description: Só na resposta do cadastro.
     ExameEntrada:
       type: object
       required: [tipoExame, dataRealizacao]
@@ -1938,7 +2507,49 @@ components:
         dataRealizacao: { type: string, format: date }
         laboratorio: { type: string }
         resultado: { type: string }
+        documentoId:
+          type: string
+          format: uuid
+          description: Documento do próprio pet usado como laudo (UC-34).
+        observacoes: { type: string, maxLength: 2000 }
+    PlanoAlimentar:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        alimento: { type: string }
+        metaDiariaGramas: { type: number }
+        limiteDiarioGramas: { type: number }
+        refeicoesPorDia: { type: integer }
+        dataInicio: { type: string, format: date }
+    Refeicao:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        dataHora: { type: string, format: date-time }
+        alimento: { type: string }
+        quantidadeGramas: { type: number }
+        observacao: { type: string }
+    ResumoAlimentar:
+      type: object
+      properties:
+        consumoDoDia: { type: number }
+        metaDiariaGramas: { type: number }
+        limiteDiarioGramas: { type: number }
+        percentualMeta: { type: integer }
+        limiteExcedido: { type: boolean }
+    Exame:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        tipoExame: { type: string }
+        dataRealizacao: { type: string, format: date }
+        laboratorio: { type: string }
+        resultado: { type: string }
         documentoId: { type: string, format: uuid }
+        temArquivo:
+          type: boolean
+          description: Há laudo anexado; o arquivo sai só por URL assinada (ARQ-03, seção 3.6).
+        observacoes: { type: string }
     AlergiaEntrada:
       type: object
       required: [tipo, descricao, gravidade]
@@ -2161,9 +2772,23 @@ components:
       properties:
         id: { type: string, format: uuid }
         agendamentoId: { type: string, format: uuid }
+        petId: { type: string, format: uuid }
         status: { type: string, enum: [EM_ANDAMENTO, FINALIZADO] }
+        procedimentosRealizados: { type: string }
+        observacoesClinicas: { type: string }
         total: { type: number }
         finalizadoEm: { type: string, format: date-time }
+        itens:
+          type: array
+          items:
+            type: object
+            properties:
+              servicoId: { type: string, format: uuid }
+              quantidade: { type: integer }
+              valorUnitario:
+                type: number
+                description: Preço contratado para o serviço agendado (RN27); preço atual para extras.
+              observacao: { type: string }
     Funcionario:
       type: object
       properties:
@@ -2197,6 +2822,56 @@ components:
           type: string
           description: Motivo da recusa em linguagem do tutor, só quando RECUSADO.
         notaFiscalUrl: { type: string, format: uri }
+    Notificacao:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        titulo: { type: string }
+        mensagem: { type: string }
+        canal: { type: string, enum: [PUSH, EMAIL, SMS] }
+        dataProgramada: { type: string, format: date-time }
+        dataEnvio: { type: string, format: date-time }
+        status: { type: string, enum: [AGENDADA, ENVIADA, FALHOU, CANCELADA] }
+    ConfiguracaoNotificacao:
+      type: object
+      properties:
+        tipoEvento:
+          type: string
+          enum: [CONSULTA, VACINA, MEDICAMENTO, EXAME, CIRURGIA, BANHO_TOSA, HOSPEDAGEM, COMPROMISSO, OUTRO]
+        canal: { type: string, enum: [PUSH, EMAIL, SMS] }
+        antecedenciaMinutos: { type: integer }
+        ativa: { type: boolean }
+    Integracao:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        nome: { type: string }
+        tipo: { type: string, enum: [CALENDARIO, PAGAMENTO, PLATAFORMA_VETERINARIA, NOTIFICACAO, OUTRA] }
+        endpointUrl: { type: string }
+        parametros: { type: string }
+        ativa: { type: boolean }
+        temCredenciais: { type: boolean }
+    Webhook:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        url: { type: string }
+        eventos: { type: array, items: { type: string } }
+        metodoAutenticacao: { type: string }
+        ativo: { type: boolean }
+        integracaoId: { type: string, format: uuid }
+        segredo:
+          type: string
+          description: Só na resposta da criação.
+    Assinatura:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        plano: { type: string, enum: [GRATUITO, PANTERA] }
+        status: { type: string, enum: [PENDENTE, ATIVA, CANCELADA, EXPIRADA] }
+        dataInicio: { type: string, format: date }
+        dataFim: { type: string, format: date }
+        precoMensal: { type: number }
     TipoConversa:
       type: string
       enum: [EMPRESA, ASSISTENTE_VIRTUAL]

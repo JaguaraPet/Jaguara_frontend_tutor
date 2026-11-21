@@ -763,7 +763,30 @@ export interface paths {
             };
             cookie?: never;
         };
-        get?: never;
+        /** Listar compartilhamentos do pet (UC-11) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Compartilhamentos com a situação atual (ativo, revogado ou expirado). */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Compartilhamento"][];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
         put?: never;
         /** Compartilhar perfil do pet (UC-11) */
         post: {
@@ -781,7 +804,11 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Compartilhamento ativo com os escopos informados (RN15). */
+                /**
+                 * @description Compartilhamento ativo com os escopos informados (RN15). Com `destinatarioEmail`, o
+                 *     destinatário recebe por e-mail um link de leitura sem conta; o `link` só aparece nesta
+                 *     resposta. Com `empresaId`, o acesso vale dentro do sistema. Informe um dos dois.
+                 */
                 201: {
                     headers: {
                         [name: string]: unknown;
@@ -790,8 +817,148 @@ export interface paths {
                         "application/json": components["schemas"]["Compartilhamento"];
                     };
                 };
+                404: components["responses"]["NaoEncontrado"];
+                422: components["responses"]["Validacao"];
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/compartilhamentos/{compartilhamentoId}/revogacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                compartilhamentoId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Revogar compartilhamento (UC-11) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    compartilhamentoId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Acesso revogado na hora. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/compartilhados/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        /** Ver o perfil compartilhado por link (UC-11) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    token: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Nome do pet, dados básicos se liberados e as seções compartilhadas. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            pet?: {
+                                nome?: string;
+                                especie?: string;
+                                raca?: string;
+                                sexo?: string;
+                                castrado?: boolean;
+                                idadeAnos?: number;
+                            };
+                            escopos?: string[];
+                            secoes?: ("vacinas" | "exames" | "medicamentos" | "alergias")[];
+                            /** Format: date-time */
+                            dataExpiracao?: string;
+                        };
+                    };
+                };
+                410: components["responses"]["Expirado"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/compartilhados/{token}/{secao}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+                secao: "vacinas" | "exames" | "medicamentos" | "alergias";
+            };
+            cookie?: never;
+        };
+        /** Ver uma seção do perfil compartilhado (UC-11) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    token: string;
+                    secao: "vacinas" | "exames" | "medicamentos" | "alergias";
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Registros da seção, só se o escopo foi compartilhado (CT-11-02). */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": Record<string, never>[];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                410: components["responses"]["Expirado"];
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -900,6 +1067,8 @@ export interface paths {
                         "application/json": components["schemas"]["Vacinacao"];
                     };
                 };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
                 422: components["responses"]["Validacao"];
             };
         };
@@ -918,9 +1087,37 @@ export interface paths {
             };
             cookie?: never;
         };
-        get?: never;
+        /** Listar tratamentos medicamentosos (UC-14) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Tratamentos do pet, do mais recente para o mais antigo. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Tratamento"][];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
         put?: never;
-        /** Cadastrar tratamento medicamentoso (UC-14) */
+        /**
+         * Cadastrar tratamento medicamentoso (UC-14)
+         * @description Agenda um lembrete por dose para cada responsável do pet, da primeira dose até o fim do
+         *     último dia (sem data de fim, os próximos 30 dias; no máximo 120 doses).
+         */
         post: {
             parameters: {
                 query?: never;
@@ -941,8 +1138,13 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["Tratamento"];
+                    };
                 };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                422: components["responses"]["Validacao"];
             };
         };
         delete?: never;
@@ -981,6 +1183,8 @@ export interface paths {
                     };
                     content?: never;
                 };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
             };
         };
         delete?: never;
@@ -998,7 +1202,31 @@ export interface paths {
             };
             cookie?: never;
         };
-        get?: never;
+        /** Histórico de exames (UC-36) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Exames válidos, do mais recente para o mais antigo. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Exame"][];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
         put?: never;
         /** Registrar exame (UC-36) */
         post: {
@@ -1021,9 +1249,13 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["Exame"];
+                    };
                 };
                 403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                422: components["responses"]["Validacao"];
             };
         };
         delete?: never;
@@ -1140,7 +1372,10 @@ export interface paths {
             };
             cookie?: never;
         };
-        /** Listar eventos do calendário (UC-10) */
+        /**
+         * Listar eventos do calendário (UC-10)
+         * @description Eventos do tutor e agendamentos ativos com empresas (origem AGENDAMENTO). Sem período, de agora a 30 dias.
+         */
         get: {
             parameters: {
                 query?: {
@@ -1183,7 +1418,7 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Evento criado e lembrete agendado. */
+                /** @description Evento criado e lembrete agendado uma hora antes para os responsáveis (RN37). */
                 201: {
                     headers: {
                         [name: string]: unknown;
@@ -1192,9 +1427,139 @@ export interface paths {
                         "application/json": components["schemas"]["Evento"];
                     };
                 };
+                404: components["responses"]["NaoEncontrado"];
+                /** @description O pet já tem compromisso no horário (RN14_CONFLITO_PET). Evento sem fim ocupa uma hora. */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+                422: components["responses"]["Validacao"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/eventos/{eventoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventoId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Excluir evento manual e cancelar o lembrete (UC-10) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    eventoId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Evento excluído. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                404: components["responses"]["NaoEncontrado"];
                 409: components["responses"]["Conflito"];
             };
         };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pets/{petId}/plano-alimentar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                petId: components["parameters"]["PetId"];
+            };
+            cookie?: never;
+        };
+        /** Ver o plano alimentar ativo (UC-08) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Plano ativo, ou `plano` nulo quando não há. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            plano?: components["schemas"]["PlanoAlimentar"] | null;
+                        };
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        /**
+         * Definir meta e limite diários (UC-08, RN12)
+         * @description Substitui o plano ativo; o anterior fica no histórico.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        alimento: string;
+                        metaDiariaGramas: number;
+                        /** @description Não pode ser menor que a meta. */
+                        limiteDiarioGramas?: number;
+                        refeicoesPorDia: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Plano ativo. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PlanoAlimentar"];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+                422: components["responses"]["Validacao"];
+            };
+        };
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1210,7 +1575,37 @@ export interface paths {
             };
             cookie?: never;
         };
-        get?: never;
+        /** Refeições do dia com o consumo (UC-08) */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Dia em Brasília; padrão, hoje. */
+                    data?: string;
+                };
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Refeições do dia e o resumo do consumo. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ResumoAlimentar"] & {
+                            /** Format: date */
+                            data?: string;
+                            refeicoes?: components["schemas"]["Refeicao"][];
+                        };
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
         put?: never;
         /** Registrar refeição (UC-08) */
         post: {
@@ -1229,24 +1624,190 @@ export interface paths {
                         dataHora: string;
                         alimento: string;
                         quantidadeGramas: number;
+                        observacao?: string;
                     };
                 };
             };
             responses: {
-                /** @description Refeição registrada; `limiteExcedido` indica alerta (RN12). */
+                /** @description Refeição registrada; `limiteExcedido` indica alerta (RN12, CT-08-02). */
                 201: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            consumoDoDia?: number;
-                            limiteExcedido?: boolean;
-                        };
+                        "application/json": components["schemas"]["Refeicao"] & components["schemas"]["ResumoAlimentar"];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+                422: components["responses"]["Validacao"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notificacoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Notificações do usuário, enviadas e agendadas (UC-31) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description As 50 mais recentes. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Notificacao"][];
                     };
                 };
             };
         };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notificacoes/configuracoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preferências de notificação por tipo de compromisso (RN37) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Uma configuração por tipo, com o padrão onde o usuário não mudou. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ConfiguracaoNotificacao"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notificacoes/configuracoes/{tipoEvento}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tipoEvento: "CONSULTA" | "VACINA" | "MEDICAMENTO" | "EXAME" | "CIRURGIA" | "BANHO_TOSA" | "HOSPEDAGEM" | "COMPROMISSO" | "OUTRO";
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Definir canal, antecedência e liga/desliga de um tipo (RN37, CT-31-01)
+         * @description Vale para os lembretes agendados daqui em diante.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    tipoEvento: "CONSULTA" | "VACINA" | "MEDICAMENTO" | "EXAME" | "CIRURGIA" | "BANHO_TOSA" | "HOSPEDAGEM" | "COMPROMISSO" | "OUTRO";
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        canal: "PUSH" | "EMAIL";
+                        antecedenciaMinutos: number;
+                        ativa: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description Configuração salva. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ConfiguracaoNotificacao"];
+                    };
+                };
+                422: components["responses"]["Validacao"];
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/categorias-despesa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar as categorias de despesa (RN10) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Categorias disponíveis, em ordem alfabética. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** Format: uuid */
+                            id?: string;
+                            nome?: string;
+                            descricao?: string;
+                        }[];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1265,7 +1826,11 @@ export interface paths {
         /** Listar despesas (UC-06) */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    de?: string;
+                    ate?: string;
+                    categoriaId?: string;
+                };
                 header?: never;
                 path: {
                     petId: components["parameters"]["PetId"];
@@ -1311,6 +1876,7 @@ export interface paths {
                         "application/json": components["schemas"]["Despesa"];
                     };
                 };
+                404: components["responses"]["NaoEncontrado"];
                 422: components["responses"]["Validacao"];
             };
         };
@@ -1850,7 +2416,12 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            agendamentos?: components["schemas"]["Agendamento"][];
+                            agendamentos?: (components["schemas"]["Agendamento"] & {
+                                servicoNome?: string;
+                                petNome?: string;
+                                profissionalNome?: string;
+                                recursoNome?: string;
+                            })[];
                             solicitacoesPendentes?: components["schemas"]["Solicitacao"][];
                         };
                     };
@@ -2257,7 +2828,31 @@ export interface paths {
             };
             cookie?: never;
         };
-        get?: never;
+        /** Consultar o atendimento de um agendamento (UC-23) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    agendamentoId: components["parameters"]["AgendamentoId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Atendimento com os itens cobrados. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Atendimento"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
         put?: never;
         /** Registrar serviços e atendimento (UC-23) */
         post: {
@@ -2285,6 +2880,17 @@ export interface paths {
                     };
                 };
                 403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                /** @description Atendimento já registrado (ATENDIMENTO_JA_REGISTRADO), agendamento inativo ou ainda não ocorrido (AGENDAMENTO_NAO_OCORREU). */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+                422: components["responses"]["Validacao"];
             };
         };
         delete?: never;
@@ -2337,6 +2943,8 @@ export interface paths {
                         "application/json": components["schemas"]["Atendimento"];
                     };
                 };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
                 422: components["responses"]["Validacao"];
             };
         };
@@ -2839,6 +3447,128 @@ export interface paths {
                         "application/problem+json": components["schemas"]["Problema"];
                     };
                 };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assinaturas/atual": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ver o plano do tutor (gratuito ou PANTERA) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Plano vigente, a assinatura vigente ou pendente e o preço mensal. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            plano?: "GRATUITO" | "PANTERA";
+                            vigente?: boolean;
+                            assinatura?: components["schemas"]["Assinatura"];
+                            precoMensal?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assinaturas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Assinar o PANTERA (UC-43, FA1)
+         * @description Cria a assinatura PENDENTE de um mês (ou devolve a que já está pendente). Pague com
+         *     POST /pagamentos e `assinaturaId`; ela vira ATIVA só com o pagamento confirmado (RN39).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Assinatura pendente de pagamento. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Assinatura"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assinaturas/atual/cancelamento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancelar a assinatura PANTERA
+         * @description O acesso continua até o fim do período já pago.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Assinatura cancelada. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Assinatura"];
+                    };
+                };
+                409: components["responses"]["Conflito"];
             };
         };
         delete?: never;
@@ -3360,7 +4090,13 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Solicitar exportação, correção ou exclusão de dados (UC-46) */
+        /**
+         * Solicitar exportação, correção ou exclusão de dados (UC-46)
+         * @description Exportação fica pronta na hora (GET /privacidade/exportacao). Exclusão do tutor é
+         *     imediata: anonimiza a conta, passa os pets divididos a outro responsável, anonimiza os
+         *     demais e encerra as sessões. Exclusão de conta de empresa e correção ficam ABERTAS para
+         *     o suporte, com resposta em até 15 dias.
+         */
         post: {
             parameters: {
                 query?: never;
@@ -3382,15 +4118,68 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Pedido registrado; resposta em até 15 dias. */
+                /** @description Pedido registrado. */
                 202: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": {
+                            /** Format: uuid */
+                            id?: string;
+                            tipo?: string;
+                            /** @enum {string} */
+                            status?: "ABERTA" | "CONCLUIDA";
+                        };
+                    };
+                };
+                /** @description Senha ausente ou incorreta na exclusão. */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/privacidade/exportacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Exportar os dados do titular (LGPD art. 18, V) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Conta, pets, saúde, despesas, agenda, alimentação e consentimentos em JSON. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": Record<string, never>;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3484,6 +4273,176 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/integracoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar integrações (UC-27) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Integrações, sem as credenciais. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Integracao"][];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        put?: never;
+        /** Criar integração (UC-27, RN33) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        nome: string;
+                        /** @enum {string} */
+                        tipo: "CALENDARIO" | "PAGAMENTO" | "PLATAFORMA_VETERINARIA" | "NOTIFICACAO" | "OUTRA";
+                        /** Format: uri */
+                        endpointUrl: string;
+                        /** @description Gravadas cifradas e nunca devolvidas. */
+                        credenciais: string;
+                        parametros?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Integração salva (CT-27-01). */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Integracao"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                422: components["responses"]["Validacao"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/integracoes/{integracaoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                integracaoId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Alterar integração (UC-27) */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    integracaoId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        nome?: string;
+                        /** Format: uri */
+                        endpointUrl?: string;
+                        credenciais?: string;
+                        parametros?: string;
+                        ativa?: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description Integração alterada e auditada. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Integracao"];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+                422: components["responses"]["Validacao"];
+            };
+        };
+        trace?: never;
+    };
+    "/admin/integracoes/{integracaoId}/teste": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                integracaoId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Testar se o serviço da integração responde (CT-27-01) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    integracaoId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Resultado do teste. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ok?: boolean;
+                            status?: number;
+                            detalhe?: string;
+                        };
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/webhooks": {
         parameters: {
             query?: never;
@@ -3491,9 +4450,36 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Listar webhooks (UC-30) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Webhooks, sem o segredo. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Webhook"][];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
         put?: never;
-        /** Cadastrar webhook (UC-30) */
+        /**
+         * Cadastrar webhook (UC-30)
+         * @description Só URL HTTPS pública com assinatura HMAC-SHA256 (RN36). Sem `segredo`, a API gera um; ele
+         *     aparece só nesta resposta. Cada envio leva `X-Jaguara-Evento`, `X-Jaguara-Id` e
+         *     `X-Jaguara-Assinatura: t=<segundos>,v1=<HMAC-SHA256 de t.corpo>`, com até 5 tentativas e
+         *     espera exponencial (ARQ-03, seção 3.7).
+         */
         post: {
             parameters: {
                 query?: never;
@@ -3506,20 +4492,26 @@ export interface paths {
                     "application/json": {
                         /** Format: uri */
                         url: string;
-                        eventos: string[];
+                        eventos: ("solicitacao.criada" | "solicitacao.status_alterado" | "agendamento.criado" | "agendamento.cancelado" | "atendimento.finalizado" | "pagamento.confirmado")[];
                         /** @enum {string} */
                         metodoAutenticacao: "HMAC_SHA256";
+                        segredo?: string;
+                        /** Format: uuid */
+                        integracaoId?: string;
                     };
                 };
             };
             responses: {
-                /** @description Webhook salvo (RN36). */
+                /** @description Webhook salvo (RN36), com o segredo só desta vez. */
                 201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["Webhook"];
+                    };
                 };
+                403: components["responses"]["SemPermissao"];
                 422: components["responses"]["Validacao"];
             };
         };
@@ -3527,6 +4519,55 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/admin/webhooks/{webhookId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                webhookId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Ativar, desativar ou mudar os eventos do webhook (UC-30) */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    webhookId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        ativo?: boolean;
+                        eventos?: string[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Webhook alterado e auditado. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Webhook"];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+                422: components["responses"]["Validacao"];
+            };
+        };
         trace?: never;
     };
     "/webhooks/pagamentos": {
@@ -3748,9 +4789,13 @@ export interface components {
             lote?: string;
             /** Format: date */
             dataAplicacao: string;
-            /** Format: date */
+            /**
+             * Format: date
+             * @description Agenda o lembrete aos responsáveis às 9h do dia anterior (RN37).
+             */
             dataProximaDose?: string;
             responsavelAplicacao: string;
+            observacoes?: string;
         };
         Vacinacao: components["schemas"]["VacinacaoEntrada"] & {
             /** Format: uuid */
@@ -3766,6 +4811,29 @@ export interface components {
             dataInicio: string;
             /** Format: date */
             dataFim?: string;
+            /**
+             * @description Hora da primeira dose, em Brasília.
+             * @default 08:00
+             */
+            horaPrimeiraDose: string;
+            observacoes?: string;
+        };
+        Tratamento: {
+            /** Format: uuid */
+            id?: string;
+            medicamento?: string;
+            dosagem?: string;
+            viaAdministracao?: string;
+            intervaloHoras?: number;
+            /** Format: date */
+            dataInicio?: string;
+            /** Format: date */
+            dataFim?: string;
+            /** @enum {string} */
+            status?: "ATIVO" | "FINALIZADO" | "SUSPENSO";
+            observacoes?: string;
+            /** @description Só na resposta do cadastro. */
+            lembretesAgendados?: number;
         };
         ExameEntrada: {
             tipoExame: string;
@@ -3773,8 +4841,52 @@ export interface components {
             dataRealizacao: string;
             laboratorio?: string;
             resultado?: string;
+            /**
+             * Format: uuid
+             * @description Documento do próprio pet usado como laudo (UC-34).
+             */
+            documentoId?: string;
+            observacoes?: string;
+        };
+        PlanoAlimentar: {
+            /** Format: uuid */
+            id?: string;
+            alimento?: string;
+            metaDiariaGramas?: number;
+            limiteDiarioGramas?: number;
+            refeicoesPorDia?: number;
+            /** Format: date */
+            dataInicio?: string;
+        };
+        Refeicao: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: date-time */
+            dataHora?: string;
+            alimento?: string;
+            quantidadeGramas?: number;
+            observacao?: string;
+        };
+        ResumoAlimentar: {
+            consumoDoDia?: number;
+            metaDiariaGramas?: number;
+            limiteDiarioGramas?: number;
+            percentualMeta?: number;
+            limiteExcedido?: boolean;
+        };
+        Exame: {
+            /** Format: uuid */
+            id?: string;
+            tipoExame?: string;
+            /** Format: date */
+            dataRealizacao?: string;
+            laboratorio?: string;
+            resultado?: string;
             /** Format: uuid */
             documentoId?: string;
+            /** @description Há laudo anexado; o arquivo sai só por URL assinada (ARQ-03, seção 3.6). */
+            temArquivo?: boolean;
+            observacoes?: string;
         };
         AlergiaEntrada: {
             /** @enum {string} */
@@ -3977,11 +5089,23 @@ export interface components {
             id?: string;
             /** Format: uuid */
             agendamentoId?: string;
+            /** Format: uuid */
+            petId?: string;
             /** @enum {string} */
             status?: "EM_ANDAMENTO" | "FINALIZADO";
+            procedimentosRealizados?: string;
+            observacoesClinicas?: string;
             total?: number;
             /** Format: date-time */
             finalizadoEm?: string;
+            itens?: {
+                /** Format: uuid */
+                servicoId?: string;
+                quantidade?: number;
+                /** @description Preço contratado para o serviço agendado (RN27); preço atual para extras. */
+                valorUnitario?: number;
+                observacao?: string;
+            }[];
         };
         Funcionario: {
             /** Format: uuid */
@@ -4016,6 +5140,64 @@ export interface components {
             motivoRecusa?: string;
             /** Format: uri */
             notaFiscalUrl?: string;
+        };
+        Notificacao: {
+            /** Format: uuid */
+            id?: string;
+            titulo?: string;
+            mensagem?: string;
+            /** @enum {string} */
+            canal?: "PUSH" | "EMAIL" | "SMS";
+            /** Format: date-time */
+            dataProgramada?: string;
+            /** Format: date-time */
+            dataEnvio?: string;
+            /** @enum {string} */
+            status?: "AGENDADA" | "ENVIADA" | "FALHOU" | "CANCELADA";
+        };
+        ConfiguracaoNotificacao: {
+            /** @enum {string} */
+            tipoEvento?: "CONSULTA" | "VACINA" | "MEDICAMENTO" | "EXAME" | "CIRURGIA" | "BANHO_TOSA" | "HOSPEDAGEM" | "COMPROMISSO" | "OUTRO";
+            /** @enum {string} */
+            canal?: "PUSH" | "EMAIL" | "SMS";
+            antecedenciaMinutos?: number;
+            ativa?: boolean;
+        };
+        Integracao: {
+            /** Format: uuid */
+            id?: string;
+            nome?: string;
+            /** @enum {string} */
+            tipo?: "CALENDARIO" | "PAGAMENTO" | "PLATAFORMA_VETERINARIA" | "NOTIFICACAO" | "OUTRA";
+            endpointUrl?: string;
+            parametros?: string;
+            ativa?: boolean;
+            temCredenciais?: boolean;
+        };
+        Webhook: {
+            /** Format: uuid */
+            id?: string;
+            url?: string;
+            eventos?: string[];
+            metodoAutenticacao?: string;
+            ativo?: boolean;
+            /** Format: uuid */
+            integracaoId?: string;
+            /** @description Só na resposta da criação. */
+            segredo?: string;
+        };
+        Assinatura: {
+            /** Format: uuid */
+            id?: string;
+            /** @enum {string} */
+            plano?: "GRATUITO" | "PANTERA";
+            /** @enum {string} */
+            status?: "PENDENTE" | "ATIVA" | "CANCELADA" | "EXPIRADA";
+            /** Format: date */
+            dataInicio?: string;
+            /** Format: date */
+            dataFim?: string;
+            precoMensal?: number;
         };
         /** @enum {string} */
         TipoConversa: "EMPRESA" | "ASSISTENTE_VIRTUAL";

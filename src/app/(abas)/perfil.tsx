@@ -11,6 +11,11 @@ export default function Perfil() {
       <Cartao titulo="Sua conta" subtitulo={usuario?.perfil}>
         <Texto variante="legenda">Pagamentos, privacidade e notificações chegam nas próximas versões.</Texto>
       </Cartao>
+      <Cartao
+        titulo="Plano PANTERA"
+        subtitulo="Assistente virtual para o seu pet"
+        aoTocar={() => router.push('/pantera')}
+      />
       <Botao
         titulo="Sair"
         variante="secundaria"
