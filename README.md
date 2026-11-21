@@ -31,6 +31,10 @@ src/
 
 As abas Início, Pets, Agenda, Serviços e Perfil (UX-01, seção 3) ficam em `src/app/(abas)` e exigem login: sem sessão, o app abre as boas-vindas, com os botões Entrar e Criar conta. O access token fica só em memória e o refresh token no armazenamento seguro do aparelho (`expo-secure-store`). Ao abrir o app, a sessão é restaurada pelo refresh token, e o cliente da API renova o token e repete a requisição quando recebe 401. Só contas de tutor entram no app; empresas usam a web Enterprise.
 
+## Busca de empresas e catálogo (UC-33)
+
+A aba Serviços busca empresas com serviços ativos pelo nome ou por um serviço (`GET /empresas`) e filtra por categoria. Tocar numa empresa abre `/empresa/[empresaId]`, com o perfil público e o catálogo: nome, descrição, preço e duração de cada serviço ativo. Os rótulos e formatos ficam em `src/catalogo/catalogo.ts`.
+
 ## Design e componentes base
 
 Os tokens do UX-02 (cores, tipografia Inter, espaçamento de 4 px, raio de 8 px e área de toque de 44 px) ficam em `src/tema/tokens.ts`, arquivo idêntico ao da web Enterprise. Os componentes base ficam em `src/componentes`:

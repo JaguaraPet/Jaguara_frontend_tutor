@@ -475,6 +475,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/especies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar espécies e raças cadastradas (RN07) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Espécies com as raças de cada uma. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Especie"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/pets": {
         parameters: {
             query?: never;
@@ -1325,6 +1361,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/empresas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Buscar empresas com serviços ativos (UC-33) */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Trecho do nome da empresa ou de um serviço. */
+                    busca?: string;
+                    tipo?: "CLINICA_VETERINARIA" | "PET_SHOP" | "HOTEL_PET" | "CRECHE" | "CASA_DE_CUIDADO";
+                    /** @description Categoria de serviço oferecida. */
+                    categoria?: "CONSULTA" | "EXAME" | "CIRURGIA" | "VACINACAO" | "BANHO_TOSA" | "HOSPEDAGEM" | "PET_SITTER" | "CRECHE" | "OUTRO";
+                    cidade?: string;
+                    pagina?: components["parameters"]["Pagina"];
+                    tamanho?: components["parameters"]["Tamanho"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Empresas encontradas. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PaginaEmpresas"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/empresas/{empresaId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+            };
+            cookie?: never;
+        };
+        /** Ver o perfil público da empresa (UC-33) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Dados públicos da empresa. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EmpresaPublica"];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/empresas/{empresaId}/servicos": {
         parameters: {
             query?: never;
@@ -1438,6 +1560,116 @@ export interface paths {
         };
         trace?: never;
     };
+    "/empresas/{empresaId}/recursos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+            };
+            cookie?: never;
+        };
+        /** Listar recursos da empresa (UC-38) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Salas, equipamentos, baias e veículos da empresa. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Recurso"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Cadastrar recurso (UC-38) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RecursoEntrada"];
+                };
+            };
+            responses: {
+                /** @description Recurso criado. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Recurso"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recursos/{recursoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recursoId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Alterar ou desativar recurso (UC-38) */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    recursoId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RecursoEntrada"];
+                };
+            };
+            responses: {
+                /** @description Recurso atualizado. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Recurso"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
     "/servicos/{servicoId}/horarios-disponiveis": {
         parameters: {
             query?: never;
@@ -1489,7 +1721,29 @@ export interface paths {
             };
             cookie?: never;
         };
-        get?: never;
+        /** Listar horários de atuação (UC-24) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Horários de atuação dos profissionais e recursos da empresa. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["HorarioAtuacao"][];
+                    };
+                };
+            };
+        };
         put?: never;
         /** Cadastrar horário de atuação (UC-24) */
         post: {
@@ -1512,12 +1766,53 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["HorarioAtuacao"];
+                    };
                 };
                 409: components["responses"]["Conflito"];
             };
         };
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/horarios-atuacao/{horarioId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                horarioId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remover horário de atuação (UC-24) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    horarioId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Horário removido. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -2198,7 +2493,29 @@ export interface paths {
             };
             cookie?: never;
         };
-        get?: never;
+        /** Listar clientes (UC-21) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Clientes da empresa, com a situação do consentimento (RN41). */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Cliente"][];
+                    };
+                };
+            };
+        };
         put?: never;
         /** Cadastrar cliente (UC-21) */
         post: {
@@ -2241,7 +2558,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["Cliente"];
+                    };
                 };
                 422: components["responses"]["Validacao"];
             };
@@ -2465,7 +2784,14 @@ export interface paths {
             };
         };
         put?: never;
-        /** Realizar pagamento (UC-44) */
+        /**
+         * Realizar pagamento (UC-44)
+         * @description O pagamento nasce PENDENTE com o preço contratado (RN27) e só fica ACEITO pela
+         *     confirmação do gateway (RN39). Com PIX, a resposta traz o `qrCode`; com cartão, o app
+         *     manda só o token gerado pelo formulário seguro do gateway, nunca os dados do cartão.
+         *     Cartão recusado responde 201 com status RECUSADO e `motivoRecusa`, para o tutor tentar
+         *     outro meio (UC-44, FA1).
+         */
         post: {
             parameters: {
                 query?: never;
@@ -2481,17 +2807,36 @@ export interface paths {
                         /** Format: uuid */
                         assinaturaId?: string;
                         metodo: components["schemas"]["MetodoPagamento"];
+                        /** @description Token do cartão gerado no app pelo gateway. Obrigatório para cartão. */
+                        tokenCartao?: string;
+                        /** @description Meio informado pelo gateway (ex. visa, master, debvisa). Obrigatório para cartão. */
+                        bandeiraCartao?: string;
+                        /** @default 1 */
+                        parcelas?: number;
                     } & (unknown | unknown);
                 };
             };
             responses: {
-                /** @description Pagamento PENDENTE com dados de cobrança (RN39). */
+                /** @description Pagamento PENDENTE com dados de cobrança, ou o resultado do cartão (RN39). */
                 201: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
                         "application/json": components["schemas"]["Pagamento"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                409: components["responses"]["Conflito"];
+                422: components["responses"]["Validacao"];
+                /** @description Gateway indisponível (GATEWAY_INDISPONIVEL); nada foi cobrado e o tutor tenta de novo. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
                     };
                 };
             };
@@ -2631,9 +2976,43 @@ export interface paths {
             };
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Histórico da conversa, do mais novo para o mais antigo (UC-43)
+         * @description Devolve até 50 mensagens e marca como lidas as mensagens dos outros participantes.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Só mensagens enviadas antes deste instante (página anterior). */
+                    antes?: string;
+                };
+                header?: never;
+                path: {
+                    conversaId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Mensagens da conversa. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Mensagem"][];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
         put?: never;
-        /** Enviar mensagem (também disponível por WebSocket) */
+        /**
+         * Enviar mensagem (também disponível por WebSocket)
+         * @description Na conversa com o assistente virtual, a resposta chega depois pelo evento `mensagem:nova`,
+         *     com `remetenteId` nulo. O assistente exige o PANTERA ativo e tem limite diário de mensagens
+         *     por assinante (ARQ-03, seção 3.5).
+         */
         post: {
             parameters: {
                 query?: never;
@@ -2660,6 +3039,70 @@ export interface paths {
                         "application/json": components["schemas"]["Mensagem"];
                     };
                 };
+                /** @description Assistente exige assinatura PANTERA ativa. */
+                402: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+                409: components["responses"]["Conflito"];
+                422: components["responses"]["Validacao"];
+                /** @description Limite diário de mensagens do assistente atingido (ASSISTENTE_LIMITE_DIARIO). */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversas/{conversaId}/encerramento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversaId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Encerrar a conversa (UC-43, passos 6 e 7)
+         * @description Só o tutor encerra. A conversa fica arquivada e não recebe novas mensagens.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    conversaId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Conversa encerrada. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
             };
         };
         delete?: never;
@@ -3014,6 +3457,7 @@ export interface paths {
                 query?: {
                     nivel?: "INFO" | "ALERTA" | "CRITICO";
                     de?: string;
+                    ate?: string;
                 };
                 header?: never;
                 path?: never;
@@ -3094,12 +3538,22 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Receber eventos do gateway de pagamento */
+        /**
+         * Receber eventos do gateway de pagamento
+         * @description Formato do Mercado Pago. A assinatura `X-Signature` (`ts=...,v1=...`, HMAC-SHA256 de
+         *     `id:<data.id>;request-id:<X-Request-Id>;ts:<ts>;`) é conferida antes de tudo (RN36). O
+         *     status vem de nova consulta ao gateway, nunca do corpo, e eventos repetidos não mudam
+         *     nada (idempotente).
+         */
         post: {
             parameters: {
-                query?: never;
+                query?: {
+                    "data.id"?: string;
+                    type?: string;
+                };
                 header: {
                     "X-Signature": string;
+                    "X-Request-Id": string;
                 };
                 path?: never;
                 cookie?: never;
@@ -3386,6 +3840,72 @@ export interface components {
             /** Format: uuid */
             empresaId?: string;
         };
+        EmpresaPublica: {
+            /** Format: uuid */
+            id?: string;
+            nomeFantasia?: string;
+            /** @enum {string} */
+            tipo?: "CLINICA_VETERINARIA" | "PET_SHOP" | "HOTEL_PET" | "CRECHE" | "CASA_DE_CUIDADO";
+            bairro?: string;
+            cidade?: string;
+            uf?: string;
+            /** @description Categorias dos serviços ativos. */
+            categorias?: string[];
+        };
+        PaginaEmpresas: {
+            itens?: components["schemas"]["EmpresaPublica"][];
+            total?: number;
+            pagina?: number;
+            tamanho?: number;
+        };
+        Cliente: {
+            /** Format: uuid */
+            id?: string;
+            codigo?: string;
+            nome?: string;
+            /** @description CPF mascarado (ARQ-02). */
+            cpf?: string;
+            telefone?: string;
+            /** Format: email */
+            email?: string;
+            /** @description Ligado a uma conta de tutor (ADR-010). */
+            possuiConta?: boolean;
+            ativo?: boolean;
+            /** @enum {string} */
+            consentimento?: "PENDENTE" | "VIGENTE" | "REVOGADO";
+            /**
+             * Format: uri
+             * @description Link do termo para o cliente aceitar (só enquanto pendente).
+             */
+            linkTermo?: string;
+        };
+        Especie: {
+            /** Format: uuid */
+            id?: string;
+            nome?: string;
+            racas?: {
+                /** Format: uuid */
+                id?: string;
+                nome?: string;
+            }[];
+        };
+        HorarioAtuacao: components["schemas"]["HorarioAtuacaoEntrada"] & {
+            /** Format: uuid */
+            id?: string;
+        };
+        RecursoEntrada: {
+            nome: string;
+            /** @enum {string} */
+            tipo: "SALA" | "EQUIPAMENTO" | "BAIA" | "VEICULO" | "OUTRO";
+            /** @default true */
+            ativo: boolean;
+        };
+        Recurso: components["schemas"]["RecursoEntrada"] & {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            empresaId?: string;
+        };
         HorarioAtuacaoEntrada: {
             /** @enum {string} */
             diaSemana: "SEGUNDA" | "TERCA" | "QUARTA" | "QUINTA" | "SEXTA" | "SABADO" | "DOMINGO";
@@ -3488,7 +4008,12 @@ export interface components {
             status?: components["schemas"]["StatusPagamento"];
             /** Format: date-time */
             dataConfirmacao?: string;
+            /** Format: uuid */
+            agendamentoId?: string;
+            /** @description PIX copia e cola, só na resposta da criação. */
             qrCode?: string;
+            /** @description Motivo da recusa em linguagem do tutor, só quando RECUSADO. */
+            motivoRecusa?: string;
             /** Format: uri */
             notaFiscalUrl?: string;
         };
@@ -3508,6 +4033,8 @@ export interface components {
         Mensagem: {
             /** Format: uuid */
             id?: string;
+            /** Format: uuid */
+            conversaId?: string;
             conteudo?: string;
             /** Format: date-time */
             dataHoraEnvio?: string;
