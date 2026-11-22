@@ -3806,7 +3806,10 @@ export interface paths {
         /**
          * Realizar pagamento (UC-44)
          * @description O pagamento nasce PENDENTE com o preço contratado (RN27) e só fica ACEITO pela
-         *     confirmação do gateway (RN39). Com PIX, a resposta traz o `qrCode`; com cartão, o app
+         *     confirmação do gateway (RN39). Com PIX, a resposta traz o `qrCode`; com boleto, traz o
+         *     `boleto` (link, linha digitável e vencimento em 3 dias) e, enquanto ele estiver em aberto,
+         *     um novo pedido devolve o mesmo boleto. O boleto registrado exige o endereço do pagador:
+         *     o informado em `endereco` fica guardado para os próximos. Com cartão, o app
          *     manda só o token gerado pelo formulário seguro do gateway, nunca os dados do cartão.
          *     Cartão recusado responde 201 com status RECUSADO e `motivoRecusa`, para o tutor tentar
          *     outro meio (UC-44, FA1).
@@ -3832,6 +3835,8 @@ export interface paths {
                         bandeiraCartao?: string;
                         /** @default 1 */
                         parcelas?: number;
+                        /** @description Endereço do pagador para o boleto. Sem ele, vale o último informado. */
+                        endereco?: components["schemas"]["Endereco"];
                     } & (unknown | unknown);
                 };
             };
@@ -5807,6 +5812,17 @@ export interface components {
             agendamentoId?: string;
             /** @description PIX copia e cola, só na resposta da criação. */
             qrCode?: string;
+            /** @description Boleto emitido, só na resposta da criação. */
+            boleto?: {
+                /**
+                 * Format: uri
+                 * @description Link para abrir ou imprimir o boleto.
+                 */
+                url: string;
+                linhaDigitavel: string;
+                /** Format: date-time */
+                vencimento: string;
+            };
             /** @description Motivo da recusa em linguagem do tutor, só quando RECUSADO. */
             motivoRecusa?: string;
             /** Format: uri */
