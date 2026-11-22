@@ -41,6 +41,10 @@ Na aba Pets, "Cadastrar pet" abre `/pets/novo`; a edição fica em `/pets/[petId
 
 `/pets/[petId]` mostra os dados do pet, as alergias e restrições (as graves no topo, em destaque e anunciadas pelo leitor de tela, UC-37) e as últimas vacinas com a próxima dose. "Editar dados" abre a edição, e a edição tem o atalho "Ver perfil do pet". Pet arquivado ou falecido mostra o aviso e não oferece edição.
 
+## Solicitar agendamento (UC-40)
+
+Na tela da empresa, cada serviço tem "Solicitar agendamento", que abre `/solicitar/[servicoId]`: o tutor escolhe o pet, um dos próximos 14 dias e um horário livre (`GET /servicos/{id}/horarios-disponiveis`, no fuso de Brasília) e pode deixar observações. A solicitação fica pendente até a empresa responder (RN38). Se o horário for ocupado enquanto o tutor escolhe, a API responde 409, o app avisa e busca os horários de novo (CT-40-02).
+
 ## Plano PANTERA e assistente virtual (UC-43)
 
 `/pantera` (no Perfil) mostra o preço e os benefícios e assina com PIX: cria a assinatura pendente, gera o código copia e cola e ativa quando o banco confirma (RN39). `/assistente` (no Início) abre a conversa; sem o plano, oferece a assinatura (CT-43-02). A resposta do assistente chega alguns segundos depois do envio, e a tela consulta de novo até ela aparecer.
