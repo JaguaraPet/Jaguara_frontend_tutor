@@ -67,7 +67,7 @@ describe('PANTERA e assistente virtual no app (UC-43)', () => {
     expect(get).toHaveBeenCalledTimes(3);
   });
 
-  it('deve assinar com PIX e mostrar o código copia e cola', async () => {
+  it('deve assinar, escolher o PIX e mostrar o código copia e cola', async () => {
     jest
       .spyOn(api, 'GET')
       .mockImplementation(() => resposta({ plano: 'GRATUITO', vigente: false, precoMensal: 14.9 }));
@@ -78,6 +78,8 @@ describe('PANTERA e assistente virtual no app (UC-43)', () => {
     await render(<Pantera />);
     expect(await screen.findByText('R$ 14,90 por mês')).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('button', { name: 'Tornar-se membro' }));
+    expect(await screen.findByRole('radio', { name: 'Boleto' })).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole('button', { name: 'Gerar código PIX' }));
     expect(await screen.findByText('00020126-PIX-TESTE')).toBeOnTheScreen();
     expect(post).toHaveBeenLastCalledWith('/pagamentos', {
       body: { assinaturaId: 'as1', metodo: 'PIX' },

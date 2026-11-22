@@ -5,6 +5,7 @@ import { api } from '../api/cliente';
 import type { components } from '../api/esquema';
 import { preco } from '../catalogo/catalogo';
 import { Alerta, Botao, Cartao, Tela, Texto } from '../componentes';
+import { CobrancaPendente, FormularioPagamento, type Pagamento } from '../pagamento/FormularioPagamento';
 import { mensagemDaApi } from '../pets/erros';
 import { dataBr } from '../pets/formulario';
 import { cores, espaco } from '../tema/tokens';
@@ -22,10 +23,11 @@ const BENEFICIOS = [
   'Tudo do plano gratuito: saúde, rotina, agenda e despesas',
 ];
 
-/** Plano PANTERA (ADR-010, UC-43 FA1): assinatura mensal paga com PIX. */
+/** Plano PANTERA (ADR-010, UC-43 FA1): assinatura mensal paga com PIX, cartão ou boleto. */
 export default function Pantera() {
   const [situacao, setSituacao] = useState<Situacao | null>(null);
-  const [pix, setPix] = useState<string | null>(null);
+  const [assinaturaId, setAssinaturaId] = useState<string | null>(null);
+  const [pagamento, setPagamento] = useState<Pagamento | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
@@ -50,11 +52,7 @@ export default function Pantera() {
     try {
       const assinatura = await api.POST('/assinaturas');
       if (!assinatura.data?.id) throw new Error(mensagemDaApi(assinatura.error));
-      const pagamento = await api.POST('/pagamentos', {
-        body: { assinaturaId: assinatura.data.id, metodo: 'PIX' },
-      });
-      if (pagamento.error || !pagamento.data) throw new Error(mensagemDaApi(pagamento.error));
-      setPix(pagamento.data.qrCode ?? null);
+      setAssinaturaId(assinatura.data.id);
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Tente de novo em instantes.');
     } finally {
@@ -65,7 +63,16 @@ export default function Pantera() {
   async function conferir() {
     const atual = await consultar();
     if (atual) setSituacao(atual);
-    if (atual?.vigente) setPix(null);
+    if (atual?.vigente) {
+      setPagamento(null);
+      setAssinaturaId(null);
+    }
+  }
+
+  // Cartão aprovado na hora: a assinatura já vale.
+  async function aoPagar(novo: Pagamento) {
+    setPagamento(novo);
+    if (novo.status === 'ACEITO') await conferir();
   }
 
   if (!situacao) {
@@ -103,18 +110,27 @@ export default function Pantera() {
         </View>
       </Cartao>
 
-      {pix ? (
-        <Cartao titulo="Pague com PIX" subtitulo="Copie o código no app do seu banco.">
-          <Texto selectable style={estilos.pix} accessibilityLabel="Código PIX copia e cola">
-            {pix}
-          </Texto>
+      {pagamento?.status === 'PENDENTE' && (pagamento.qrCode || pagamento.boleto) ? (
+        <>
+          <CobrancaPendente pagamento={pagamento} />
           <Texto variante="legenda" cor={cores.textoSecundario}>
             A assinatura é ativada assim que o banco confirmar o pagamento.
           </Texto>
           <Botao titulo="Já paguei, conferir" variante="secundaria" onPress={() => void conferir()} />
-        </Cartao>
+        </>
       ) : situacao.vigente ? (
         <Botao titulo="Conversar com o assistente" larguraTotal onPress={() => router.push('/assistente')} />
+      ) : assinaturaId ? (
+        <>
+          {pagamento && (pagamento.status === 'RECUSADO' || pagamento.status === 'CANCELADO') && (
+            <Alerta
+              tipo="erro"
+              titulo="Pagamento não aprovado"
+              mensagem={pagamento.motivoRecusa ?? 'O gateway não aprovou a transação. Nada foi cobrado.'}
+            />
+          )}
+          <FormularioPagamento alvo={{ assinaturaId }} aoPagar={(novo) => void aoPagar(novo)} />
+        </>
       ) : (
         <Botao titulo="Tornar-se membro" larguraTotal carregando={enviando} onPress={() => void assinar()} />
       )}
@@ -124,10 +140,4 @@ export default function Pantera() {
 
 const estilos = StyleSheet.create({
   lista: { gap: espaco.xs, marginTop: espaco.sm },
-  pix: {
-    padding: espaco.md,
-    borderRadius: 8,
-    backgroundColor: cores.fundo,
-    fontFamily: 'monospace',
-  },
 });
