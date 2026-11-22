@@ -61,6 +61,16 @@ export default function PerfilEmpresa() {
       titulo={empresa.nomeFantasia ?? 'Empresa'}
       subtitulo={[rotuloTipo(empresa.tipo), local(empresa)].filter(Boolean).join(' · ')}
     >
+      <Botao
+        titulo="Conversar com a empresa"
+        variante="secundaria"
+        onPress={() =>
+          router.push({
+            pathname: '/chat/[empresaId]',
+            params: { empresaId: empresa.id!, empresa: empresa.nomeFantasia ?? '' },
+          })
+        }
+      />
       <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
       <Texto variante="titulo2">Serviços</Texto>
       {servicos.length === 0 ? (
