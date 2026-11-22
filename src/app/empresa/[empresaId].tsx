@@ -76,6 +76,17 @@ export default function PerfilEmpresa() {
                   {duracao(servico.duracaoMinutos)}
                 </Texto>
               </View>
+              <Botao
+                titulo="Solicitar agendamento"
+                variante="secundaria"
+                accessibilityLabel={`Solicitar ${servico.nome}`}
+                onPress={() =>
+                  router.push({
+                    pathname: '/solicitar/[servicoId]',
+                    params: { servicoId: servico.id!, servico: servico.nome, empresa: empresa.nomeFantasia ?? '' },
+                  })
+                }
+              />
             </Cartao>
           ))}
         </View>
