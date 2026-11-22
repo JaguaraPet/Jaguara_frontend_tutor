@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { api } from '../../../api/cliente';
 import { Alerta, Botao, Tela } from '../../../componentes';
+import { ArquivarPet } from '../../../pets/ArquivarPet';
 import { mensagemDaApi } from '../../../pets/erros';
 import { FormularioPet } from '../../../pets/FormularioPet';
 import { dataBr } from '../../../pets/formulario';
@@ -78,6 +79,8 @@ export default function EditarPet() {
           return null;
         }}
       />
+      {!novo && <ArquivarPet petId={petId} nome={inicial.nome} />}
+      <Botao titulo="Ver perfil do pet" variante="secundaria" onPress={() => router.replace(`/pets/${petId}`)} />
       <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );

@@ -37,6 +37,10 @@ A tela Entrar (`src/app/entrar.tsx`, UC-02) pede e-mail e senha e explica cada r
 
 Na aba Pets, "Cadastrar pet" abre `/pets/novo`; a edição fica em `/pets/[petId]/editar`. O formulário (`src/pets/FormularioPet.tsx`) traz espécies e raças do catálogo (`GET /especies`, RN07), sexo, data de nascimento com máscara DD/MM/AAAA, peso, cor, microchip e castração, e valida no aparelho antes de enviar, dizendo o que corrigir. Quem cadastra fica como responsável principal (RN09).
 
+## Perfil do pet (UC-04)
+
+`/pets/[petId]` mostra os dados do pet, as alergias e restrições (as graves no topo, em destaque e anunciadas pelo leitor de tela, UC-37) e as últimas vacinas com a próxima dose. "Editar dados" abre a edição, e a edição tem o atalho "Ver perfil do pet". Pet arquivado ou falecido mostra o aviso e não oferece edição.
+
 ## Plano PANTERA e assistente virtual (UC-43)
 
 `/pantera` (no Perfil) mostra o preço e os benefícios e assina com PIX: cria a assinatura pendente, gera o código copia e cola e ativa quando o banco confirma (RN39). `/assistente` (no Início) abre a conversa; sem o plano, oferece a assinatura (CT-43-02). A resposta do assistente chega alguns segundos depois do envio, e a tela consulta de novo até ela aparecer.
