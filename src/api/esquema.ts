@@ -408,7 +408,11 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Se o e-mail existir, um link válido por 2 horas é enviado (RN05). */
+                /**
+                 * @description Se o e-mail tiver conta ativa, um link `<URL_WEB>/redefinir-senha?token=...` válido por
+                 *     2 horas e uso único é enviado (RN05); um link novo invalida os anteriores. A resposta
+                 *     é a mesma para qualquer e-mail.
+                 */
                 202: {
                     headers: {
                         [name: string]: unknown;
@@ -450,7 +454,7 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Senha redefinida. */
+                /** @description Senha redefinida; a conta é desbloqueada e as sessões abertas são encerradas. */
                 204: {
                     headers: {
                         [name: string]: unknown;
@@ -458,7 +462,7 @@ export interface paths {
                     content?: never;
                 };
                 410: components["responses"]["Expirado"];
-                /** @description Senha igual a uma das três últimas (RN06). */
+                /** @description Senha fora da política ou igual a uma das três últimas (RN06). */
                 422: {
                     headers: {
                         [name: string]: unknown;
@@ -701,7 +705,33 @@ export interface paths {
                 };
             };
         };
-        delete?: never;
+        /**
+         * Desarquivar pet
+         * @description Só o responsável principal. O pet arquivado volta para a lista de ativos; pet falecido não volta.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Pet de volta à lista de ativos. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                409: components["responses"]["Conflito"];
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -716,9 +746,35 @@ export interface paths {
             };
             cookie?: never;
         };
-        get?: never;
+        /** Listar responsáveis pelo pet (UC-05) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Responsáveis ativos, principais primeiro. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Responsavel"][];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
         put?: never;
-        /** Vincular responsável (UC-05) */
+        /**
+         * Vincular responsável (UC-05)
+         * @description Só o responsável principal vincula; a outra pessoa precisa ter conta de tutor ativa.
+         */
         post: {
             parameters: {
                 query?: never;
@@ -738,13 +794,17 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Vínculo criado. */
+                /** @description Vínculo criado; devolve os responsáveis. */
                 201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["Responsavel"][];
+                    };
                 };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
                 409: components["responses"]["Conflito"];
             };
         };
@@ -752,6 +812,83 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/pets/{petId}/responsaveis/{tutorId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                petId: components["parameters"]["PetId"];
+                tutorId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remover responsável (UC-05)
+         * @description O principal remove qualquer um; o adicional só sai do próprio vínculo. O pet nunca fica sem principal (RN09_SEM_PRINCIPAL).
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                    tutorId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Vínculo removido. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                409: components["responses"]["Conflito"];
+            };
+        };
+        options?: never;
+        head?: never;
+        /** Trocar entre principal e adicional (UC-05, RN09) */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                    tutorId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        tipo: components["schemas"]["TipoResponsavel"];
+                    };
+                };
+            };
+            responses: {
+                /** @description Responsáveis atualizados. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Responsavel"][];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                409: components["responses"]["Conflito"];
+            };
+        };
         trace?: never;
     };
     "/pets/{petId}/compartilhamentos": {
@@ -974,7 +1111,10 @@ export interface paths {
             };
             cookie?: never;
         };
-        /** Consultar linha do tempo do pet (UC-35) */
+        /**
+         * Consultar linha do tempo do pet (UC-35)
+         * @description Vacinas, exames, tratamentos, compromissos e atendimentos. A empresa precisa do escopo LINHA_DO_TEMPO (RN26).
+         */
         get: {
             parameters: {
                 query?: never;
@@ -986,7 +1126,7 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Eventos em ordem cronológica. */
+                /** @description Eventos em ordem cronológica, do mais antigo para o mais recente. */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -1273,7 +1413,31 @@ export interface paths {
             };
             cookie?: never;
         };
-        get?: never;
+        /** Listar alergias e restrições (UC-37) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description As graves primeiro, com `destaque` para o perfil do pet (CT-37-01). */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Alergia"][];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
         put?: never;
         /** Registrar alergia ou restrição (UC-37) */
         post: {
@@ -1296,14 +1460,89 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["Alergia"];
+                    };
                 };
+                403: components["responses"]["SemPermissao"];
+                422: components["responses"]["Validacao"];
             };
         };
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/alergias/{alergiaId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                alergiaId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Excluir alergia ou restrição (UC-37)
+         * @description Edição clínica; empresa precisa de ALERGIAS e EDICAO_CLINICA (RN30, CT-37-02).
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    alergiaId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Alergia excluída. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        options?: never;
+        head?: never;
+        /** Alterar alergia ou restrição (UC-37) */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    alergiaId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AlergiaEntrada"];
+                };
+            };
+            responses: {
+                /** @description Alergia alterada. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Alergia"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
         trace?: never;
     };
     "/pets/{petId}/documentos": {
@@ -1907,16 +2146,26 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Relatório em JSON ou PDF (RN11), conforme o cabeçalho Accept. */
+                /** @description Relatório em JSON ou PDF (RN11), conforme o cabeçalho Accept. Sem `petId`, junta todos os pets de que o tutor é responsável. */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["RelatorioDespesas"];
                         "application/pdf": string;
                     };
                 };
+                /** @description Pet não encontrado, ou não há despesas no período (código RN11_SEM_DADOS, CT-07-02). */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+                422: components["responses"]["Validacao"];
             };
         };
         put?: never;
@@ -2539,7 +2788,7 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Solicitação ACEITA e agendamento criado. */
+                /** @description Solicitação ACEITA e agendamento criado pelo preço atual (RN27); o tutor recebe e-mail. */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -2548,7 +2797,18 @@ export interface paths {
                         "application/json": components["schemas"]["Agendamento"];
                     };
                 };
-                409: components["responses"]["Conflito"];
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                /** @description Já respondida (SOLICITACAO_RESPONDIDA) ou conflito de agenda (RN14, RN29). */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+                422: components["responses"]["Validacao"];
             };
         };
         delete?: never;
@@ -2586,13 +2846,17 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Solicitação RECUSADA. */
+                /** @description Solicitação RECUSADA; o tutor recebe o motivo por e-mail. */
                 204: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content?: never;
                 };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                409: components["responses"]["Conflito"];
+                422: components["responses"]["Validacao"];
             };
         };
         delete?: never;
@@ -3025,6 +3289,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/empresas/{empresaId}/perfis": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+            };
+            cookie?: never;
+        };
+        /** Listar perfis de acesso da empresa (UC-16, UC-19) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Perfis que a empresa pode dar aos funcionários, com as permissões de cada um (RN20). */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PerfilDaEmpresa"][];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/funcionarios/{funcionarioId}": {
         parameters: {
             query?: never;
@@ -3288,15 +3593,110 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Pets com agendamento ou compartilhamento ativo e pets de clientes sem conta. */
+                /** @description Pets com compartilhamento ativo, agendamento com a empresa ou de clientes da empresa. */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Pet"][];
+                        "application/json": components["schemas"]["PetVinculado"][];
                     };
                 };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/empresas/{empresaId}/pets/{petId}/perfil": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+                petId: components["parameters"]["PetId"];
+            };
+            cookie?: never;
+        };
+        /** Visualizar perfil do pet com as seções liberadas (UC-22, RN26) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Perfil básico e só as seções que o tutor liberou no compartilhamento. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PerfilPetEmpresa"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/empresas/{empresaId}/relatorios/{tipo}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+                /** @description `atendimentos` (operacional) ou `financeiro` (gerencial, exige também financeiro:ler). */
+                tipo: "atendimentos" | "financeiro";
+            };
+            cookie?: never;
+        };
+        /** Emitir relatórios (UC-18, RN22) */
+        get: {
+            parameters: {
+                query: {
+                    de: string;
+                    ate: string;
+                };
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                    /** @description `atendimentos` (operacional) ou `financeiro` (gerencial, exige também financeiro:ler). */
+                    tipo: "atendimentos" | "financeiro";
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Relatório da própria empresa em JSON, ou PDF com `Accept: application/pdf`. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RelatorioAtendimentos"] | components["schemas"]["RelatorioFinanceiro"];
+                        "application/pdf": string;
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                422: components["responses"]["Validacao"];
             };
         };
         put?: never;
@@ -3331,24 +3731,35 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Indicadores da própria empresa. */
+                /** @description Indicadores só da própria empresa, em período de até um ano: atendimentos realizados, faturamento confirmado, taxa de aceite das solicitações respondidas (%), os cinco serviços mais pedidos e os atendimentos por dia. */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
                         "application/json": {
-                            atendimentos?: number;
-                            faturamento?: number;
-                            taxaAceite?: number;
-                            servicosMaisSolicitados?: {
-                                servico?: string;
-                                quantidade?: number;
+                            /** Format: date */
+                            de: string;
+                            /** Format: date */
+                            ate: string;
+                            atendimentos: number;
+                            faturamento: number;
+                            taxaAceite: number;
+                            solicitacoes: number;
+                            servicosMaisSolicitados: {
+                                servico: string;
+                                quantidade: number;
+                            }[];
+                            atendimentosPorDia: {
+                                /** Format: date */
+                                data: string;
+                                quantidade: number;
                             }[];
                         };
                     };
                 };
                 403: components["responses"]["SemPermissao"];
+                422: components["responses"]["Validacao"];
             };
         };
         put?: never;
@@ -4186,6 +4597,89 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/usuarios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Buscar contas de usuários (UC-28) */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Trecho do e-mail ou do nome. */
+                    busca?: string;
+                    status?: components["schemas"]["StatusConta"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Até 100 contas, das mais recentes para as mais antigas. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ContaResumo"][];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/usuarios/{usuarioId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                usuarioId: string;
+            };
+            cookie?: never;
+        };
+        /** Ver o perfil e o status da conta (UC-28) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    usuarioId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Perfil, status, sessões ativas e as últimas mudanças de status auditadas. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ContaDetalhe"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/usuarios/{usuarioId}/status": {
         parameters: {
             query?: never;
@@ -4216,7 +4710,7 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Status alterado e auditado (RN34). */
+                /** @description Status alterado e auditado (RN34). Bloquear ou suspender encerra as sessões da conta. */
                 204: {
                     headers: {
                         [name: string]: unknown;
@@ -4224,6 +4718,26 @@ export interface paths {
                     content?: never;
                 };
                 403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                /** @description Mudança recusada (RN34_STATUS_INVALIDO): mesmo status, conta própria, pendente ou excluída. */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+                422: components["responses"]["Validacao"];
+                /** @description Auditoria indisponível (RN34_AUDITORIA_INDISPONIVEL); o status não mudou (CT-28-02). */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
             };
         };
         post?: never;
@@ -4751,6 +5265,145 @@ export interface components {
             microchip?: string;
             castrado: boolean;
         };
+        ContagemRelatorio: {
+            chave: string;
+            quantidade: number;
+            total?: number;
+        };
+        RelatorioAtendimentos: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            tipo: "atendimentos";
+            /** Format: date */
+            de: string;
+            /** Format: date */
+            ate: string;
+            total: number;
+            /** @description Percentual de realizados entre realizados e faltas. */
+            taxaComparecimento: number;
+            porStatus: components["schemas"]["ContagemRelatorio"][];
+            porServico: components["schemas"]["ContagemRelatorio"][];
+            porProfissional: components["schemas"]["ContagemRelatorio"][];
+            agendamentos: {
+                /** Format: date-time */
+                dataHora?: string;
+                pet?: string;
+                servico?: string;
+                profissional?: string;
+                status?: string;
+                atendimentoFinalizado?: boolean;
+            }[];
+        };
+        RelatorioFinanceiro: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            tipo: "financeiro";
+            /** Format: date */
+            de: string;
+            /** Format: date */
+            ate: string;
+            faturamento: number;
+            pagamentosConfirmados: number;
+            ticketMedio: number;
+            pendentes: {
+                quantidade?: number;
+                total?: number;
+            };
+            porServico: components["schemas"]["ContagemRelatorio"][];
+            porMetodo: components["schemas"]["ContagemRelatorio"][];
+        };
+        /** @enum {string} */
+        StatusConta: "PENDENTE_CONFIRMACAO" | "ATIVA" | "BLOQUEADA" | "SUSPENSA" | "INATIVA";
+        ContaResumo: {
+            /** Format: uuid */
+            id: string;
+            /** Format: email */
+            email: string;
+            nome: string;
+            /** @enum {string} */
+            tipo: "TUTOR" | "EMPRESA" | "FUNCIONARIO" | "ADMINISTRADOR";
+            status: components["schemas"]["StatusConta"];
+            /** Format: date-time */
+            dataCadastro: string;
+        };
+        ContaDetalhe: components["schemas"]["ContaResumo"] & {
+            emailConfirmado: boolean;
+            sessoesAtivas: number;
+            historico: {
+                /** Format: date-time */
+                dataHora: string;
+                /** @enum {string} */
+                acao: "CONTA_REATIVADA" | "CONTA_BLOQUEADA" | "CONTA_SUSPENSA";
+                /** Format: uuid */
+                autorId?: string;
+                motivo?: string;
+            }[];
+        };
+        RelatorioDespesas: {
+            /** Format: date */
+            de: string;
+            /** Format: date */
+            ate: string;
+            /** Format: uuid */
+            petId?: string;
+            total: number;
+            porCategoria: {
+                categoria?: string;
+                quantidade?: number;
+                total?: number;
+            }[];
+            despesas: {
+                descricao?: string;
+                valor?: number;
+                /** Format: date */
+                data?: string;
+                categoria?: string;
+                pet?: string;
+            }[];
+        };
+        PetVinculado: {
+            /** Format: uuid */
+            id: string;
+            nome: string;
+            especie: string;
+            raca: string;
+            sexo: string;
+            idade?: number;
+            status: string;
+            motivos: ("COMPARTILHAMENTO" | "AGENDAMENTO" | "CLIENTE")[];
+            secoes: ("vacinas" | "exames" | "medicamentos" | "alergias")[];
+        };
+        PerfilPetEmpresa: components["schemas"]["PetVinculado"] & {
+            vacinas?: {
+                nomeVacina?: string;
+                /** Format: date */
+                dataAplicacao?: string;
+                /** Format: date */
+                dataProximaDose?: string;
+            }[];
+            exames?: {
+                tipoExame?: string;
+                /** Format: date */
+                dataRealizacao?: string;
+                resultado?: string;
+            }[];
+            medicamentos?: {
+                medicamento?: string;
+                dosagem?: string;
+                status?: string;
+                /** Format: date */
+                dataInicio?: string;
+            }[];
+            alergias?: {
+                tipo?: string;
+                descricao?: string;
+                gravidade?: string;
+            }[];
+        };
         Pet: components["schemas"]["PetEntrada"] & {
             /** Format: uuid */
             id?: string;
@@ -4896,6 +5549,13 @@ export interface components {
             gravidade: "LEVE" | "MODERADA" | "GRAVE";
             /** Format: date */
             dataIdentificacao?: string;
+            observacoes?: string;
+        };
+        Alergia: components["schemas"]["AlergiaEntrada"] & {
+            /** Format: uuid */
+            id?: string;
+            /** @description Alergia grave */
+            destaque?: boolean;
         };
         ItemLinhaDoTempo: {
             /** Format: date-time */
@@ -5115,7 +5775,18 @@ export interface components {
             email?: string;
             cargo?: string;
             perfil?: string;
+            /** Format: uuid */
+            perfilId?: string;
             ativo?: boolean;
+            /** @description Convite ainda não aceito: o funcionário não criou a senha (RN02). */
+            pendente?: boolean;
+        };
+        PerfilDaEmpresa: {
+            /** Format: uuid */
+            id: string;
+            nome: string;
+            descricao?: string;
+            permissoes: string[];
         };
         /** @enum {string} */
         MetodoPagamento: "CARTAO_CREDITO" | "CARTAO_DEBITO" | "PIX" | "BOLETO";
@@ -5185,6 +5856,16 @@ export interface components {
             integracaoId?: string;
             /** @description Só na resposta da criação. */
             segredo?: string;
+        };
+        Responsavel: {
+            /** Format: uuid */
+            tutorId?: string;
+            nome?: string;
+            tipo?: components["schemas"]["TipoResponsavel"];
+            /** Format: date-time */
+            dataVinculo?: string;
+            /** @description É o usuário autenticado. */
+            voce?: boolean;
         };
         Assinatura: {
             /** Format: uuid */
