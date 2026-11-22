@@ -49,6 +49,10 @@ Na tela da empresa, cada serviço tem "Solicitar agendamento", que abre `/solici
 
 `/pagar/[agendamentoId]` (com `servico` e `valor` nos parâmetros) paga pelo preço contratado (RN27) com PIX ou cartão. O PIX mostra o código copia e cola e a tela confere a cada 5 segundos até o banco confirmar. No cartão, os dados vão direto para o gateway e a API recebe só o token e a bandeira (`src/pagamento/cartao.ts`); recusa mostra o motivo e "Tentar outro meio" (RN39). Com `EXPO_PUBLIC_MP_CHAVE_PUBLICA` no `.env` o token vem do Mercado Pago (sandbox: cartão 5031 4332 1540 6351, titular APRO aprova e OTHE recusa); sem ela, o app gera um token de teste para o gateway simulado da API, e o titular OTHE também simula a recusa. A tela é aberta por "Minhas solicitações" (UC-42), que chega em outra entrega.
 
+## Chat com a empresa (UC-43)
+
+Na tela da empresa, "Conversar com a empresa" abre `/chat/[empresaId]`, que inicia (ou retoma) a conversa com `POST /conversas` e mostra o histórico em ordem. Com a tela aberta, o app busca mensagens novas a cada 5 segundos (a web da empresa recebe em tempo real pelo Socket.IO). Só quem é cliente ou tem agendamento com a empresa conversa; os demais veem o aviso da API (CT-43-01).
+
 ## Plano PANTERA e assistente virtual (UC-43)
 
 `/pantera` (no Perfil) mostra o preço e os benefícios e assina com PIX: cria a assinatura pendente, gera o código copia e cola e ativa quando o banco confirma (RN39). `/assistente` (no Início) abre a conversa; sem o plano, oferece a assinatura (CT-43-02). A resposta do assistente chega alguns segundos depois do envio, e a tela consulta de novo até ela aparecer.
