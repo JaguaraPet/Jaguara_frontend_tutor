@@ -1554,11 +1554,39 @@ export interface paths {
             };
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Listar documentos do pet (UC-34)
+         * @description Tutor responsável ou empresa com o escopo DOCUMENTOS (RN15). A lista não traz endereço de arquivo.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Documentos, do envio mais recente para o mais antigo. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Documento"][];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
         put?: never;
         /**
          * Iniciar envio de documento (UC-34)
-         * @description Retorna uma URL assinada de envio válida por 5 minutos.
+         * @description Registra o documento e devolve a URL assinada para o aparelho enviar o arquivo com PUT,
+         *     válida por 5 minutos (ADR-005). Aceita PDF, JPG, PNG, WEBP e HEIC até 10 MB.
          */
         post: {
             parameters: {
@@ -1576,6 +1604,10 @@ export interface paths {
                         tipo: components["schemas"]["TipoDocumento"];
                         nomeArquivo: string;
                         tamanhoBytes: number;
+                        /** Format: date */
+                        dataEmissao?: string;
+                        /** Format: date */
+                        dataValidade?: string;
                     };
                 };
             };
@@ -1588,15 +1620,119 @@ export interface paths {
                     content: {
                         "application/json": {
                             /** Format: uuid */
-                            documentoId?: string;
+                            documentoId: string;
                             /** Format: uri */
-                            urlEnvio?: string;
+                            urlEnvio: string;
+                            /** Format: date-time */
+                            expiraEm: string;
                         };
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                422: components["responses"]["Validacao"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documentos/{documentoId}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                documentoId: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Baixar documento do pet (UC-34)
+         * @description URL assinada de download, válida por 5 minutos, que baixa com o nome original (CT-34-02).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    documentoId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description URL de download. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** Format: uri */
+                            url: string;
+                            /** Format: date-time */
+                            expiraEm: string;
+                        };
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documentos/{documentoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                documentoId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Excluir documento do pet (UC-34) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    documentoId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Documento excluído e auditado. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                /** @description O documento é o laudo de um exame (DOCUMENTO_EM_USO). */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
                     };
                 };
             };
         };
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -3323,8 +3459,180 @@ export interface paths {
             };
         };
         put?: never;
+        /** Criar perfil de acesso (UC-16, RN20) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PerfilEntrada"];
+                };
+            };
+            responses: {
+                /** @description Perfil criado e auditado. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PerfilDaEmpresa"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                /** @description Já existe perfil com esse nome (PERFIL_DUPLICADO). */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+                422: components["responses"]["Validacao"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/empresas/{empresaId}/permissoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+            };
+            cookie?: never;
+        };
+        /** Listar as permissões que a empresa pode distribuir (UC-16) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Permissões do catálogo para perfis de empresa. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            codigo: string;
+                            modulo: string;
+                            descricao: string;
+                        }[];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/perfis/{perfilId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                perfilId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Alterar perfil de acesso (UC-16, RN20)
+         * @description As sessões de quem usa o perfil são encerradas para as permissões novas valerem na hora.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    perfilId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PerfilEntrada"];
+                };
+            };
+            responses: {
+                /** @description Perfil alterado e auditado. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PerfilDaEmpresa"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                /** @description Perfil Proprietário (PERFIL_PROTEGIDO) ou nome repetido (PERFIL_DUPLICADO). */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+                422: components["responses"]["Validacao"];
+            };
+        };
+        post?: never;
+        /** Excluir perfil de acesso (UC-16) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    perfilId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Perfil excluído e auditado. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                /** @description Perfil Proprietário (PERFIL_PROTEGIDO) ou com pessoas (PERFIL_EM_USO). */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -5370,6 +5678,19 @@ export interface components {
                 pet?: string;
             }[];
         };
+        Documento: {
+            /** Format: uuid */
+            id: string;
+            titulo: string;
+            tipo: components["schemas"]["TipoDocumento"];
+            nomeArquivo: string;
+            /** Format: date */
+            dataEmissao?: string;
+            /** Format: date */
+            dataValidade?: string;
+            /** Format: date-time */
+            dataUpload: string;
+        };
         PetVinculado: {
             /** Format: uuid */
             id: string;
@@ -5785,6 +6106,11 @@ export interface components {
             ativo?: boolean;
             /** @description Convite ainda não aceito: o funcionário não criou a senha (RN02). */
             pendente?: boolean;
+        };
+        PerfilEntrada: {
+            nome: string;
+            descricao?: string;
+            permissoes: string[];
         };
         PerfilDaEmpresa: {
             /** Format: uuid */
