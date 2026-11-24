@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { Botao, Cartao, Tela, Texto } from '../../componentes';
+import { removerAparelho } from '../../notificacoes/push';
 import { sessao } from '../../sessao/sessao';
 import { useUsuario } from '../../sessao/useUsuario';
 
@@ -20,7 +21,11 @@ export default function Perfil() {
         titulo="Sair"
         variante="secundaria"
         larguraTotal
-        onPress={() => void sessao.sair().then(() => router.replace('/boas-vindas'))}
+        onPress={() =>
+          void removerAparelho()
+            .then(() => sessao.sair())
+            .then(() => router.replace('/boas-vindas'))
+        }
       />
     </Tela>
   );
