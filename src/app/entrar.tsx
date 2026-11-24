@@ -80,6 +80,12 @@ export default function Entrar() {
         />
         <Botao titulo="Entrar" larguraTotal carregando={enviando} onPress={() => void enviar()} />
         <Botao
+          titulo="Esqueci minha senha"
+          variante="texto"
+          larguraTotal
+          onPress={() => router.push('/recuperar-senha')}
+        />
+        <Botao
           titulo="Ainda não tenho conta"
           variante="texto"
           larguraTotal

@@ -37,6 +37,10 @@ A tela Entrar (`src/app/entrar.tsx`, UC-02) pede e-mail e senha e explica cada r
 
 `/cadastro` pede nome completo, CPF, e-mail, celular opcional e senha (8+ caracteres, letras e números), mostra os termos de uso e a política de privacidade vigentes (abrem ao tocar) e só envia com o aceite marcado (RN42). CPF e senha são conferidos no aparelho antes de enviar (`src/sessao/cadastro.ts`); CPF ou e-mail repetidos voltam como aviso da API (RN01). Depois do cadastro, a tela pede para confirmar o e-mail pelo link (RN02).
 
+## Recuperação de senha (UC-03)
+
+No login, "Esqueci minha senha" abre `/recuperar-senha`, que pede o e-mail e mostra sempre a mesma resposta, exista a conta ou não. O link do e-mail abre a página da web; no celular, o mesmo link no formato `jaguara://redefinir-senha?token=...` abre `/redefinir-senha` no app. A nova senha segue a política e não pode repetir as três últimas (RN06); link vencido ou já usado mostra como pedir outro (RN05).
+
 ## Cadastro e edição do pet (UC-04)
 
 Na aba Pets, "Cadastrar pet" abre `/pets/novo`; a edição fica em `/pets/[petId]/editar`. O formulário (`src/pets/FormularioPet.tsx`) traz espécies e raças do catálogo (`GET /especies`, RN07), sexo, data de nascimento com máscara DD/MM/AAAA, peso, cor, microchip e castração, e valida no aparelho antes de enviar, dizendo o que corrigir. Quem cadastra fica como responsável principal (RN09).
