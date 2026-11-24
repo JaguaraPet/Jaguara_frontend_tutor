@@ -57,6 +57,10 @@ Na tela da empresa, cada serviço tem "Solicitar agendamento", que abre `/solici
 
 Na tela da empresa, "Conversar com a empresa" abre `/chat/[empresaId]`, que inicia (ou retoma) a conversa com `POST /conversas` e mostra o histórico em ordem. Com a tela aberta, o app busca mensagens novas a cada 5 segundos (a web da empresa recebe em tempo real pelo Socket.IO). Só quem é cliente ou tem agendamento com a empresa conversa; os demais veem o aviso da API (CT-43-01).
 
+## Agenda e eventos (UC-10)
+
+A aba Agenda mostra os próximos 30 dias do pet escolhido, agrupados por dia, com os eventos do tutor e os agendamentos com empresas (só os eventos manuais podem ser excluídos, e o lembrete sai junto). "Novo evento" abre `/eventos/novo`: título, tipo, data DD/MM/AAAA, início e fim HH:MM no fuso de Brasília, local e observações; conflito de horário do pet volta como aviso (RN14), e a API agenda o lembrete uma hora antes (RN37). O componente `Opcoes` (escolha única acessível) fica em `src/componentes`.
+
 ## Plano PANTERA e assistente virtual (UC-43)
 
 `/pantera` (no Perfil) mostra o preço e os benefícios e assina com PIX: cria a assinatura pendente, gera o código copia e cola e ativa quando o banco confirma (RN39). `/assistente` (no Início) abre a conversa; sem o plano, oferece a assinatura (CT-43-02). A resposta do assistente chega alguns segundos depois do envio, e a tela consulta de novo até ela aparecer.
