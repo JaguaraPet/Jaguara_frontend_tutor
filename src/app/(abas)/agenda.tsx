@@ -87,6 +87,7 @@ export default function Agenda() {
         larguraTotal
         onPress={() => router.push({ pathname: '/eventos/novo', params: { petId } })}
       />
+      <Botao titulo="Google Agenda" variante="secundaria" larguraTotal onPress={() => router.push('/calendario')} />
       {aviso && <Alerta tipo="erro" titulo={aviso} />}
       {excluindo && (
         <Alerta

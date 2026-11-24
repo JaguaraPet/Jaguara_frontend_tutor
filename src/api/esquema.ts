@@ -1821,6 +1821,221 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/calendario-externo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Situação do calendário externo do tutor (UC-09) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Conta conectada, se autorizada e a última sincronização; vazio quando não há conexão. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            provedor?: "GOOGLE";
+                            conta?: string;
+                            autorizado?: boolean;
+                            /** Format: date-time */
+                            ultimaSincronizacao?: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        /**
+         * Desconectar o calendário externo (UC-09, RN13)
+         * @description Apaga a autorização e os compromissos importados.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Calendário desconectado. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/calendario-externo/google/autorizacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Iniciar a autorização do Google Agenda (UC-09)
+         * @description Devolve o endereço de consentimento do Google (só leitura do calendário). O app abre no
+         *     navegador; o Google volta para a rota de retorno. Sem GOOGLE_CLIENT_ID e
+         *     GOOGLE_CLIENT_SECRET, o calendário é simulado e o endereço volta direto para a API.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Endereço de consentimento, válido por 10 minutos. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** Format: uri */
+                            url: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/calendario-externo/google/retorno": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Retorno do consentimento do Google (UC-09) */
+        get: {
+            parameters: {
+                query: {
+                    code?: string;
+                    state: string;
+                    error?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /**
+                 * @description Volta para o app em `<URL_APP>/calendario?resultado=conectado|negado|erro`. Acesso
+                 *     negado ou estado inválido não guarda nada (CT-09-02).
+                 */
+                302: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pets/{petId}/calendario-externo/sincronizacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                petId: components["parameters"]["PetId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sincronizar o calendário externo com a agenda do pet (UC-09, CT-09-01)
+         * @description Importa os compromissos dos próximos 30 dias como eventos de origem CALENDARIO_EXTERNO; os que saíram do calendário externo são removidos.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Resumo da sincronização. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            importados: number;
+                            atualizados: number;
+                            removidos: number;
+                        };
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+                /** @description Calendário não autorizado ou autorização revogada (RN13_SEM_AUTORIZACAO). */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+                /** @description Google Agenda indisponível (CALENDARIO_INDISPONIVEL). */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/eventos/{eventoId}": {
         parameters: {
             query?: never;
