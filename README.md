@@ -37,6 +37,10 @@ A tela Entrar (`src/app/entrar.tsx`, UC-02) pede e-mail e senha e explica cada r
 
 `/cadastro` pede nome completo, CPF, e-mail, celular opcional e senha (8+ caracteres, letras e números), mostra os termos de uso e a política de privacidade vigentes (abrem ao tocar) e só envia com o aceite marcado (RN42). CPF e senha são conferidos no aparelho antes de enviar (`src/sessao/cadastro.ts`); CPF ou e-mail repetidos voltam como aviso da API (RN01). Depois do cadastro, a tela pede para confirmar o e-mail pelo link (RN02).
 
+## Medicamentos (UC-14)
+
+No perfil do pet, "Medicamentos" abre `/pets/[petId]/medicamentos`: os tratamentos em uso e os anteriores, o cadastro (medicamento, dose, via, intervalo, início, fim opcional e hora da primeira dose) e "Finalizar". Ao salvar, a tela mostra quantos lembretes de dose a API agendou (RN18); ao finalizar, os lembretes futuros são cancelados.
+
 ## Responsáveis pelo pet (UC-05)
 
 No perfil do pet, "Responsáveis" abre `/pets/[petId]/responsaveis`. O responsável principal adiciona outro tutor pelo e-mail da conta (adicional ou principal), troca o tipo e remove vínculos; o adicional só pode sair. A API garante que o pet nunca fique sem principal (RN09) e a tela mostra a recusa.
