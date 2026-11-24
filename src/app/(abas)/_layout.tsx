@@ -1,6 +1,8 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Redirect, Tabs } from 'expo-router';
+import { useEffect } from 'react';
 import type { ComponentProps } from 'react';
+import { registrarAparelho } from '../../notificacoes/push';
 import { useUsuario } from '../../sessao/useUsuario';
 import { familiaPorPeso } from '../../tema/fontes';
 import { cores } from '../../tema/tokens';
@@ -19,6 +21,13 @@ const abas: { nome: string; titulo: string; icone: NomeIcone }[] = [
 /** As abas exigem login: sem sessão, o tutor vai para as boas-vindas. */
 export default function LayoutAbas() {
   const usuario = useUsuario();
+  const usuarioId = usuario?.id;
+
+  // Com a sessão aberta, registra o aparelho para os lembretes por push (UC-31).
+  useEffect(() => {
+    if (usuarioId) void registrarAparelho().catch(() => null);
+  }, [usuarioId]);
+
   if (!usuario) return <Redirect href="/boas-vindas" />;
 
   return (

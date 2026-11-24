@@ -2023,6 +2023,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/dispositivos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Registrar o aparelho para push (UC-31)
+         * @description O app registra o token de push do Expo depois do login. O mesmo aparelho com outra conta
+         *     passa para a conta atual. Com PUSH_EXPO ligado, o worker manda os lembretes por push.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example ExponentPushToken[xxxxxxxx] */
+                        token: string;
+                        /** @enum {string} */
+                        plataforma: "ios" | "android" | "web";
+                    };
+                };
+            };
+            responses: {
+                /** @description Aparelho registrado. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["Validacao"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dispositivos/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Tirar o aparelho da conta na saída (UC-31) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    token: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Aparelho removido da conta. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/notificacoes": {
         parameters: {
             query?: never;
@@ -3001,6 +3087,88 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/minhas-solicitacoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Minhas solicitações, com nomes e situação (UC-42)
+         * @description Só o tutor. Da mais recente para a mais antiga, já com serviço, empresa, pet, agendamento, pagamento e se ainda pode cancelar.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Solicitações do tutor. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DetalheSolicitacao"][];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/solicitacoes/{solicitacaoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                solicitacaoId: components["parameters"]["SolicitacaoId"];
+            };
+            cookie?: never;
+        };
+        /** Detalhes da solicitação com o histórico (UC-42, CT-42-01) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    solicitacaoId: components["parameters"]["SolicitacaoId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Status atual, histórico e se pode cancelar. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DetalheSolicitacao"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/solicitacoes/{solicitacaoId}/cancelamento": {
         parameters: {
             query?: never;
@@ -3012,7 +3180,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Cancelar solicitação (UC-42) */
+        /**
+         * Cancelar solicitação (UC-42)
+         * @description Pendente ou aceita, antes do horário. Se já aceita, o agendamento é desfeito e o horário
+         *     volta para a agenda; a empresa recebe e-mail e o histórico registra o tutor como autor (RN38).
+         */
         post: {
             parameters: {
                 query?: never;
@@ -3031,7 +3203,16 @@ export interface paths {
                     };
                     content?: never;
                 };
-                409: components["responses"]["Conflito"];
+                404: components["responses"]["NaoEncontrado"];
+                /** @description Status ou horário não permitem cancelar (RN38_CANCELAMENTO_BLOQUEADO, CT-42-02). */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -3049,7 +3230,7 @@ export interface paths {
             };
             cookie?: never;
         };
-        /** Histórico de status da solicitação (RN38) */
+        /** Histórico de status da solicitação para o tutor (RN38) */
         get: {
             parameters: {
                 query?: never;
@@ -6032,10 +6213,51 @@ export interface components {
         };
         HistoricoSolicitacao: {
             /** Format: date-time */
-            dataHora?: string;
+            dataHora: string;
             statusAnterior?: components["schemas"]["StatusSolicitacao"];
-            statusNovo?: components["schemas"]["StatusSolicitacao"];
-            autor?: string;
+            statusNovo: components["schemas"]["StatusSolicitacao"];
+            /** @description "Você" ou o nome da empresa. */
+            autor: string;
+            descricao?: string;
+        };
+        DetalheSolicitacao: {
+            /** Format: uuid */
+            id: string;
+            status: components["schemas"]["StatusSolicitacao"];
+            /** Format: date-time */
+            dataHoraDesejada: string;
+            observacoes?: string;
+            motivoRecusa?: string;
+            servico: {
+                /** Format: uuid */
+                id: string;
+                nome: string;
+                preco: number;
+                duracaoMinutos: number;
+            };
+            empresa: {
+                /** Format: uuid */
+                id: string;
+                nome: string;
+            };
+            pet: {
+                /** Format: uuid */
+                id: string;
+                nome: string;
+            };
+            agendamento?: {
+                /** Format: uuid */
+                id: string;
+                /** Format: date-time */
+                dataHoraInicio: string;
+                precoContratado: number;
+                /** @enum {string} */
+                status: "AGENDADO" | "CANCELADO" | "REALIZADO" | "NAO_COMPARECEU";
+                pagamento?: components["schemas"]["StatusPagamento"];
+            };
+            podeCancelar: boolean;
+            motivoSemCancelamento?: string;
+            historico: components["schemas"]["HistoricoSolicitacao"][];
             descricao?: string;
         };
         AgendamentoEntrada: {

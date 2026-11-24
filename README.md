@@ -73,6 +73,10 @@ Na tela da empresa, "Conversar com a empresa" abre `/chat/[empresaId]`, que inic
 
 A aba Agenda mostra os próximos 30 dias do pet escolhido, agrupados por dia, com os eventos do tutor e os agendamentos com empresas (só os eventos manuais podem ser excluídos, e o lembrete sai junto). "Novo evento" abre `/eventos/novo`: título, tipo, data DD/MM/AAAA, início e fim HH:MM no fuso de Brasília, local e observações; conflito de horário do pet volta como aviso (RN14), e a API agenda o lembrete uma hora antes (RN37). O componente `Opcoes` (escolha única acessível) fica em `src/componentes`.
 
+## Notificações push (UC-31)
+
+Com a sessão aberta, o app pede a permissão e registra o aparelho na API (`src/notificacoes/push.ts`, `expo-notifications`); ao sair, tira o aparelho da conta. O token de push exige o projeto do EAS (`extra.eas.projectId`, criado no build da JAG-212) e um aparelho de verdade: no emulador ou sem o projeto, o app não registra e as notificações continuam na lista.
+
 ## Plano PANTERA e assistente virtual (UC-43)
 
 `/pantera` (no Perfil) mostra o preço e os benefícios e assina com PIX: cria a assinatura pendente, gera o código copia e cola e ativa quando o banco confirma (RN39). `/assistente` (no Início) abre a conversa; sem o plano, oferece a assinatura (CT-43-02). A resposta do assistente chega alguns segundos depois do envio, e a tela consulta de novo até ela aparecer.
