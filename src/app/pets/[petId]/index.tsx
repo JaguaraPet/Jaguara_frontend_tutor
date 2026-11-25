@@ -151,6 +151,7 @@ export default function PerfilPet() {
       <Botao titulo="Exames" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/exames`)} />
       <Botao titulo="Documentos" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/documentos`)} />
       <Botao titulo="Responsáveis" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/responsaveis`)} />
+      <Botao titulo="Memorial" variante="texto" larguraTotal onPress={() => router.push(`/pets/${pet.id}/memorial`)} />
       <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );
