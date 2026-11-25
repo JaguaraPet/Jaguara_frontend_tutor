@@ -21,6 +21,11 @@ export default function Inicio() {
           aoTocar={() => router.push('/agenda')}
         />
         <Cartao
+          titulo="Minhas solicitações"
+          subtitulo="Pedidos de agendamento, pagamento e cancelamento"
+          aoTocar={() => router.push('/solicitacoes')}
+        />
+        <Cartao
           titulo="Assistente virtual"
           subtitulo="Dúvidas do dia a dia do seu pet (PANTERA)"
           aoTocar={() => router.push('/assistente')}
