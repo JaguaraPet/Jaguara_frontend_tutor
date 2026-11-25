@@ -37,6 +37,10 @@ A tela Entrar (`src/app/entrar.tsx`, UC-02) pede e-mail e senha e explica cada r
 
 `/cadastro` pede nome completo, CPF, e-mail, celular opcional e senha (8+ caracteres, letras e números), mostra os termos de uso e a política de privacidade vigentes (abrem ao tocar) e só envia com o aceite marcado (RN42). CPF e senha são conferidos no aparelho antes de enviar (`src/sessao/cadastro.ts`); CPF ou e-mail repetidos voltam como aviso da API (RN01). Depois do cadastro, a tela pede para confirmar o e-mail pelo link (RN02).
 
+## Linha do tempo (UC-35)
+
+No perfil do pet, "Linha do tempo" abre `/pets/[petId]/linha-do-tempo`: vacinas, exames, medicamentos, compromissos e atendimentos do mais recente ao mais antigo, com ícone e filtro por tipo. Cada item é lido pelo leitor de tela como uma frase só (data, tipo e título).
+
 ## Vacinas (UC-12, UC-13)
 
 No perfil do pet, "Vacinas" abre `/pets/[petId]/vacinas`: o histórico válido em ordem de aplicação (RN16), a próxima dose em destaque e o registro (vacina, data, quem aplicou, próxima dose, fabricante, lote e observações). Quem aplicou é obrigatório (RN17) e a data não pode ser futura. Com próxima dose, a API agenda o lembrete às 9h do dia anterior.
