@@ -104,7 +104,7 @@ export default function SolicitarAgendamento() {
           titulo="Pedido enviado à empresa"
           mensagem={`${servico ?? 'O serviço'} em ${rotuloDia(dia)} às ${horaBrasilia(horario)}. Você recebe um aviso quando a empresa responder.`}
         />
-        <Botao titulo="Ver minha agenda" larguraTotal onPress={() => router.replace('/agenda')} />
+        <Botao titulo="Ver minhas solicitações" larguraTotal onPress={() => router.replace('/solicitacoes')} />
         <Botao titulo="Voltar para a empresa" variante="texto" onPress={() => router.back()} />
       </Tela>
     );

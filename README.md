@@ -81,9 +81,13 @@ Na aba Pets, "Cadastrar pet" abre `/pets/novo`; a edição fica em `/pets/[petId
 
 Na tela da empresa, cada serviço tem "Solicitar agendamento", que abre `/solicitar/[servicoId]`: o tutor escolhe o pet, um dos próximos 14 dias e um horário livre (`GET /servicos/{id}/horarios-disponiveis`, no fuso de Brasília) e pode deixar observações. A solicitação fica pendente até a empresa responder (RN38). Se o horário for ocupado enquanto o tutor escolhe, a API responde 409, o app avisa e busca os horários de novo (CT-40-02).
 
+## Minhas solicitações (UC-42)
+
+No Início, "Minhas solicitações" abre `/solicitacoes`: as em andamento (ou todas), com serviço, pet, empresa, horário e status. O detalhe (`/solicitacoes/[id]`) mostra o valor contratado, o motivo da recusa, o histórico com o autor de cada mudança, "Pagar" quando a solicitação foi aceita e ainda não foi paga, e "Cancelar solicitação" antes do horário, com confirmação (RN38).
+
 ## Pagamento de agendamento (UC-44)
 
-`/pagar/[agendamentoId]` (com `servico` e `valor` nos parâmetros) paga pelo preço contratado (RN27) com PIX ou cartão. O PIX mostra o código copia e cola e a tela confere a cada 5 segundos até o banco confirmar. No cartão, os dados vão direto para o gateway e a API recebe só o token e a bandeira (`src/pagamento/cartao.ts`); recusa mostra o motivo e "Tentar outro meio" (RN39). Com `EXPO_PUBLIC_MP_CHAVE_PUBLICA` no `.env` o token vem do Mercado Pago (sandbox: cartão 5031 4332 1540 6351, titular APRO aprova e OTHE recusa); sem ela, o app gera um token de teste para o gateway simulado da API, e o titular OTHE também simula a recusa. A tela é aberta por "Minhas solicitações" (UC-42), que chega em outra entrega.
+`/pagar/[agendamentoId]` (com `servico` e `valor` nos parâmetros) paga pelo preço contratado (RN27) com PIX ou cartão. O PIX mostra o código copia e cola e a tela confere a cada 5 segundos até o banco confirmar. No cartão, os dados vão direto para o gateway e a API recebe só o token e a bandeira (`src/pagamento/cartao.ts`); recusa mostra o motivo e "Tentar outro meio" (RN39). Com `EXPO_PUBLIC_MP_CHAVE_PUBLICA` no `.env` o token vem do Mercado Pago (sandbox: cartão 5031 4332 1540 6351, titular APRO aprova e OTHE recusa); sem ela, o app gera um token de teste para o gateway simulado da API, e o titular OTHE também simula a recusa. A tela é aberta pelo botão "Pagar" do detalhe em "Minhas solicitações".
 
 ## Chat com a empresa (UC-43)
 
