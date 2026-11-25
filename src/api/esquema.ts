@@ -737,6 +737,237 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/pets/{petId}/falecimento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                petId: components["parameters"]["PetId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Registrar o falecimento do pet (UC-15)
+         * @description Só o responsável principal. O pet fica FALECIDO, os remédios em uso terminam e os lembretes pendentes do pet são cancelados.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Falecimento registrado e auditado. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pets/{petId}/memorial": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                petId: components["parameters"]["PetId"];
+            };
+            cookie?: never;
+        };
+        /** Ver o memorial do pet (UC-15) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Mensagem e lembranças; as fotos vêm com URL assinada de leitura (5 minutos). */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Memorial"];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        /** Criar ou alterar a mensagem do memorial (UC-15, RN19) */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        mensagem: string;
+                        publico: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description Memorial salvo. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Memorial"];
+                    };
+                };
+                /** @description Pet sem o falecimento registrado (RN19_MEMORIAL_BLOQUEADO, CT-15-02). */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pets/{petId}/memorial/itens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                petId: components["parameters"]["PetId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Adicionar lembrança ao memorial (UC-15)
+         * @description Texto ou homenagem vão no corpo; foto (JPG, PNG, WEBP ou HEIC até 8 MB) devolve a URL assinada de envio (PUT, 5 minutos).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        tipo: "FOTO" | "TEXTO" | "HOMENAGEM";
+                        conteudo?: string;
+                        nomeArquivo?: string;
+                        tamanhoBytes?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Lembrança criada. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** Format: uuid */
+                            itemId: string;
+                            /** Format: uri */
+                            urlEnvio?: string;
+                            /** Format: date-time */
+                            expiraEm?: string;
+                        };
+                    };
+                };
+                /** @description Pet sem o falecimento registrado (RN19_MEMORIAL_BLOQUEADO). */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+                422: components["responses"]["Validacao"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/memorial/itens/{itemId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remover lembrança do memorial (UC-15) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    itemId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Lembrança removida. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/pets/{petId}/responsaveis": {
         parameters: {
             query?: never;
@@ -5514,6 +5745,156 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/permissoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catálogo de permissões da plataforma (UC-29) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Permissões com o módulo e a categoria de perfil a que pertencem (vazia quando servem a mais de uma). */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            codigo: string;
+                            modulo: string;
+                            descricao: string;
+                            /** @enum {string} */
+                            categoria?: "TUTOR" | "EMPRESA" | "ADMINISTRADOR";
+                        }[];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/perfis": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Matriz de acesso dos perfis globais (UC-29) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Perfis globais (Tutor, Empresa e os da administração) com as permissões e quantas contas usam cada um. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PerfilGlobal"][];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/perfis/{perfilId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                perfilId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Alterar as permissões de um perfil global (UC-29, RN35)
+         * @description Vale na próxima requisição de quem usa o perfil: tokens emitidos antes recebem 401 e o
+         *     cliente renova a sessão, que já sai com as permissões novas. Auditado como CRITICO.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    perfilId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        permissoes: string[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Perfil alterado. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PerfilGlobal"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                /** @description O administrador tiraria admin:usuarios do próprio perfil (RN35_AUTOBLOQUEIO). */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+                /** @description Perfil sem permissão (CT-29-02) ou com permissão de outra categoria. */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/logs": {
         parameters: {
             query?: never;
@@ -6145,6 +6526,24 @@ export interface components {
             /** Format: date-time */
             dataUpload: string;
         };
+        Memorial: {
+            /** Format: uuid */
+            petId: string;
+            nome: string;
+            mensagem?: string;
+            publico: boolean;
+            itens: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                tipo: "FOTO" | "TEXTO" | "HOMENAGEM";
+                conteudo?: string;
+                /** Format: uri */
+                urlFoto?: string;
+                /** Format: date-time */
+                dataRegistro: string;
+            }[];
+        };
         PetVinculado: {
             /** Format: uuid */
             id: string;
@@ -6601,6 +7000,16 @@ export interface components {
             ativo?: boolean;
             /** @description Convite ainda não aceito: o funcionário não criou a senha (RN02). */
             pendente?: boolean;
+        };
+        PerfilGlobal: {
+            /** Format: uuid */
+            id: string;
+            nome: string;
+            descricao?: string;
+            /** @enum {string} */
+            categoria: "TUTOR" | "EMPRESA" | "ADMINISTRADOR";
+            permissoes: string[];
+            usuarios: number;
         };
         PerfilEntrada: {
             nome: string;

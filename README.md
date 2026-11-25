@@ -61,6 +61,10 @@ No perfil do pet, "Documentos" abre `/pets/[petId]/documentos`: o tutor escolhe 
 
 No perfil do pet, "Responsáveis" abre `/pets/[petId]/responsaveis`. O responsável principal adiciona outro tutor pelo e-mail da conta (adicional ou principal), troca o tipo e remove vínculos; o adicional só pode sair. A API garante que o pet nunca fique sem principal (RN09) e a tela mostra a recusa.
 
+## Memorial (UC-15)
+
+No perfil do pet, "Memorial" abre `/pets/[petId]/memorial`. Para pet ativo, a tela explica e oferece "Registrar falecimento", com confirmação. Depois, mostra a mensagem do memorial, as lembranças e homenagens e as fotos, enviadas direto ao armazenamento pela URL assinada (RN19).
+
 ## Recuperação de senha (UC-03)
 
 No login, "Esqueci minha senha" abre `/recuperar-senha`, que pede o e-mail e mostra sempre a mesma resposta, exista a conta ou não. O link do e-mail abre a página da web; no celular, o mesmo link no formato `jaguara://redefinir-senha?token=...` abre `/redefinir-senha` no app. A nova senha segue a política e não pode repetir as três últimas (RN06); link vencido ou já usado mostra como pedir outro (RN05).
