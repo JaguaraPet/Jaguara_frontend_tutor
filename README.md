@@ -49,6 +49,10 @@ No perfil do pet, "Medicamentos" abre `/pets/[petId]/medicamentos`: os tratament
 
 No perfil do pet, "Exames" abre `/pets/[petId]/exames`: o histórico com laboratório e resultado e o registro com o laudo escolhido entre os documentos do pet. "Ver laudo" pede a URL assinada e abre o arquivo no aparelho (`src/saude/arquivos.ts`). Sem permissão, a recusa da API aparece na tela (CT-36-02).
 
+## Documentos (UC-34)
+
+No perfil do pet, "Documentos" abre `/pets/[petId]/documentos`: o tutor escolhe um PDF ou foto (até 10 MB, `expo-document-picker`), dá título e tipo e envia. A API registra e devolve a URL assinada; o arquivo vai do aparelho direto para o armazenamento (`src/saude/envio.ts`), e se esse envio falhar o registro é desfeito. "Abrir" baixa pela URL assinada e "Excluir" pede confirmação.
+
 ## Responsáveis pelo pet (UC-05)
 
 No perfil do pet, "Responsáveis" abre `/pets/[petId]/responsaveis`. O responsável principal adiciona outro tutor pelo e-mail da conta (adicional ou principal), troca o tipo e remove vínculos; o adicional só pode sair. A API garante que o pet nunca fique sem principal (RN09) e a tela mostra a recusa.
