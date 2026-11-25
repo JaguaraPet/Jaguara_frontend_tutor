@@ -10,8 +10,13 @@ export default function Perfil() {
   return (
     <Tela titulo="Perfil">
       <Cartao titulo="Sua conta" subtitulo={usuario?.perfil}>
-        <Texto variante="legenda">Pagamentos, privacidade e notificações chegam nas próximas versões.</Texto>
+        <Texto variante="legenda">{usuario?.perfil === 'Tutor' ? 'Tutor no app do Jaguara.' : usuario?.perfil}</Texto>
       </Cartao>
+      <Cartao
+        titulo="Pagamentos"
+        subtitulo="Histórico e reembolsos"
+        aoTocar={() => router.push('/pagamentos')}
+      />
       <Cartao
         titulo="Plano PANTERA"
         subtitulo="Assistente virtual para o seu pet"

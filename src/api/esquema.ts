@@ -4495,15 +4495,16 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Pagamentos realizados (tutor) ou recebidos (empresa). */
+                /** @description Pagamentos realizados (tutor) ou recebidos (empresa com financeiro:ler), do mais recente para o mais antigo (CT-45-01). */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Pagamento"][];
+                        "application/json": components["schemas"]["PagamentoDetalhado"][];
                     };
                 };
+                403: components["responses"]["SemPermissao"];
             };
         };
         put?: never;
@@ -4697,6 +4698,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/pagamentos/{pagamentoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pagamentoId: string;
+            };
+            cookie?: never;
+        };
+        /** Detalhe do pagamento (UC-45) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    pagamentoId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Pagamento com descrição, contraparte, pet, reembolso e se ainda pode pedir reembolso. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagamentoDetalhado"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/pagamentos/{pagamentoId}/reembolsos": {
         parameters: {
             query?: never;
@@ -4708,7 +4751,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Solicitar reembolso (UC-45) */
+        /**
+         * Solicitar reembolso (UC-45)
+         * @description Só quem pagou, para pagamento confirmado há até 30 dias e sem outro pedido. A empresa recebe e-mail.
+         */
         post: {
             parameters: {
                 query?: never;
@@ -4731,9 +4777,21 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["PagamentoDetalhado"];
+                    };
                 };
-                409: components["responses"]["Conflito"];
+                404: components["responses"]["NaoEncontrado"];
+                /** @description Pagamento não confirmado, fora do prazo ou com outro pedido (RN39_REEMBOLSO_INDISPONIVEL, CT-45-02). */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+                422: components["responses"]["Validacao"];
             };
         };
         delete?: never;
@@ -6590,6 +6648,33 @@ export interface components {
             motivoRecusa?: string;
             /** Format: uri */
             notaFiscalUrl?: string;
+        };
+        PagamentoDetalhado: {
+            /** Format: uuid */
+            id: string;
+            codigoTransacao: string;
+            valor: number;
+            /** Format: date-time */
+            dataHora: string;
+            metodo: components["schemas"]["MetodoPagamento"];
+            status: components["schemas"]["StatusPagamento"];
+            /** Format: date-time */
+            dataConfirmacao?: string;
+            /** Format: uuid */
+            agendamentoId?: string;
+            /** @description Serviço pago ou "Assinatura PANTERA". */
+            descricao: string;
+            /** @description Empresa para o tutor; tutor para a empresa. */
+            contraparte: string;
+            pet?: string;
+            reembolso?: {
+                /** @enum {string} */
+                status?: "EM_ANALISE" | "APROVADO" | "NEGADO";
+                motivo?: string;
+                /** Format: date-time */
+                dataSolicitacao?: string;
+            };
+            podeReembolsar: boolean;
         };
         Notificacao: {
             /** Format: uuid */

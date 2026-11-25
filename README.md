@@ -93,6 +93,10 @@ A aba Agenda mostra os próximos 30 dias do pet escolhido, agrupados por dia, co
 
 Com a sessão aberta, o app pede a permissão e registra o aparelho na API (`src/notificacoes/push.ts`, `expo-notifications`); ao sair, tira o aparelho da conta. O token de push exige o projeto do EAS (`extra.eas.projectId`, criado no build da JAG-212) e um aparelho de verdade: no emulador ou sem o projeto, o app não registra e as notificações continuam na lista.
 
+## Meus pagamentos (UC-45)
+
+Na aba Perfil, "Pagamentos" abre `/pagamentos`: o histórico com valor, data, meio, situação e filtro (pagos, aguardando, recusados), com "Limpar filtro" quando nada aparece. Pagamento confirmado há até 30 dias tem "Pedir reembolso", com motivo; a recusa da API aparece na tela (RN39).
+
 ## Plano PANTERA e assistente virtual (UC-43)
 
 `/pantera` (no Perfil) mostra o preço e os benefícios e assina com PIX: cria a assinatura pendente, gera o código copia e cola e ativa quando o banco confirma (RN39). `/assistente` (no Início) abre a conversa; sem o plano, oferece a assinatura (CT-43-02). A resposta do assistente chega alguns segundos depois do envio, e a tela consulta de novo até ela aparecer.
