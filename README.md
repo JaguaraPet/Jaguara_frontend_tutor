@@ -45,6 +45,10 @@ No perfil do pet, "Vacinas" abre `/pets/[petId]/vacinas`: o histórico válido e
 
 No perfil do pet, "Medicamentos" abre `/pets/[petId]/medicamentos`: os tratamentos em uso e os anteriores, o cadastro (medicamento, dose, via, intervalo, início, fim opcional e hora da primeira dose) e "Finalizar". Ao salvar, a tela mostra quantos lembretes de dose a API agendou (RN18); ao finalizar, os lembretes futuros são cancelados.
 
+## Exames (UC-36)
+
+No perfil do pet, "Exames" abre `/pets/[petId]/exames`: o histórico com laboratório e resultado e o registro com o laudo escolhido entre os documentos do pet. "Ver laudo" pede a URL assinada e abre o arquivo no aparelho (`src/saude/arquivos.ts`). Sem permissão, a recusa da API aparece na tela (CT-36-02).
+
 ## Responsáveis pelo pet (UC-05)
 
 No perfil do pet, "Responsáveis" abre `/pets/[petId]/responsaveis`. O responsável principal adiciona outro tutor pelo e-mail da conta (adicional ou principal), troca o tipo e remove vínculos; o adicional só pode sair. A API garante que o pet nunca fique sem principal (RN09) e a tela mostra a recusa.
