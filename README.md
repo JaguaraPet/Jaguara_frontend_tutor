@@ -119,6 +119,12 @@ Com a sessão aberta, o app pede a permissão e registra o aparelho na API (`src
 
 Na aba Perfil, "Pagamentos" abre `/pagamentos`: o histórico com valor, data, meio, situação e filtro (pagos, aguardando, recusados), com "Limpar filtro" quando nada aparece. Pagamento confirmado há até 30 dias tem "Pedir reembolso", com motivo; a recusa da API aparece na tela (RN39).
 
+## Privacidade (UC-46)
+
+Na aba Perfil, "Privacidade" abre `/privacidade`: os termos aceitos com versão e data, com a chave para revogar os opcionais (auditada na API). O termo obrigatório não sai: a API devolve 409 e a tela explica que só a exclusão da conta encerra o aceite. "Exportar meus dados" baixa o JSON da API e abre o compartilhamento do aparelho (`expo-file-system`, `expo-sharing`). "Quero excluir minha conta" pede a senha; a exclusão é imediata, anonimiza a conta e volta para as boas-vindas.
+
+Quando sai versão nova de um termo obrigatório (RN42), as abas mandam o tutor para `/termos-pendentes` antes das demais telas: ele lê o texto vigente e aceita, ou sai da conta.
+
 ## Plano PANTERA e assistente virtual (UC-43)
 
 `/pantera` (no Perfil) mostra o preço e os benefícios e assina com PIX: cria a assinatura pendente, gera o código copia e cola e ativa quando o banco confirma (RN39). `/assistente` (no Início) abre a conversa; sem o plano, oferece a assinatura (CT-43-02). A resposta do assistente chega alguns segundos depois do envio, e a tela consulta de novo até ela aparecer.
