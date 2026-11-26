@@ -73,6 +73,10 @@ No perfil do pet, "Responsáveis" abre `/pets/[petId]/responsaveis`. O responsá
 
 No perfil do pet, "Memorial" abre `/pets/[petId]/memorial`. Para pet ativo, a tela explica e oferece "Registrar falecimento", com confirmação. Depois, mostra a mensagem do memorial, as lembranças e homenagens e as fotos, enviadas direto ao armazenamento pela URL assinada (RN19).
 
+## Compartilhar perfil (UC-11)
+
+No perfil do pet, "Compartilhar perfil" abre `/pets/[petId]/compartilhar`: com uma empresa encontrada na busca ou com uma pessoa por e-mail, escolhendo o que mostrar (perfil básico, vacinas, alergias, medicamentos, exames, documentos, linha do tempo e, só para empresa, registrar na saúde) e por quanto tempo. Por e-mail, a pessoa recebe um link de leitura, que aparece uma vez e pode ser enviado pelo compartilhamento do sistema. A lista mostra a situação de cada compartilhamento e permite revogar na hora (RN15).
+
 ## Recuperação de senha (UC-03)
 
 No login, "Esqueci minha senha" abre `/recuperar-senha`, que pede o e-mail e mostra sempre a mesma resposta, exista a conta ou não. O link do e-mail abre a página da web; no celular, o mesmo link no formato `jaguara://redefinir-senha?token=...` abre `/redefinir-senha` no app. A nova senha segue a política e não pode repetir as três últimas (RN06); link vencido ou já usado mostra como pedir outro (RN05).
