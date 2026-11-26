@@ -49,6 +49,10 @@ No perfil do pet, "Vacinas" abre `/pets/[petId]/vacinas`: o histórico válido e
 
 No perfil do pet, "Despesas" abre `/pets/[petId]/despesas`: o mês atual e os dois anteriores, o registro com categoria obrigatória (RN10) e o total do mês por categoria. "Baixar relatório em PDF" baixa o arquivo com a sessão (`expo-file-system`) e abre o compartilhamento do sistema (`expo-sharing`) para salvar ou enviar (RN11). Mês sem despesas mostra o aviso e não oferece o PDF (CT-07-02).
 
+## Alimentação (UC-08)
+
+No perfil do pet, "Alimentação" abre `/pets/[petId]/alimentacao`: o plano (alimento, meta e limite diários, refeições por dia), a barra do consumo de hoje e o registro de refeições com hora no fuso de Brasília. Quando a refeição passa do limite, ela é registrada e a tela avisa (RN12, CT-08-02).
+
 ## Medicamentos (UC-14)
 
 No perfil do pet, "Medicamentos" abre `/pets/[petId]/medicamentos`: os tratamentos em uso e os anteriores, o cadastro (medicamento, dose, via, intervalo, início, fim opcional e hora da primeira dose) e "Finalizar". Ao salvar, a tela mostra quantos lembretes de dose a API agendou (RN18); ao finalizar, os lembretes futuros são cancelados.
