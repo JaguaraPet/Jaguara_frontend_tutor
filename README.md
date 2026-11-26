@@ -111,6 +111,8 @@ A aba Agenda mostra os próximos 30 dias do pet escolhido, agrupados por dia, co
 
 ## Notificações push (UC-31)
 
+Na aba Perfil, "Notificações" abre `/notificacoes`: os próximos lembretes e os avisos recebidos e, em "Preferências", para cada tipo de compromisso, se recebe, o canal (celular ou e-mail) e a antecedência (RN37). A preferência salva na hora e volta ao valor anterior se a API recusar.
+
 Com a sessão aberta, o app pede a permissão e registra o aparelho na API (`src/notificacoes/push.ts`, `expo-notifications`); ao sair, tira o aparelho da conta. O token de push exige o projeto do EAS (`extra.eas.projectId`, criado no build da JAG-212) e um aparelho de verdade: no emulador ou sem o projeto, o app não registra e as notificações continuam na lista.
 
 ## Meus pagamentos (UC-45)

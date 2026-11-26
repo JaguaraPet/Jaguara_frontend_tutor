@@ -13,6 +13,11 @@ export default function Perfil() {
         <Texto variante="legenda">{usuario?.perfil === 'Tutor' ? 'Tutor no app do Jaguara.' : usuario?.perfil}</Texto>
       </Cartao>
       <Cartao
+        titulo="Notificações"
+        subtitulo="Lembretes e preferências"
+        aoTocar={() => router.push('/notificacoes')}
+      />
+      <Cartao
         titulo="Pagamentos"
         subtitulo="Histórico e reembolsos"
         aoTocar={() => router.push('/pagamentos')}
