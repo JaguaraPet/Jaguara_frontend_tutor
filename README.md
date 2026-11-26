@@ -45,6 +45,10 @@ No perfil do pet, "Linha do tempo" abre `/pets/[petId]/linha-do-tempo`: vacinas,
 
 No perfil do pet, "Vacinas" abre `/pets/[petId]/vacinas`: o histórico válido em ordem de aplicação (RN16), a próxima dose em destaque e o registro (vacina, data, quem aplicou, próxima dose, fabricante, lote e observações). Quem aplicou é obrigatório (RN17) e a data não pode ser futura. Com próxima dose, a API agenda o lembrete às 9h do dia anterior.
 
+## Despesas e relatório (UC-06, UC-07)
+
+No perfil do pet, "Despesas" abre `/pets/[petId]/despesas`: o mês atual e os dois anteriores, o registro com categoria obrigatória (RN10) e o total do mês por categoria. "Baixar relatório em PDF" baixa o arquivo com a sessão (`expo-file-system`) e abre o compartilhamento do sistema (`expo-sharing`) para salvar ou enviar (RN11). Mês sem despesas mostra o aviso e não oferece o PDF (CT-07-02).
+
 ## Medicamentos (UC-14)
 
 No perfil do pet, "Medicamentos" abre `/pets/[petId]/medicamentos`: os tratamentos em uso e os anteriores, o cadastro (medicamento, dose, via, intervalo, início, fim opcional e hora da primeira dose) e "Finalizar". Ao salvar, a tela mostra quantos lembretes de dose a API agendou (RN18); ao finalizar, os lembretes futuros são cancelados.
