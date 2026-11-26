@@ -1,8 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Redirect, Tabs } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { ComponentProps } from 'react';
 import { registrarAparelho } from '../../notificacoes/push';
+import { temTermoPendente } from '../../privacidade/termos';
 import { useUsuario } from '../../sessao/useUsuario';
 import { familiaPorPeso } from '../../tema/fontes';
 import { cores } from '../../tema/tokens';
@@ -22,13 +23,20 @@ const abas: { nome: string; titulo: string; icone: NomeIcone }[] = [
 export default function LayoutAbas() {
   const usuario = useUsuario();
   const usuarioId = usuario?.id;
+  const [termoPendente, setTermoPendente] = useState(false);
 
   // Com a sessão aberta, registra o aparelho para os lembretes por push (UC-31).
   useEffect(() => {
     if (usuarioId) void registrarAparelho().catch(() => null);
   }, [usuarioId]);
 
+  // CT-46-03: versão nova de termo obrigatório pede aceite antes das demais telas.
+  useEffect(() => {
+    if (usuarioId) void temTermoPendente().then(setTermoPendente).catch(() => null);
+  }, [usuarioId]);
+
   if (!usuario) return <Redirect href="/boas-vindas" />;
+  if (termoPendente) return <Redirect href="/termos-pendentes" />;
 
   return (
     <Tabs

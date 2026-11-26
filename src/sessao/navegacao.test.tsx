@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { render, screen } from '@testing-library/react-native';
+import { api } from '../api/cliente';
 import type { ReactNode } from 'react';
 import LayoutAbas from '../app/(abas)/_layout';
 import { sessao } from './sessao';
@@ -21,6 +22,13 @@ jest.mock('expo-router', () => {
   };
 });
 
+type Qualquer = Awaited<ReturnType<typeof api.GET>>;
+const consentimentos = (lista: unknown[]) =>
+  jest
+    .spyOn(api, 'GET')
+    .mockImplementation(() => Promise.resolve({ data: lista, response: new Response(null) } as unknown as Qualquer) as never);
+const tutor: Usuario = { id: 't1', tipo: 'TUTOR', perfil: 'Tutor', permissoes: [] };
+
 describe('Navegação do app (UX-01)', () => {
   afterEach(() => {
     jest.restoreAllMocks();
@@ -33,11 +41,18 @@ describe('Navegação do app (UX-01)', () => {
   });
 
   it('deve mostrar as cinco abas quando o tutor está logado', async () => {
-    const tutor: Usuario = { id: 't1', tipo: 'TUTOR', perfil: 'Tutor', permissoes: [] };
+    consentimentos([{ termoId: 'tu1', obrigatorio: true, aceito: true }]);
     jest.spyOn(sessao, 'usuario', 'get').mockReturnValue(tutor);
     await render(<LayoutAbas />);
     for (const aba of ['Início', 'Pets', 'Agenda', 'Serviços', 'Perfil']) {
       expect(screen.getByLabelText(aba)).toBeOnTheScreen();
     }
+  });
+
+  it('CT-46-03: deve pedir o aceite da versão nova do termo antes das abas', async () => {
+    consentimentos([{ termoId: 'tu2', obrigatorio: true, aceito: false }]);
+    jest.spyOn(sessao, 'usuario', 'get').mockReturnValue(tutor);
+    await render(<LayoutAbas />);
+    expect(await screen.findByText('Redireciona para /termos-pendentes')).toBeOnTheScreen();
   });
 });

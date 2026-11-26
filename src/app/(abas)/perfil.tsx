@@ -23,6 +23,11 @@ export default function Perfil() {
         aoTocar={() => router.push('/pagamentos')}
       />
       <Cartao
+        titulo="Privacidade"
+        subtitulo="Termos, exportação e exclusão dos dados"
+        aoTocar={() => router.push('/privacidade')}
+      />
+      <Cartao
         titulo="Plano PANTERA"
         subtitulo="Assistente virtual para o seu pet"
         aoTocar={() => router.push('/pantera')}
