@@ -89,6 +89,10 @@ No login, "Esqueci minha senha" abre `/recuperar-senha`, que pede o e-mail e mos
 
 Na aba Pets, "Cadastrar pet" abre `/pets/novo`; a edição fica em `/pets/[petId]/editar`. O formulário (`src/pets/FormularioPet.tsx`) traz espécies e raças do catálogo (`GET /especies`, RN07), sexo, data de nascimento com máscara DD/MM/AAAA, peso, cor, microchip e castração, e valida no aparelho antes de enviar, dizendo o que corrigir. Quem cadastra fica como responsável principal (RN09).
 
+## Lista de pets (UC-04)
+
+A aba Pets lista os pets do tutor com foto (ou a inicial do nome), espécie, raça e idade, e filtra por ativos, arquivados e memorial. Tocar no pet abre o perfil (`/pets/{id}`); "Cadastrar pet" abre `/pets/novo`. A lista é buscada de novo ao voltar para a aba.
+
 ## Perfil do pet (UC-04)
 
 `/pets/[petId]` mostra os dados do pet, as alergias e restrições (as graves no topo, em destaque e anunciadas pelo leitor de tela, UC-37) e as últimas vacinas com a próxima dose. "Editar dados" abre a edição, e a edição tem o atalho "Ver perfil do pet". Pet arquivado ou falecido mostra o aviso e não oferece edição.
