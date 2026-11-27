@@ -37,6 +37,10 @@ A tela Entrar (`src/app/entrar.tsx`, UC-02) pede e-mail e senha e explica cada r
 
 `/cadastro` pede nome completo, CPF, e-mail, celular opcional e senha (8+ caracteres, letras e números), mostra os termos de uso e a política de privacidade vigentes (abrem ao tocar) e só envia com o aceite marcado (RN42). CPF e senha são conferidos no aparelho antes de enviar (`src/sessao/cadastro.ts`); CPF ou e-mail repetidos voltam como aviso da API (RN01). Depois do cadastro, a tela pede para confirmar o e-mail pelo link (RN02).
 
+## Entrar com Google ou Apple (UC-02, RF46)
+
+Em `/entrar`, "Continuar com Google" aparece quando o build tem o ID de cliente OAuth da plataforma (`EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID`, `EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS` ou `EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB`), e "Continuar com Apple" aparece no iPhone (`expo-apple-authentication`). O app gera um nonce novo a cada tentativa (`expo-crypto`) e manda o `id_token` para a API (`src/sessao/BotoesSociais.tsx`). Se o e-mail já tem conta, a tela pede a senha dela para ligar o login; no primeiro acesso, `/cadastro-social` pede CPF, celular opcional e o aceite dos termos e já entra. Os mesmos IDs de cliente do Google entram em `GOOGLE_LOGIN_CLIENT_IDS` na API.
+
 ## Linha do tempo (UC-35)
 
 No perfil do pet, "Linha do tempo" abre `/pets/[petId]/linha-do-tempo`: vacinas, exames, medicamentos, compromissos e atendimentos do mais recente ao mais antigo, com ícone e filtro por tipo. Cada item é lido pelo leitor de tela como uma frase só (data, tipo e título).

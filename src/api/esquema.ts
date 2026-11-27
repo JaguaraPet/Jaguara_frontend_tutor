@@ -208,7 +208,13 @@ export interface paths {
                         provedor: "GOOGLE" | "APPLE";
                         /** @description id_token OpenID Connect emitido pelo provedor. */
                         idToken: string;
+                        /** @description Valor aleatório gerado pelo app; o token traz ele puro (Google) ou em SHA-256 (Apple). */
                         nonce: string;
+                        /**
+                         * Format: password
+                         * @description Senha da conta do Jaguara com o mesmo e-mail, para ligar a identidade (CT-02-04).
+                         */
+                        senha?: string;
                     };
                 };
             };
@@ -223,7 +229,7 @@ export interface paths {
                     };
                 };
                 401: components["responses"]["NaoAutenticado"];
-                /** @description Já existe conta com o mesmo e-mail; o usuário confirma a senha dela para ligar a identidade. */
+                /** @description Já existe conta com o mesmo e-mail: o app pede a senha dela e repete o pedido com `senha` (IDENTIDADE_SEM_VINCULO, SENHA_INCORRETA_VINCULO). */
                 409: {
                     headers: {
                         [name: string]: unknown;
@@ -244,6 +250,15 @@ export interface paths {
                             /** Format: email */
                             email?: string;
                         };
+                    };
+                };
+                /** @description Login social sem IDs de cliente configurados (LOGIN_SOCIAL_INDISPONIVEL). */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
                     };
                 };
             };
@@ -277,13 +292,14 @@ export interface paths {
                         cadastroToken: string;
                         nome: string;
                         cpf: string;
+                        telefone?: string;
                         /** @constant */
                         aceiteTermos: true;
                     };
                 };
             };
             responses: {
-                /** @description Conta criada com o e-mail já confirmado pelo provedor e sessão aberta. */
+                /** @description Conta criada com o e-mail já confirmado pelo provedor e sessão aberta. A conta não tem senha; o tutor pode criar uma por "Esqueci minha senha". */
                 201: {
                     headers: {
                         [name: string]: unknown;
@@ -293,6 +309,15 @@ export interface paths {
                     };
                 };
                 409: components["responses"]["Conflito"];
+                /** @description Token de cadastro inválido ou vencido (30 minutos); entre com o provedor de novo. */
+                410: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
                 422: components["responses"]["Validacao"];
             };
         };
@@ -3372,7 +3397,7 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Solicitações do usuário autenticado. */
+                /** @description Solicitações do usuário autenticado, com os nomes do serviço, do pet e do tutor para a lista da empresa (UC-41). */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -5048,13 +5073,13 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Conversas do usuário. */
+                /** @description Conversas do usuário, da mais recente para a mais antiga, com os nomes, a última mensagem e quantas o usuário ainda não leu. */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Conversa"][];
+                        "application/json": components["schemas"]["ConversaResumo"][];
                     };
                 };
             };
@@ -5589,6 +5614,338 @@ export interface paths {
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chamados": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Meus chamados de suporte (UC-26) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Chamados abertos pelo usuário autenticado, do mais recente para o mais antigo. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Chamado"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Abrir chamado de suporte (UC-26) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        titulo: string;
+                        descricao: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Chamado ABERTO com o protocolo para o usuário citar. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Chamado"];
+                    };
+                };
+                422: components["responses"]["Validacao"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chamados/{chamadoId}/complemento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chamadoId: components["parameters"]["ChamadoId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Responder ao pedido de informação do suporte (UC-26, FA1) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    chamadoId: components["parameters"]["ChamadoId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["MensagemChamado"];
+                };
+            };
+            responses: {
+                /** @description Complemento juntado à descrição; o chamado volta para EM_ANALISE. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Chamado"];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+                /** @description O suporte não pediu informação (CHAMADO_SEM_PEDIDO). */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+                422: components["responses"]["Validacao"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/chamados": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Central de suporte (UC-26)
+         * @description Exige `admin:suporte`. Do mais antigo para o mais novo, para atender por ordem de chegada.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    status?: components["schemas"]["StatusChamado"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Chamados com o solicitante e o atendente. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ChamadoResumo"][];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/chamados/{chamadoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chamadoId: components["parameters"]["ChamadoId"];
+            };
+            cookie?: never;
+        };
+        /** Detalhes do chamado com as intervenções (UC-26) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    chamadoId: components["parameters"]["ChamadoId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Chamado e histórico de intervenções. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ChamadoDetalhe"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/chamados/{chamadoId}/intervencoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chamadoId: components["parameters"]["ChamadoId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Registrar intervenção (UC-26, CT-26-01, RN32)
+         * @description A intervenção, a nova situação e a auditoria são gravadas juntas; o solicitante recebe o aviso por e-mail.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    chamadoId: components["parameters"]["ChamadoId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        acaoExecutada: string;
+                        descricao: string;
+                        /** @enum {string} */
+                        status: "EM_ANALISE" | "RESOLVIDO" | "FECHADO";
+                    };
+                };
+            };
+            responses: {
+                /** @description Intervenção registrada e auditada. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ChamadoDetalhe"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                /** @description Chamado já fechado (CHAMADO_FECHADO). */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+                422: components["responses"]["Validacao"];
+                /** @description Auditoria indisponível; nada mudou (RN32_AUDITORIA_INDISPONIVEL). */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/chamados/{chamadoId}/pedido-informacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chamadoId: components["parameters"]["ChamadoId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pedir informação ao solicitante (UC-26, CT-26-02) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    chamadoId: components["parameters"]["ChamadoId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["MensagemChamado"];
+                };
+            };
+            responses: {
+                /** @description Chamado em AGUARDANDO_INFORMACAO; o solicitante recebe o pedido por e-mail. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ChamadoDetalhe"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+                /** @description Chamado já fechado (CHAMADO_FECHADO). */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["Problema"];
+                    };
+                };
+                422: components["responses"]["Validacao"];
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -6882,6 +7239,14 @@ export interface components {
             dataHoraDesejada?: string;
             status?: components["schemas"]["StatusSolicitacao"];
             motivoRecusa?: string;
+            /** @description Nome do serviço (na listagem). */
+            servico?: string;
+            /** @description Nome do pet (na listagem). */
+            pet?: string;
+            /** @description Nome do tutor (na listagem). */
+            tutor?: string;
+            /** @description Observações do tutor ao pedir (na listagem). */
+            observacoes?: string;
         };
         HistoricoSolicitacao: {
             /** Format: date-time */
@@ -7000,6 +7365,46 @@ export interface components {
             ativo?: boolean;
             /** @description Convite ainda não aceito: o funcionário não criou a senha (RN02). */
             pendente?: boolean;
+        };
+        /** @enum {string} */
+        StatusChamado: "ABERTO" | "EM_ANALISE" | "AGUARDANDO_INFORMACAO" | "RESOLVIDO" | "FECHADO";
+        MensagemChamado: {
+            mensagem: string;
+        };
+        Chamado: {
+            /** Format: uuid */
+            id: string;
+            /** @example SUP-20261126-7K2QD */
+            protocolo: string;
+            titulo: string;
+            descricao: string;
+            status: components["schemas"]["StatusChamado"];
+            /** Format: date-time */
+            dataAbertura: string;
+            /** Format: date-time */
+            dataFechamento?: string;
+        };
+        ChamadoResumo: components["schemas"]["Chamado"] & {
+            solicitante: {
+                /** Format: uuid */
+                id: string;
+                nome: string;
+                /** Format: email */
+                email: string;
+                /** @enum {string} */
+                tipo: "TUTOR" | "EMPRESA" | "FUNCIONARIO" | "ADMINISTRADOR";
+            };
+            /** @description Nome do administrador que atendeu por último. */
+            atendente?: string;
+        };
+        ChamadoDetalhe: components["schemas"]["ChamadoResumo"] & {
+            intervencoes: {
+                /** Format: date-time */
+                dataHora: string;
+                acaoExecutada: string;
+                descricao: string;
+                autor: string;
+            }[];
         };
         PerfilGlobal: {
             /** Format: uuid */
@@ -7158,6 +7563,8 @@ export interface components {
         Conversa: {
             /** Format: uuid */
             id?: string;
+            /** Format: uuid */
+            tutorId?: string;
             tipo?: components["schemas"]["TipoConversa"];
             /** Format: uuid */
             empresaId?: string;
@@ -7165,6 +7572,18 @@ export interface components {
             petId?: string;
             /** @enum {string} */
             status?: "ABERTA" | "ENCERRADA";
+        };
+        ConversaResumo: components["schemas"]["Conversa"] & {
+            tutor: string;
+            empresa?: string;
+            pet?: string;
+            naoLidas: number;
+            ultimaMensagem?: {
+                conteudo?: string;
+                /** Format: date-time */
+                dataHoraEnvio?: string;
+                minha?: boolean;
+            };
         };
         Mensagem: {
             /** Format: uuid */
@@ -7275,6 +7694,7 @@ export interface components {
         };
     };
     parameters: {
+        ChamadoId: string;
         PetId: string;
         EmpresaId: string;
         SolicitacaoId: string;
