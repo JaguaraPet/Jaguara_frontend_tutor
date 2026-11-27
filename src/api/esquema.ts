@@ -6679,6 +6679,97 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/demonstracao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Criar uma clínica de demonstração e entrar nela
+         * @description Cria, para quem visita, uma clínica temporária com dados fictícios (agenda, clientes, atendimentos, vacinas e cobranças) e devolve a sessão da conta da clínica. A clínica não aparece na busca dos tutores, não envia e-mails e expira sozinha. Só existe nos ambientes com a demonstração habilitada; nos outros responde 404.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Demonstração criada. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DemonstracaoCriada"];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+                /** @description Muitas demonstrações criadas pelo mesmo endereço. */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/demonstracao/tutor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Entrar como a tutora da demonstração */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        codigo: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Sessão da tutora da demonstração. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Tokens"];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+                410: components["responses"]["Expirado"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -6695,6 +6786,23 @@ export interface components {
                 campo?: string;
                 mensagem?: string;
             }[];
+        };
+        DemonstracaoCriada: {
+            sessao: components["schemas"]["Tokens"];
+            /** @description Código de uso único para entrar como a tutora da demonstração no app. */
+            codigoTutor: string;
+            /** Format: date-time */
+            expiraEm: string;
+            /**
+             * Format: uri
+             * @description Formulário de opinião mostrado durante a demonstração.
+             */
+            formularioOpiniao: string | null;
+            /**
+             * Format: uri
+             * @description Versão web do app do tutor, para o "Ver como tutor".
+             */
+            urlTutor: string | null;
         };
         Tokens: {
             accessToken: string;
