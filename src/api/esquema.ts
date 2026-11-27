@@ -4667,6 +4667,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/empresas/{empresaId}/hoje": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Resumo do dia da empresa (tela Hoje)
+         * @description Agenda de hoje em Brasília com tutor, alergias e situação do atendimento e do pagamento; pedidos de agendamento pendentes; cobranças em aberto (só para quem vê o financeiro); vacinas de pets de clientes atrasadas ou vencendo nos próximos 30 dias; faturamento e atendimentos dos últimos 7 dias.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Resumo do dia. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ResumoDoDia"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/empresas/{empresaId}/indicadores": {
         parameters: {
             query?: never;
@@ -6803,6 +6847,81 @@ export interface components {
              * @description Versão web do app do tutor, para o "Ver como tutor".
              */
             urlTutor: string | null;
+        };
+        ResumoDoDia: {
+            /** Format: date */
+            data: string;
+            agenda: {
+                /** Format: uuid */
+                id: string;
+                /** Format: date-time */
+                inicio: string;
+                /** Format: date-time */
+                fim: string;
+                /** @enum {string} */
+                status: "AGENDADO" | "CANCELADO" | "REALIZADO" | "NAO_COMPARECEU";
+                servicoNome: string;
+                /** Format: uuid */
+                petId: string;
+                petNome: string;
+                especie: string;
+                tutorNome: string | null;
+                /** Format: uuid */
+                profissionalId: string | null;
+                profissionalNome: string | null;
+                recursoNome: string | null;
+                alergias: string[];
+                /** Format: uuid */
+                atendimentoId: string | null;
+                /** @enum {string|null} */
+                atendimentoStatus: "EM_ANDAMENTO" | "FINALIZADO" | null;
+                /** @description null quando ainda não há cobrança. */
+                pago: boolean | null;
+            }[];
+            solicitacoes: {
+                total: number;
+                itens: {
+                    /** Format: uuid */
+                    id: string;
+                    petNome: string;
+                    tutorNome: string;
+                    servicoNome: string;
+                    /** Format: date-time */
+                    dataHoraDesejada: string;
+                    observacoes: string | null;
+                }[];
+            };
+            cobrancas: null | {
+                total: number;
+                /** @description Soma em reais, com duas casas. */
+                valor: string;
+                itens: {
+                    /** Format: uuid */
+                    id: string;
+                    tutorNome: string;
+                    petNome: string | null;
+                    descricao: string;
+                    valor: string;
+                    /** Format: date-time */
+                    dataHora: string;
+                }[];
+            };
+            vacinas: {
+                /** Format: uuid */
+                petId: string;
+                petNome: string;
+                tutorNome: string | null;
+                tutorTelefone: string | null;
+                vacina: string;
+                /** Format: date */
+                proximaDose: string;
+                atrasada: boolean;
+            }[];
+            semana: {
+                /** @description Recebido nos últimos 7 dias; null sem permissão do financeiro. */
+                faturamento: string | null;
+                atendimentos: number;
+            };
         };
         Tokens: {
             accessToken: string;
