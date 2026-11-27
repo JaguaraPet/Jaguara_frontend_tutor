@@ -89,6 +89,28 @@ async function postar(caminho: string, corpo?: unknown, token?: string) {
   });
 }
 
+/** Resposta do login social (UC-02 FA04): entrou, falta a senha da conta ou falta o cadastro. */
+export type ResultadoSocial =
+  | { tipo: 'entrou' }
+  | { tipo: 'senha'; mensagem: string }
+  | { tipo: 'cadastro'; cadastroToken: string; nome?: string; email: string };
+
+export interface PedidoSocial {
+  provedor: 'GOOGLE' | 'APPLE';
+  idToken: string;
+  nonce: string;
+  senha?: string;
+}
+
+/** Só tutores usam o app: tokens de outra conta são devolvidos e a sessão não abre. */
+async function aceitarTokensDeTutor(tokens: Tokens) {
+  if (lerToken(tokens.accessToken).tipo !== 'TUTOR') {
+    await postar('/auth/logout', undefined, tokens.accessToken).catch(() => undefined);
+    throw new ErroApi({ codigo: 'SO_TUTOR', title: 'O app é dos tutores. Empresas usam o Jaguara Enterprise na web.' });
+  }
+  await guardar(tokens);
+}
+
 export const sessao = {
   get accessToken() {
     return accessToken;
@@ -107,14 +129,37 @@ export const sessao = {
   async entrar(email: string, senha: string): Promise<Usuario> {
     const resposta = await postar('/auth/login', { email, senha });
     if (!resposta.ok) throw new ErroApi((await resposta.json()) as Problema);
-    const tokens = (await resposta.json()) as Tokens;
-    const dono = lerToken(tokens.accessToken);
-    if (dono.tipo !== 'TUTOR') {
-      await postar('/auth/logout', undefined, tokens.accessToken).catch(() => undefined);
-      throw new ErroApi({ codigo: 'SO_TUTOR', title: 'O app é dos tutores. Empresas usam o Jaguara Enterprise na web.' });
-    }
-    await guardar(tokens);
+    await aceitarTokensDeTutor((await resposta.json()) as Tokens);
     return usuario!;
+  },
+
+  /** UC-02 FA04: entra com o id_token do Google ou da Apple. */
+  async entrarSocial(pedido: PedidoSocial): Promise<ResultadoSocial> {
+    const resposta = await postar('/auth/login/social', pedido);
+    if (resposta.status === 428) {
+      const pendente = (await resposta.json()) as { cadastroToken: string; nome?: string; email: string };
+      return { tipo: 'cadastro', ...pendente };
+    }
+    if (resposta.status === 409) {
+      const problema = (await resposta.json()) as Problema;
+      return { tipo: 'senha', mensagem: problema.detail ?? problema.title ?? 'Confirme a senha da sua conta.' };
+    }
+    if (!resposta.ok) throw new ErroApi((await resposta.json()) as Problema);
+    await aceitarTokensDeTutor((await resposta.json()) as Tokens);
+    return { tipo: 'entrou' };
+  },
+
+  /** UC-01 com RF46: conclui o cadastro iniciado pelo Google ou pela Apple e já entra. */
+  async concluirCadastroSocial(dados: {
+    cadastroToken: string;
+    nome: string;
+    cpf: string;
+    telefone?: string;
+    aceiteTermos: true;
+  }): Promise<void> {
+    const resposta = await postar('/auth/cadastro/social', dados);
+    if (!resposta.ok) throw new ErroApi((await resposta.json()) as Problema);
+    await aceitarTokensDeTutor((await resposta.json()) as Tokens);
   },
 
   /** Troca o refresh token por tokens novos; chamadas simultâneas esperam a mesma renovação. */
