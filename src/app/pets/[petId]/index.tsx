@@ -149,6 +149,7 @@ export default function PerfilPet() {
       <Botao titulo="Vacinas" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/vacinas`)} />
       <Botao titulo="Medicamentos" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/medicamentos`)} />
       <Botao titulo="Exames" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/exames`)} />
+      <Botao titulo="Alergias e restrições" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/alergias`)} />
       <Botao titulo="Documentos" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/documentos`)} />
       <Botao titulo="Alimentação" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/alimentacao`)} />
       <Botao titulo="Despesas" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/despesas`)} />
