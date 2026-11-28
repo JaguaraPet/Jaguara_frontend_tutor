@@ -126,7 +126,6 @@ export default function DetalheDaSolicitacao() {
           {h.descricao ? <Texto variante="legenda">{h.descricao}</Texto> : null}
         </View>
       ))}
-      <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );
 }

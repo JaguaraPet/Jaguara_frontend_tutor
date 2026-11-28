@@ -1,12 +1,12 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Image } from 'expo-image';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import type { ComponentProps } from 'react';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { api } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
-import { Alerta, Botao, Opcoes, Tela, Texto } from '../../../componentes';
+import { Alerta, Opcoes, Tela, Texto } from '../../../componentes';
 import { cores, espaco, raio } from '../../../tema/tokens';
 import { criarEstilos } from '../../../tema/estilos';
 
@@ -89,7 +89,6 @@ export default function LinhaDoTempo() {
           })}
         </View>
       )}
-      <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );
 }

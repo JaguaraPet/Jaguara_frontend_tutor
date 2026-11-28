@@ -4,6 +4,7 @@ export { Alerta } from './Alerta';
 export { Botao } from './Botao';
 export { Campo } from './Campo';
 export { Cartao } from './Cartao';
+export { BotoesEtapas, ProgressoEtapas } from './Etapas';
 export { Icone } from './Icone';
 export type { NomeIcone } from './Icone';
 export { Opcoes } from './Opcoes';

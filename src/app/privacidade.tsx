@@ -115,7 +115,6 @@ export default function Privacidade() {
           </>
         )}
       </Cartao>
-      <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );
 }

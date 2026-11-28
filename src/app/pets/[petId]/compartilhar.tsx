@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, Share, View } from 'react-native';
 import { api } from '../../../api/cliente';
@@ -170,7 +170,6 @@ export default function Compartilhar() {
           );
         })
       )}
-      <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );
 }

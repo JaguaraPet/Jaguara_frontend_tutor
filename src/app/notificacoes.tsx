@@ -1,10 +1,9 @@
-import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Switch, View } from 'react-native';
 import { TIPOS_EVENTO } from '../agenda/agenda';
 import { api } from '../api/cliente';
 import type { components } from '../api/esquema';
-import { Alerta, Botao, Cartao, Opcoes, Tela, Texto } from '../componentes';
+import { Alerta, Cartao, Opcoes, Tela, Texto } from '../componentes';
 import { mensagemDaApi } from '../pets/erros';
 import { cores, espaco } from '../tema/tokens';
 
@@ -130,7 +129,6 @@ export default function Notificacoes() {
             )}
           </Cartao>
         ))}
-      <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );
 }

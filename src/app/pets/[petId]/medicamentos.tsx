@@ -1,9 +1,9 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { api } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
-import { Alerta, Botao, Campo, Cartao, Opcoes, Tela, Texto } from '../../../componentes';
+import { Alerta, Botao, BotoesEtapas, Campo, Cartao, Opcoes, ProgressoEtapas, Tela, Texto } from '../../../componentes';
 import { hojeBrasilia } from '../../../pets/datas';
 import { mensagemDaApi } from '../../../pets/erros';
 import { dataBr, mascararData } from '../../../pets/formulario';
@@ -13,6 +13,9 @@ import { mascararHora } from '../../../agenda/agenda';
 import { cores, espaco } from '../../../tema/tokens';
 
 type Tratamento = components['schemas']['Tratamento'];
+
+/** O cadastro do remédio em duas etapas curtas. */
+const ETAPAS = ['O remédio', 'Quando dar'] as const;
 
 /** Medicamentos do pet (UC-14, RN18): cada dose vira lembrete para os responsáveis. */
 export default function Medicamentos() {
@@ -32,6 +35,7 @@ export default function Medicamentos() {
   });
   const [erros, setErros] = useState<Partial<Record<keyof ValoresTratamento, string>>>({});
   const [salvando, setSalvando] = useState(false);
+  const [etapa, setEtapa] = useState(0);
   const [finalizando, setFinalizando] = useState<Tratamento | null>(null);
   const [aviso, setAviso] = useState<{ tipo: 'sucesso' | 'erro'; titulo: string; mensagem?: string } | null>(null);
   const [versao, setVersao] = useState(0);
@@ -46,6 +50,22 @@ export default function Medicamentos() {
       ativo = false;
     };
   }, [petId, versao]);
+
+  /** Primeira etapa: o remédio e a dose. Sem erro neles, segue para os horários. */
+  function continuar() {
+    const montado = montarTratamento(v, hoje);
+    const daEtapa = montado.ok
+      ? {}
+      : Object.fromEntries(Object.entries(montado.erros).filter(([c]) => c === 'medicamento' || c === 'dosagem'));
+    setErros(daEtapa);
+    if (Object.keys(daEtapa).length === 0) setEtapa(1);
+  }
+
+  function fechar() {
+    setFormulario(false);
+    setEtapa(0);
+    setErros({});
+  }
 
   async function salvar() {
     const montado = montarTratamento(v, hoje);
@@ -69,7 +89,7 @@ export default function Medicamentos() {
       titulo: 'Medicamento salvo',
       mensagem: `${data?.lembretesAgendados ?? 0} lembretes de dose agendados para os responsáveis.`,
     });
-    setFormulario(false);
+    fechar();
     setV((a) => ({ ...a, medicamento: '', dosagem: '', fim: '', observacoes: '' }));
     setVersao((n) => n + 1);
   }
@@ -108,50 +128,67 @@ export default function Medicamentos() {
         </>
       )}
 
-      {!formulario && <Botao titulo="Novo medicamento" larguraTotal onPress={() => setFormulario(true)} />}
+      {!formulario && <Botao titulo="Novo medicamento" icone="plus" larguraTotal onPress={() => setFormulario(true)} />}
       {formulario && (
         <Cartao titulo="Novo medicamento">
-          <Campo rotulo="Medicamento" value={v.medicamento} onChangeText={mudar('medicamento')} erro={erros.medicamento} />
-          <Campo rotulo="Dose" value={v.dosagem} onChangeText={mudar('dosagem')} erro={erros.dosagem} />
-          <Texto variante="legenda" negrito>
-            Como é dado
-          </Texto>
-          <Opcoes rotulo="Como é dado" opcoes={VIAS.map((x) => ({ valor: x, rotulo: x }))} valor={v.via} aoMudar={mudar('via')} />
-          <Texto variante="legenda" negrito>
-            De quantas em quantas horas
-          </Texto>
-          <Opcoes
-            rotulo="Intervalo"
-            opcoes={INTERVALOS.map((x) => ({ valor: x, rotulo: x === '24' ? '1 vez por dia' : `${x} em ${x} h` }))}
-            valor={v.intervalo}
-            aoMudar={mudar('intervalo')}
+          <ProgressoEtapas titulos={ETAPAS} atual={etapa} />
+          {etapa === 0 && (
+            <>
+              <Campo rotulo="Medicamento" value={v.medicamento} onChangeText={mudar('medicamento')} erro={erros.medicamento} />
+              <Campo rotulo="Dose" value={v.dosagem} onChangeText={mudar('dosagem')} erro={erros.dosagem} />
+              <Texto variante="legenda" negrito>
+                Como é dado
+              </Texto>
+              <Opcoes rotulo="Como é dado" opcoes={VIAS.map((x) => ({ valor: x, rotulo: x }))} valor={v.via} aoMudar={mudar('via')} />
+            </>
+          )}
+          {etapa === 1 && (
+            <>
+              <Texto variante="legenda" negrito>
+                De quantas em quantas horas
+              </Texto>
+              <Opcoes
+                rotulo="Intervalo"
+                opcoes={INTERVALOS.map((x) => ({ valor: x, rotulo: x === '24' ? '1 vez por dia' : `${x} em ${x} h` }))}
+                valor={v.intervalo}
+                aoMudar={mudar('intervalo')}
+              />
+              {erros.intervalo && <Texto cor={cores.erro}>{erros.intervalo}</Texto>}
+              <Campo
+                rotulo="Início (DD/MM/AAAA)"
+                keyboardType="number-pad"
+                value={v.inicio}
+                onChangeText={(t) => mudar('inicio')(mascararData(t))}
+                erro={erros.inicio}
+              />
+              <Campo
+                rotulo="Fim (opcional)"
+                keyboardType="number-pad"
+                ajuda="Sem fim, os lembretes cobrem os próximos 30 dias."
+                value={v.fim}
+                onChangeText={(t) => mudar('fim')(mascararData(t))}
+                erro={erros.fim}
+              />
+              <Campo
+                rotulo="Primeira dose (HH:MM)"
+                keyboardType="number-pad"
+                value={v.primeiraDose}
+                onChangeText={(t) => mudar('primeiraDose')(mascararHora(t))}
+                erro={erros.primeiraDose}
+              />
+              <Campo rotulo="Observações (opcional)" value={v.observacoes} onChangeText={mudar('observacoes')} multiline />
+            </>
+          )}
+          <BotoesEtapas
+            atual={etapa}
+            total={ETAPAS.length}
+            aoVoltar={() => setEtapa(0)}
+            aoContinuar={continuar}
+            tituloFinal="Salvar medicamento"
+            carregando={salvando}
+            aoConcluir={() => void salvar()}
           />
-          {erros.intervalo && <Texto cor={cores.erro}>{erros.intervalo}</Texto>}
-          <Campo
-            rotulo="Início (DD/MM/AAAA)"
-            keyboardType="number-pad"
-            value={v.inicio}
-            onChangeText={(t) => mudar('inicio')(mascararData(t))}
-            erro={erros.inicio}
-          />
-          <Campo
-            rotulo="Fim (opcional)"
-            keyboardType="number-pad"
-            ajuda="Sem fim, os lembretes cobrem os próximos 30 dias."
-            value={v.fim}
-            onChangeText={(t) => mudar('fim')(mascararData(t))}
-            erro={erros.fim}
-          />
-          <Campo
-            rotulo="Primeira dose (HH:MM)"
-            keyboardType="number-pad"
-            value={v.primeiraDose}
-            onChangeText={(t) => mudar('primeiraDose')(mascararHora(t))}
-            erro={erros.primeiraDose}
-          />
-          <Campo rotulo="Observações (opcional)" value={v.observacoes} onChangeText={mudar('observacoes')} multiline />
-          <Botao titulo="Salvar medicamento" larguraTotal carregando={salvando} onPress={() => void salvar()} />
-          <Botao titulo="Cancelar" variante="texto" onPress={() => setFormulario(false)} />
+          <Botao titulo="Cancelar" variante="texto" onPress={() => fechar()} />
         </Cartao>
       )}
 
@@ -179,7 +216,6 @@ export default function Medicamentos() {
           ))}
         </>
       )}
-      <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );
 }

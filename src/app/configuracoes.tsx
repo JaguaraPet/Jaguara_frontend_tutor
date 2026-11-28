@@ -77,7 +77,6 @@ export default function Configuracoes() {
         </Texto>
       </Cartao>
 
-      <Botao titulo="Voltar" variante="texto" icone="arrow-left" onPress={() => router.back()} />
     </Tela>
   );
 }

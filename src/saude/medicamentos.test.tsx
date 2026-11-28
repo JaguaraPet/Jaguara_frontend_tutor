@@ -63,6 +63,8 @@ describe('UC-14 · Medicamentos do pet no app', () => {
     await fireEvent.press(await screen.findByRole('button', { name: 'Novo medicamento' }));
     await fireEvent.changeText(screen.getByLabelText('Medicamento'), 'Amoxicilina');
     await fireEvent.changeText(screen.getByLabelText('Dose'), '1 comprimido');
+    await fireEvent.press(screen.getByRole('button', { name: 'Continuar' }));
+    expect(await screen.findByText('Quando dar')).toBeOnTheScreen();
     await fireEvent.changeText(screen.getByLabelText('Início (DD/MM/AAAA)'), '23112099');
     await fireEvent.press(screen.getByRole('button', { name: 'Salvar medicamento' }));
     expect(await screen.findByText('21 lembretes de dose agendados para os responsáveis.')).toBeOnTheScreen();

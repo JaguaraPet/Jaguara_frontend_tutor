@@ -211,7 +211,6 @@ export default function PerfilPet() {
           </View>
         )}
       </PainelDaAba>
-      <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );
 }
@@ -234,9 +233,9 @@ const estilos = criarEstilos(() => ({
   secaoTitulo: { fontWeight: '600', fontSize: 14, lineHeight: 18 },
   destaque: {
     backgroundColor: coresSuaves.erro,
-    borderLeftWidth: 4,
-    borderLeftColor: cores.erro,
-    borderRadius: raio.padrao,
+    borderWidth: 1,
+    borderColor: cores.erro + '4D',
+    borderRadius: raio.cartao - 4,
     padding: espaco.md,
     gap: espaco.xs,
     alignSelf: 'stretch',
