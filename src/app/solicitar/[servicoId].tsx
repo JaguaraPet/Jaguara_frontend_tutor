@@ -30,10 +30,15 @@ function Opcao({ rotulo, escolhida, aoEscolher }: { rotulo: string; escolhida: b
 
 /** Solicitar agendamento de serviço (UC-40, RN14, RN38, RN40). */
 export default function SolicitarAgendamento() {
-  const { servicoId, servico, empresa } = useLocalSearchParams<{ servicoId: string; servico?: string; empresa?: string }>();
+  const { servicoId, servico, empresa, petId: petInicial } = useLocalSearchParams<{
+    servicoId: string;
+    servico?: string;
+    empresa?: string;
+    petId?: string;
+  }>();
   const [dias] = useState(() => proximosDias(hojeBrasilia()));
   const [pets, setPets] = useState<Pet[] | null>(null);
-  const [petId, setPetId] = useState('');
+  const [petId, setPetId] = useState(petInicial ?? '');
   const [dia, setDia] = useState('');
   const [horarios, setHorarios] = useState<string[] | null>(null);
   const [horario, setHorario] = useState('');

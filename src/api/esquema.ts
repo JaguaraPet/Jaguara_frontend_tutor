@@ -5247,6 +5247,203 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/agendamentos/{agendamentoId}/avaliacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agendamentoId: components["parameters"]["AgendamentoId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Avaliar o atendimento
+         * @description Um responsável pelo pet dá uma nota de 1 a 5, com comentário opcional, em até 30 dias depois do atendimento realizado. Avaliar de novo altera a própria avaliação.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    agendamentoId: components["parameters"]["AgendamentoId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AvaliacaoEntrada"];
+                };
+            };
+            responses: {
+                /** @description Avaliação gravada. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Avaliacao"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                /** @description Atendimento não realizado, prazo encerrado ou já avaliado por outro responsável. */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["Validacao"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tutor/avaliacoes/pendentes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Atendimentos esperando avaliação
+         * @description Atendimentos dos pets do tutor nos últimos 30 dias ainda sem avaliação, com o resumo do que foi feito.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Até 10 atendimentos, do mais recente ao mais antigo. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AvaliacaoPendente"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/empresas/{empresaId}/avaliacoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+            };
+            cookie?: never;
+        };
+        /** Avaliações recebidas pela empresa */
+        get: {
+            parameters: {
+                query?: {
+                    pagina?: number;
+                    tamanho?: number;
+                };
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Resumo das notas e a página de avaliações. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            resumo: components["schemas"]["ResumoAvaliacoes"];
+                            itens: components["schemas"]["Avaliacao"][];
+                            pagina: number;
+                            tamanho: number;
+                        };
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/empresas/{empresaId}/avaliacoes/{avaliacaoId}/resposta": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+                avaliacaoId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Responder uma avaliação
+         * @description A resposta aparece junto da avaliação na página pública. Resposta vazia apaga a anterior.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                    avaliacaoId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        resposta: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Avaliação com a resposta. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Avaliacao"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/empresas/{empresaId}/hoje": {
         parameters: {
             query?: never;
@@ -7563,6 +7760,10 @@ export interface components {
             enderecoUf: string;
         };
         VitrineEmpresa: components["schemas"]["PerfilPublico"] & {
+            avaliacoes: components["schemas"]["ResumoAvaliacoes"] & {
+                /** @description As 5 últimas avaliações com comentário. */
+                recentes: components["schemas"]["Avaliacao"][];
+            };
             servicos: {
                 /** Format: uuid */
                 id: string;
@@ -7572,6 +7773,53 @@ export interface components {
                 preco: string;
                 duracaoMinutos: number;
             }[];
+        };
+        AvaliacaoEntrada: {
+            nota: number;
+            comentario?: string;
+        };
+        Avaliacao: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            agendamentoId: string;
+            nota: number;
+            comentario?: string;
+            /** @description Resposta da empresa. */
+            resposta?: string;
+            /** Format: date-time */
+            respondidaEm?: string;
+            /** Format: date-time */
+            criadoEm: string;
+            /** @description Nome de quem avaliou (só o primeiro nome na página pública). */
+            autor: string;
+            servico: string;
+            pet: string;
+        };
+        AvaliacaoPendente: {
+            /** Format: uuid */
+            agendamentoId: string;
+            /** Format: date-time */
+            realizadoEm: string;
+            /** Format: uuid */
+            empresaId: string;
+            empresa: string;
+            slug?: string;
+            /** Format: uuid */
+            servicoId: string;
+            servico: string;
+            /** Format: uuid */
+            petId: string;
+            pet: string;
+            /** @description O que a empresa registrou no atendimento. */
+            procedimentos?: string;
+        };
+        ResumoAvaliacoes: {
+            /** @description Uma casa decimal; nula sem avaliações. */
+            media: number | null;
+            total: number;
+            /** @description Quantidade de avaliações por nota, da 1 à 5. */
+            distribuicao: number[];
         };
         /** @enum {string} */
         TipoRotina: "PASSEIO" | "BANHO" | "ANTIPULGAS" | "VERMIFUGO" | "ESCOVACAO" | "AREIA" | "ALIMENTACAO" | "OUTRO";

@@ -2,6 +2,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { api } from '../../api/cliente';
+import { AvaliarAtendimentos } from '../../avaliacao/AvaliarAtendimentos';
 import type { components } from '../../api/esquema';
 import { Alerta, Botao, Cartao, Tela, Texto } from '../../componentes';
 import { cores, espaco } from '../../tema/tokens';
@@ -223,6 +224,8 @@ export default function Inicio() {
             )}
           </Cartao>
         ))}
+
+        <AvaliarAtendimentos versao={versao} />
 
         {agendamentos.length > 0 && (
           <Cartao titulo="Próximos agendamentos">
