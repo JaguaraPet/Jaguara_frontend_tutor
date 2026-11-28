@@ -43,6 +43,15 @@ export default function Agenda() {
     };
   }, [petId, versao]);
 
+  async function confirmar(e: Evento) {
+    if (!e.id) return;
+    const { error } = await api.POST('/agendamentos/{agendamentoId}/confirmacao', {
+      params: { path: { agendamentoId: e.id } },
+    });
+    setAviso(error ? 'Não foi possível confirmar agora. Tente de novo.' : null);
+    setVersao((v) => v + 1);
+  }
+
   async function excluir() {
     if (!excluindo?.id) return;
     const { error } = await api.DELETE('/eventos/{eventoId}', { params: { path: { eventoId: excluindo.id } } });
@@ -117,11 +126,22 @@ export default function Agenda() {
               <Cartao
                 key={`${e.origem}-${e.id}`}
                 titulo={`${horaDe(e.dataHoraInicio)} · ${e.titulo}`}
-                subtitulo={[rotuloTipo(e.tipo), e.origem === 'AGENDAMENTO' ? 'Agendamento com empresa' : e.local]
+                subtitulo={[rotuloTipo(e.tipo), e.origem === 'AGENDAMENTO' ? e.local ?? 'Agendamento com empresa' : e.local]
                   .filter(Boolean)
                   .join(' · ')}
               >
                 {e.descricao ? <Texto>{e.descricao}</Texto> : null}
+                {e.origem === 'AGENDAMENTO' && new Date(e.dataHoraInicio) > new Date() &&
+                  (e.confirmado ? (
+                    <Texto cor={cores.sucesso}>Presença confirmada ✓</Texto>
+                  ) : (
+                    <Botao
+                      titulo="Confirmar presença"
+                      variante="secundaria"
+                      accessibilityLabel={`Confirmar presença em ${e.titulo}`}
+                      onPress={() => void confirmar(e)}
+                    />
+                  ))}
                 {e.origem === 'MANUAL' && (
                   <Botao
                     titulo="Excluir"

@@ -3871,6 +3871,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/agendamentos/{agendamentoId}/confirmacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agendamentoId: components["parameters"]["AgendamentoId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirmar presença no agendamento
+         * @description Um responsável pelo pet confirma, a partir do lembrete (um dia e duas horas antes), que vai ao agendamento. A clínica vê a confirmação na tela Hoje. Remarcar apaga a confirmação.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    agendamentoId: components["parameters"]["AgendamentoId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Presença confirmada. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Agendamento"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                /** @description O agendamento não está mais ativo. */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/agendamentos/{agendamentoId}/atendimento": {
         parameters: {
             query?: never;
@@ -6875,6 +6926,8 @@ export interface components {
                 atendimentoId: string | null;
                 /** @enum {string|null} */
                 atendimentoStatus: "EM_ANDAMENTO" | "FINALIZADO" | null;
+                /** @description O tutor confirmou a presença pelo lembrete. */
+                confirmado: boolean;
                 /** @description null quando ainda não há cobrança. */
                 pago: boolean | null;
             }[];
@@ -7345,6 +7398,8 @@ export interface components {
             id?: string;
             /** @enum {string} */
             origem?: "MANUAL" | "AGENDAMENTO" | "CALENDARIO_EXTERNO";
+            /** @description Só em agendamentos com empresa; o responsável já confirmou a presença. */
+            confirmado?: boolean;
         };
         DespesaEntrada: {
             descricao: string;
@@ -7545,6 +7600,11 @@ export interface components {
             precoContratado?: number;
             /** @enum {string} */
             status?: "AGENDADO" | "CANCELADO" | "REALIZADO" | "NAO_COMPARECEU";
+            /**
+             * Format: date-time
+             * @description Quando um responsável confirmou a presença pelo lembrete.
+             */
+            confirmadoEm?: string;
         };
         AtendimentoEntrada: {
             procedimentosRealizados: string;
