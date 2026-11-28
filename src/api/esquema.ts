@@ -1248,6 +1248,130 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/pets/{petId}/album": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                petId: components["parameters"]["PetId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Álbum de fotos do pet
+         * @description Só a família (responsáveis). As URLs valem por 6 horas.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Fotos, da mais recente à mais antiga. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FotoDoPet"][];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        put?: never;
+        /**
+         * Enviar uma foto ao álbum
+         * @description Devolve a URL para enviar a imagem com PUT (JPG, PNG, WEBP ou HEIC, até 8 MB).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        nomeArquivo: string;
+                        tamanhoBytes: number;
+                        legenda?: string;
+                        /** Format: date */
+                        tiradaEm?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Foto registrada. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** Format: uuid */
+                            id: string;
+                            /** Format: uri */
+                            urlEnvio: string;
+                        };
+                    };
+                };
+                422: components["responses"]["Validacao"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/album/{fotoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                fotoId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Apagar uma foto do álbum */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    fotoId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Apagada. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/pets/{petId}/linha-do-tempo": {
         parameters: {
             query?: never;
@@ -8663,6 +8787,17 @@ export interface components {
                 criadoEm: string;
             }[];
         };
+        FotoDoPet: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uri */
+            url: string;
+            legenda?: string;
+            /** Format: date */
+            tiradaEm: string;
+            /** @description Primeiro nome de quem enviou. */
+            enviadaPor: string;
+        };
         /** @enum {string} */
         TipoRotina: "PASSEIO" | "BANHO" | "ANTIPULGAS" | "VERMIFUGO" | "ESCOVACAO" | "AREIA" | "ALIMENTACAO" | "OUTRO";
         /** @enum {string} */
@@ -8748,6 +8883,15 @@ export interface components {
                 /** Format: date */
                 proximaDose: string;
                 atrasada: boolean;
+            }[];
+            /** @description Aniversário do pet e aniversário dele no Jaguara, no dia. */
+            celebracoes?: {
+                /** Format: uuid */
+                petId: string;
+                petNome: string;
+                /** @enum {string} */
+                tipo: "ANIVERSARIO" | "ANIVERSARIO_JAGUARA";
+                anos: number;
             }[];
         };
         Tokens: {
@@ -9145,10 +9289,15 @@ export interface components {
             /** Format: date-time */
             data?: string;
             /** @enum {string} */
-            tipo?: "VACINACAO" | "EXAME" | "TRATAMENTO" | "EVENTO" | "ATENDIMENTO";
+            tipo?: "VACINACAO" | "EXAME" | "TRATAMENTO" | "EVENTO" | "ATENDIMENTO" | "FOTO";
             titulo?: string;
             /** Format: uuid */
             referenciaId?: string;
+            /**
+             * Format: uri
+             * @description Foto do álbum (tipo FOTO, só para a família).
+             */
+            imagemUrl?: string;
         };
         EventoEntrada: {
             titulo: string;

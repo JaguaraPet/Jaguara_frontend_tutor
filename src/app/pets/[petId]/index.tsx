@@ -25,6 +25,7 @@ const SECOES = [
   { titulo: 'Alergias e restrições', caminho: 'alergias', icone: '⚠️' },
   { titulo: 'Alimentação', caminho: 'alimentacao', icone: '🥣' },
   { titulo: 'Linha do tempo', caminho: 'linha-do-tempo', icone: '🕒' },
+  { titulo: 'Álbum', caminho: 'album', icone: '📸' },
   { titulo: 'Documentos', caminho: 'documentos', icone: '📄' },
   { titulo: 'Despesas', caminho: 'despesas', icone: '🧾' },
   { titulo: 'Responsáveis', caminho: 'responsaveis', icone: '👨‍👩‍👧' },
