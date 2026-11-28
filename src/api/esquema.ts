@@ -1248,6 +1248,162 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/pets/{petId}/perdido": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                petId: components["parameters"]["PetId"];
+            };
+            cookie?: never;
+        };
+        /** Situação do aviso de pet perdido */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Aviso ativo ou não. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AvisoPetPerdido"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Avisar que o pet se perdeu
+         * @description A família informa onde o pet foi visto pela última vez e um telefone. O pet ganha uma página pública (url) com foto, cartaz para imprimir e QR Code. Avisar de novo atualiza os dados.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        local: string;
+                        telefone: string;
+                        mensagem?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Aviso ativo. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AvisoPetPerdido"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                422: components["responses"]["Validacao"];
+            };
+        };
+        /**
+         * Avisar que o pet foi encontrado
+         * @description A página pública sai do ar.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Aviso encerrado. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/publico/perdidos/{codigo}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                codigo: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Página pública do pet perdido
+         * @description Sem login. Só enquanto o aviso estiver ativo.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    codigo: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Dados para o cartaz. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            nome: string;
+                            especie: string;
+                            raca: string;
+                            /** @enum {string} */
+                            sexo: "MACHO" | "FEMEA";
+                            cor?: string;
+                            /** Format: uri */
+                            fotoUrl?: string;
+                            /** Format: date-time */
+                            desde: string;
+                            local: string;
+                            telefone: string;
+                            mensagem?: string;
+                        };
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/pets/{petId}/album": {
         parameters: {
             query?: never;
@@ -8856,6 +9012,20 @@ export interface components {
             /** @description Primeiro nome. */
             nome: string;
             souEu: boolean;
+        };
+        AvisoPetPerdido: {
+            perdido: boolean;
+            /** Format: date-time */
+            desde?: string;
+            local?: string;
+            telefone?: string;
+            mensagem?: string;
+            codigo?: string;
+            /**
+             * Format: uri
+             * @description Página pública com o cartaz e o QR Code.
+             */
+            url?: string;
         };
         /** @enum {string} */
         TipoRotina: "PASSEIO" | "BANHO" | "ANTIPULGAS" | "VERMIFUGO" | "ESCOVACAO" | "AREIA" | "ALIMENTACAO" | "OUTRO";

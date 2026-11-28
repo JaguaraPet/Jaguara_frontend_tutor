@@ -30,6 +30,7 @@ const SECOES = [
   { titulo: 'Despesas', caminho: 'despesas', icone: '🧾' },
   { titulo: 'Responsáveis', caminho: 'responsaveis', icone: '👨‍👩‍👧' },
   { titulo: 'Compartilhar perfil', caminho: 'compartilhar', icone: '🔗' },
+  { titulo: 'Meu pet se perdeu', caminho: 'perdido', icone: '🆘' },
 ] as const;
 
 export default function PerfilPet() {
