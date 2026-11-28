@@ -3308,6 +3308,113 @@ export interface paths {
         };
         trace?: never;
     };
+    "/publico/cnpj/{cnpj}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cnpj: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Consultar o CNPJ no cadastro da empresa
+         * @description Sem login. Busca razão social, endereço, situação e atividade na base pública da Receita. Só CNPJ ativo e do ramo pet pode se cadastrar. CNPJ já cadastrado volta com jaCadastrado e leva à contestação.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    cnpj: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Dados do CNPJ. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ConsultaCnpj"];
+                    };
+                };
+                422: components["responses"]["Validacao"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/publico/cnpj/{cnpj}/contestacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cnpj: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * "Este CNPJ já está cadastrado. É seu?"
+         * @description Sem login. O pedido vai para o painel do administrador.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    cnpj: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        nome: string;
+                        /** Format: email */
+                        email: string;
+                        telefone?: string;
+                        mensagem: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Pedido recebido. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** Format: uuid */
+                            protocolo: string;
+                        };
+                    };
+                };
+                /** @description O CNPJ não tem cadastro ou já tem pedidos em análise. */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/publico/empresas/{slug}": {
         parameters: {
             query?: never;
@@ -6717,6 +6824,132 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/verificacoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Empresas em verificação e contestações de CNPJ */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Pendências do cadastro seguro. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PendenciasVerificacao"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/verificacoes/empresas/{empresaId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Aprovar ou recusar a verificação da empresa
+         * @description A empresa recebe o resultado por e-mail. Recusar exige o motivo.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        aprovada: boolean;
+                        motivo?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Decisão registrada. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                404: components["responses"]["NaoEncontrado"];
+                422: components["responses"]["Validacao"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/verificacoes/contestacoes/{id}/resolucao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Marcar a contestação como resolvida */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Resolvida. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/chamados": {
         parameters: {
             query?: never;
@@ -7897,6 +8130,12 @@ export interface components {
             politicaCancelamento?: string | null;
         };
         PerfilPublico: {
+            /**
+             * @description Só empresa verificada aparece na busca e na página pública.
+             * @enum {string}
+             */
+            verificacao?: "EM_VERIFICACAO" | "VERIFICADA" | "RECUSADA";
+            verificacaoMotivo?: string | null;
             /** Format: uuid */
             id: string;
             nomeFantasia: string;
@@ -8018,6 +8257,49 @@ export interface components {
                 precoMensal: number;
                 usuarios: number;
                 descricao: string;
+            }[];
+        };
+        ConsultaCnpj: {
+            cnpj: string;
+            encontrado: boolean;
+            jaCadastrado: boolean;
+            elegivel: boolean;
+            /** @description A base da Receita não respondeu: o cadastro segue em verificação. */
+            baseIndisponivel?: boolean;
+            motivo?: string;
+            razaoSocial?: string;
+            nomeFantasia?: string;
+            situacao?: string;
+            atividade?: string;
+            endereco?: components["schemas"]["Endereco"];
+        };
+        PendenciasVerificacao: {
+            empresas: {
+                /** Format: uuid */
+                id: string;
+                cnpj: string;
+                razaoSocial: string;
+                nomeFantasia: string;
+                responsavelNome?: string | null;
+                cnae?: string | null;
+                enderecoCidade?: string;
+                enderecoUf?: string;
+                verificacaoMotivo?: string | null;
+                email: string;
+                telefone?: string;
+                /** Format: date-time */
+                cadastradaEm: string;
+            }[];
+            contestacoes: {
+                /** Format: uuid */
+                id: string;
+                cnpj: string;
+                nome: string;
+                email: string;
+                telefone?: string | null;
+                mensagem: string;
+                /** Format: date-time */
+                criadoEm: string;
             }[];
         };
         /** @enum {string} */
@@ -8146,6 +8428,8 @@ export interface components {
             email: string;
             /** Format: password */
             senha: string;
+            /** @description Quem cadastra. Se o nome estiver no quadro de sócios do CNPJ, a empresa fica verificada na hora; senão, fica em verificação até o administrador analisar (e não aparece na busca). */
+            responsavelNome?: string;
             endereco: components["schemas"]["Endereco"];
             /**
              * @description Aceite das versões vigentes dos termos da Enterprise e da política de privacidade (RN42).
