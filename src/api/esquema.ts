@@ -4261,7 +4261,32 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Excluir serviço (UC-38 FA2)
+         * @description Recusa com agendamento futuro ou pedido em aberto. Sem histórico, o serviço é apagado; com histórico, sai do catálogo e continua nos agendamentos e atendimentos antigos.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    servicoId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Serviço excluído. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                404: components["responses"]["NaoEncontrado"];
+                409: components["responses"]["Conflito"];
+            };
+        };
         options?: never;
         head?: never;
         /**
@@ -4374,7 +4399,32 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Excluir recurso (UC-38 FA2)
+         * @description Recusa com agendamento futuro. Os horários de disponibilidade saem junto. Sem histórico, o recurso é apagado; com histórico, sai da lista e continua nos agendamentos antigos.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    recursoId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Recurso excluído. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                404: components["responses"]["NaoEncontrado"];
+                409: components["responses"]["Conflito"];
+            };
+        };
         options?: never;
         head?: never;
         /** Alterar ou desativar recurso (UC-38) */
