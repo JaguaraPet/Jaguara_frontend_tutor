@@ -4825,6 +4825,68 @@ export interface paths {
         };
         trace?: never;
     };
+    "/empresas/{empresaId}/clientes/importacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Importar clientes de uma planilha
+         * @description A web lê a planilha (CSV) e envia as linhas. Cada linha vira cliente, com consentimento registrado pela declaração da empresa (meio IMPORTACAO), e o pet da linha, quando houver. Linhas inválidas ou de quem já é cliente (mesmo CPF, e-mail ou nome e telefone) são ignoradas com o motivo. Raça desconhecida entra como "Outra (digitar)" com o texto da planilha.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description A empresa declara que os clientes autorizaram o uso dos dados. Precisa ser true. */
+                        declaracaoConsentimento: boolean;
+                        linhas: components["schemas"]["LinhaImportacaoCliente"][];
+                    };
+                };
+            };
+            responses: {
+                /** @description Resultado da importação. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            criados: number;
+                            petsCriados: number;
+                            ignorados: {
+                                /** @description Linha da planilha (a 1 é o cabeçalho). */
+                                linha: number;
+                                nome?: string;
+                                motivo: string;
+                            }[];
+                        };
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                422: components["responses"]["Validacao"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/empresas/{empresaId}/clientes": {
         parameters: {
             query?: never;
@@ -7804,6 +7866,21 @@ export interface components {
             /** @description Quantidade de avaliações por nota, da 1 à 5. */
             distribuicao: number[];
         };
+        LinhaImportacaoCliente: {
+            nome: string;
+            telefone?: string;
+            email?: string;
+            cpf?: string;
+            observacoes?: string;
+            petNome?: string;
+            /** @description Ex.: Cachorro, Gato (aceita cão, gata...). */
+            petEspecie?: string;
+            petRaca?: string;
+            /** @description M, F, Macho ou Fêmea. */
+            petSexo?: string;
+            /** @description DD/MM/AAAA ou AAAA-MM-DD. */
+            petNascimento?: string;
+        };
         /** @enum {string} */
         TipoRotina: "PASSEIO" | "BANHO" | "ANTIPULGAS" | "VERMIFUGO" | "ESCOVACAO" | "AREIA" | "ALIMENTACAO" | "OUTRO";
         /** @enum {string} */
@@ -8826,7 +8903,7 @@ export interface components {
             termoId?: string;
             tipo?: string;
             /** @enum {string} */
-            meioColeta?: "ACEITE_NO_APP" | "ASSINATURA_PRESENCIAL" | "LINK_DIGITAL";
+            meioColeta?: "ACEITE_NO_APP" | "ASSINATURA_PRESENCIAL" | "LINK_DIGITAL" | "IMPORTACAO";
             titulo?: string;
             versao?: string;
             obrigatorio?: boolean;
