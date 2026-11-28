@@ -1,17 +1,13 @@
 import { router } from 'expo-router';
-import { Botao, Cartao, Tela, Texto } from '../../componentes';
+import { Botao, Cartao, Tela } from '../../componentes';
 import { removerAparelho } from '../../notificacoes/push';
 import { sessao } from '../../sessao/sessao';
-import { useUsuario } from '../../sessao/useUsuario';
 
 /** Aba Perfil: dados da conta, configurações, pagamentos e plano (UX-01, seção 3). */
 export default function Perfil() {
-  const usuario = useUsuario();
   return (
     <Tela titulo="Perfil">
-      <Cartao titulo="Sua conta" subtitulo={usuario?.perfil}>
-        <Texto variante="legenda">{usuario?.perfil === 'Tutor' ? 'Tutor no app do Jaguara.' : usuario?.perfil}</Texto>
-      </Cartao>
+      <Cartao titulo="Meus dados" subtitulo="Nome, telefone e e-mail de acesso" aoTocar={() => router.push('/meus-dados')} />
       <Cartao
         titulo="Configurações"
         subtitulo="Aparência, notificações e privacidade"

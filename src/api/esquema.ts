@@ -3642,6 +3642,73 @@ export interface paths {
         };
         trace?: never;
     };
+    "/conta": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Dados da própria conta
+         * @description Quem está logado (nome, e-mail, perfil e empresa), para o topo da Enterprise e a tela Meus dados do app.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Conta. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MinhaConta"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Mudar o nome e o telefone da própria conta
+         * @description Tutor e funcionário mudam o nome; todos mudam o telefone. O e-mail é o login e não muda aqui. Na conta da empresa, o nome é o nome fantasia, que muda no perfil da empresa.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["MinhaContaEntrada"];
+                };
+            };
+            responses: {
+                /** @description Conta atualizada. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MinhaConta"];
+                    };
+                };
+                422: components["responses"]["Validacao"];
+            };
+        };
+        trace?: never;
+    };
     "/conta/dois-fatores": {
         parameters: {
             query?: never;
@@ -9331,6 +9398,23 @@ export interface components {
             dataValidade?: string;
             /** Format: date-time */
             dataUpload: string;
+        };
+        MinhaConta: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            tipo: "TUTOR" | "EMPRESA" | "FUNCIONARIO" | "ADMINISTRADOR";
+            perfil: string;
+            nome: string;
+            /** Format: email */
+            email: string;
+            telefone?: string;
+            cargo?: string;
+            empresaNome?: string;
+        };
+        MinhaContaEntrada: {
+            nome?: string;
+            telefone?: string;
         };
         PetVinculado: {
             /** Format: uuid */
