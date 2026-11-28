@@ -5687,7 +5687,10 @@ export interface paths {
         };
         options?: never;
         head?: never;
-        /** Alterar perfil de acesso do funcionário (UC-16) */
+        /**
+         * Alterar nome, cargo ou perfil de acesso do funcionário (UC-19 FA01, UC-16)
+         * @description Mande só o que muda. Trocar o perfil encerra as sessões, para valer na hora (RN20); nome e cargo não. Cargo vazio apaga o cargo. Funcionário desligado não muda (409).
+         */
         patch: {
             parameters: {
                 query?: never;
@@ -5701,12 +5704,14 @@ export interface paths {
                 content: {
                     "application/json": {
                         /** Format: uuid */
-                        perfilId: string;
+                        perfilId?: string;
+                        nome?: string;
+                        cargo?: string;
                     };
                 };
             };
             responses: {
-                /** @description Perfil alterado com efeito imediato (RN20). */
+                /** @description Funcionário alterado. */
                 200: {
                     headers: {
                         [name: string]: unknown;
