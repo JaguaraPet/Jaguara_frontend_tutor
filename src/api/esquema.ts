@@ -1474,6 +1474,391 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tutor/hoje": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tela Hoje do tutor
+         * @description O que cada pet precisa hoje (remédios do tratamento e rotinas, com quem já fez), os agendamentos dos próximos 14 dias e as vacinas atrasadas ou vencendo em 30 dias.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Resumo do dia do tutor. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["HojeTutor"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rotinas/modelos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Modelos prontos e editáveis do criador de rotinas
+         * @description Atalhos para montar a rotina; não são recomendação veterinária.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Modelos. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ModeloRotina"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pets/{petId}/rotinas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                petId: components["parameters"]["PetId"];
+            };
+            cookie?: never;
+        };
+        /** Rotinas ativas do pet */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Rotinas. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Rotina"][];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        put?: never;
+        /**
+         * Criar rotina
+         * @description Programa os lembretes dos próximos 30 dias para todos os responsáveis do pet.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RotinaEntrada"];
+                };
+            };
+            responses: {
+                /** @description Rotina criada. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Rotina"];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+                422: components["responses"]["Validacao"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rotinas/{rotinaId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rotinaId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Encerrar rotina
+         * @description Deixa de aparecer no dia e cancela os lembretes pendentes; o histórico fica.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    rotinaId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Rotina encerrada. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        options?: never;
+        head?: never;
+        /** Alterar rotina */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    rotinaId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RotinaEntrada"];
+                };
+            };
+            responses: {
+                /** @description Rotina alterada e lembretes reprogramados. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Rotina"];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+                422: components["responses"]["Validacao"];
+            };
+        };
+        trace?: never;
+    };
+    "/rotinas/{rotinaId}/feitos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rotinaId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Marcar como feito
+         * @description Registra quem fez, uma vez por dia e horário. Sem data, vale hoje em Brasília.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    rotinaId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** Format: date */
+                        data?: string;
+                        horario?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Feito registrado. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** Format: uuid */
+                            rotinaId: string;
+                            /** Format: date */
+                            data: string;
+                            horario: string | null;
+                            /** Format: date-time */
+                            feitoEm: string;
+                        };
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        /** Desfazer o feito marcado por engano */
+        delete: {
+            parameters: {
+                query: {
+                    data: string;
+                    horario?: string;
+                };
+                header?: never;
+                path: {
+                    rotinaId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Feito desfeito. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tratamentos/{tratamentoId}/doses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tratamentoId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Registrar a dose dada
+         * @description "Dei": registra a dose prevista e quem deu, para a família ver na hora e não dar o remédio duas vezes ou nenhuma.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    tratamentoId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** Format: date-time */
+                        previstaPara: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Dose registrada. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** Format: uuid */
+                            tratamentoId: string;
+                            /** Format: date-time */
+                            previstaPara: string;
+                            /** Format: date-time */
+                            feitoEm: string;
+                        };
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        /** Desfazer a dose marcada por engano */
+        delete: {
+            parameters: {
+                query: {
+                    previstaPara: string;
+                };
+                header?: never;
+                path: {
+                    tratamentoId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Dose desfeita. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/pets/{petId}/tratamentos": {
         parameters: {
             query?: never;
@@ -3021,9 +3406,9 @@ export interface paths {
                         "application/json": components["schemas"]["PerfilPublico"];
                     };
                 };
-                400: components["responses"]["Validacao"];
                 403: components["responses"]["SemPermissao"];
                 409: components["responses"]["Conflito"];
+                422: components["responses"]["Validacao"];
             };
         };
         trace?: never;
@@ -7186,6 +7571,93 @@ export interface components {
                 /** @description Em reais, com duas casas. */
                 preco: string;
                 duracaoMinutos: number;
+            }[];
+        };
+        /** @enum {string} */
+        TipoRotina: "PASSEIO" | "BANHO" | "ANTIPULGAS" | "VERMIFUGO" | "ESCOVACAO" | "AREIA" | "ALIMENTACAO" | "OUTRO";
+        /** @enum {string} */
+        FrequenciaRotina: "DIARIA" | "SEMANAL" | "MENSAL" | "INTERVALO_DIAS";
+        RotinaEntrada: {
+            titulo: string;
+            tipo: components["schemas"]["TipoRotina"];
+            frequencia: components["schemas"]["FrequenciaRotina"];
+            /** @description Obrigatório em INTERVALO_DIAS. */
+            intervaloDias?: number;
+            /** @description Obrigatório em SEMANAL. 0 = domingo ... 6 = sábado. */
+            diasSemana?: number[];
+            horarios?: string[];
+            /** Format: date */
+            dataInicio?: string;
+        };
+        Rotina: components["schemas"]["RotinaEntrada"] & {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            petId: string;
+            intervaloDias: number | null;
+        };
+        ModeloRotina: {
+            tipo: components["schemas"]["TipoRotina"];
+            titulo: string;
+            frequencia: components["schemas"]["FrequenciaRotina"];
+            intervaloDias?: number;
+            diasSemana?: number[];
+            horarios: string[];
+            descricao: string;
+        };
+        ItemDoDia: {
+            /** @enum {string} */
+            tipo: "REMEDIO" | "ROTINA";
+            /**
+             * Format: uuid
+             * @description Tratamento ou rotina.
+             */
+            id: string;
+            titulo: string;
+            detalhe: string | null;
+            /** @description HH:MM em Brasília. */
+            horario: string | null;
+            /**
+             * Format: date-time
+             * @description Instante da dose do remédio.
+             */
+            previstaPara: string | null;
+            feito: boolean;
+            /** @description Primeiro nome de quem fez. */
+            feitoPor: string | null;
+            /** Format: date-time */
+            feitoEm: string | null;
+        };
+        HojeTutor: {
+            /** Format: date */
+            data: string;
+            pets: {
+                /** Format: uuid */
+                id: string;
+                nome: string;
+                especie: string;
+                fotoUrl: string | null;
+                itens: components["schemas"]["ItemDoDia"][];
+            }[];
+            agendamentos: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                petId: string;
+                petNome: string;
+                servicoNome: string;
+                empresaNome: string;
+                /** Format: date-time */
+                inicio: string;
+                confirmado: boolean;
+            }[];
+            vacinas: {
+                /** Format: uuid */
+                petId: string;
+                vacina: string;
+                /** Format: date */
+                proximaDose: string;
+                atrasada: boolean;
             }[];
         };
         Tokens: {

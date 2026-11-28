@@ -145,6 +145,7 @@ export default function PerfilPet() {
       {pet.status === 'ATIVO' && (
         <Botao titulo="Editar dados" larguraTotal onPress={() => router.push(`/pets/${pet.id}/editar`)} />
       )}
+      <Botao titulo="Rotinas" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/rotinas`)} />
       <Botao titulo="Linha do tempo" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/linha-do-tempo`)} />
       <Botao titulo="Vacinas" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/vacinas`)} />
       <Botao titulo="Medicamentos" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/medicamentos`)} />
