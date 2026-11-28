@@ -5496,6 +5496,111 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/empresas/{empresaId}/plano": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Plano da empresa, limites e uso
+         * @description A primeira leitura abre o teste grátis de 14 dias com os limites do plano Equipe. O plano limita os usuários (a conta da empresa e os funcionários ativos); fora do teste e sem assinatura em dia, a empresa continua usando o sistema, mas não convida mais ninguém.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Situação do plano. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PlanoDaEmpresa"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/empresas/{empresaId}/plano/assinatura": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Assinar ou mudar de plano
+         * @description Abre a cobrança mensal recorrente no Mercado Pago e devolve a página em que a empresa autoriza o pagamento. Sem credenciais do gateway (desenvolvimento e demonstração), a assinatura fica ativa na hora. O aviso do gateway chega pelo webhook de pagamentos (tipo subscription_preapproval).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        plano: components["schemas"]["PlanoEmpresa"];
+                    };
+                };
+            };
+            responses: {
+                /** @description Assinatura criada. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ativa: boolean;
+                            /** Format: uri */
+                            urlPagamento?: string;
+                        };
+                    };
+                };
+                /** @description A equipe atual passa do limite do plano escolhido. */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["Validacao"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/empresas/{empresaId}/hoje": {
         parameters: {
             query?: never;
@@ -7887,6 +7992,33 @@ export interface components {
             petSexo?: string;
             /** @description DD/MM/AAAA ou AAAA-MM-DD. */
             petNascimento?: string;
+        };
+        /** @enum {string} */
+        PlanoEmpresa: "ESSENCIAL" | "EQUIPE" | "CLINICA";
+        PlanoDaEmpresa: {
+            plano: components["schemas"]["PlanoEmpresa"];
+            /** @enum {string} */
+            status: "TESTE" | "PENDENTE" | "ATIVA" | "ATRASADA" | "CANCELADA";
+            /** @description Teste no prazo, plano ativo ou atraso dentro da tolerância de 7 dias. */
+            emDia: boolean;
+            /** Format: date-time */
+            testeAte: string;
+            diasDeTeste: number;
+            /** Format: date-time */
+            periodoAte?: string;
+            limites: {
+                usuarios: number;
+            };
+            uso: {
+                usuarios: number;
+            };
+            planos: {
+                plano: components["schemas"]["PlanoEmpresa"];
+                nome: string;
+                precoMensal: number;
+                usuarios: number;
+                descricao: string;
+            }[];
         };
         /** @enum {string} */
         TipoRotina: "PASSEIO" | "BANHO" | "ANTIPULGAS" | "VERMIFUGO" | "ESCOVACAO" | "AREIA" | "ALIMENTACAO" | "OUTRO";
