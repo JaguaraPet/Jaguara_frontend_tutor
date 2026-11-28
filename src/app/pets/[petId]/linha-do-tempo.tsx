@@ -1,4 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import type { ComponentProps } from 'react';
 import { useEffect, useState } from 'react';
@@ -18,6 +19,7 @@ const ROTULO: Record<TipoItem, { rotulo: string; icone: ComponentProps<typeof Io
   TRATAMENTO: { rotulo: 'Medicamento', icone: 'medkit' },
   EVENTO: { rotulo: 'Compromisso', icone: 'calendar' },
   ATENDIMENTO: { rotulo: 'Atendimento', icone: 'medical' },
+  FOTO: { rotulo: 'Foto', icone: 'image' },
 };
 
 const FILTROS: { valor: Filtro; rotulo: string }[] = [
@@ -77,6 +79,9 @@ export default function LinhaDoTempo() {
                     {quando(i.data)} · {info.rotulo}
                   </Texto>
                   <Texto>{i.titulo}</Texto>
+                  {i.imagemUrl && (
+                    <Image source={{ uri: i.imagemUrl }} style={estilos.foto} contentFit="cover" accessibilityLabel={i.titulo} />
+                  )}
                 </View>
               </View>
             );
@@ -100,4 +105,5 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   texto: { flex: 1, gap: espaco.xs },
+  foto: { width: '100%', aspectRatio: 4 / 3, borderRadius: raio.padrao * 2 },
 });
