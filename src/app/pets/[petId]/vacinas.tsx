@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { api } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
 import { Alerta, Botao, Campo, Cartao, Tela, Texto } from '../../../componentes';
@@ -10,7 +10,7 @@ import { dataBr, mascararData } from '../../../pets/formulario';
 import { proximaDose } from '../../../pets/perfil';
 import { montarVacina } from '../../../saude/vacina';
 import type { ValoresVacina } from '../../../saude/vacina';
-import { cores } from '../../../tema/tokens';
+import { cores, coresSuaves, espaco } from '../../../tema/tokens';
 
 type Vacina = components['schemas']['Vacinacao'];
 
@@ -129,6 +129,13 @@ export default function Vacinas() {
             titulo={x.nomeVacina}
             subtitulo={`Aplicada em ${dataBr(x.dataAplicacao)} por ${x.responsavelAplicacao}`}
           >
+            {x.verificadaPor && (
+              <View style={estilos.selo} accessibilityLabel={`Registrada pela ${x.verificadaPor}`}>
+                <Texto variante="legenda" cor={cores.secundaria}>
+                  ✓ Registrada pela {x.verificadaPor}
+                </Texto>
+              </View>
+            )}
             {(x.fabricante || x.lote) && (
               <Texto variante="legenda">{[x.fabricante, x.lote && `lote ${x.lote}`].filter(Boolean).join(' · ')}</Texto>
             )}
@@ -141,3 +148,13 @@ export default function Vacinas() {
     </Tela>
   );
 }
+
+const estilos = StyleSheet.create({
+  selo: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: espaco.sm,
+    paddingVertical: 2,
+    borderRadius: 999,
+    backgroundColor: coresSuaves.info,
+  },
+});

@@ -3782,7 +3782,34 @@ export interface paths {
             };
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Detalhe do agendamento para o atendimento
+         * @description Serviço com a categoria (que decide os campos do atendimento estruturado), pet com as alergias, tutor, profissional e se o tutor liberou o registro de saúde para a empresa.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    agendamentoId: components["parameters"]["AgendamentoId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Detalhe do agendamento. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AgendamentoDetalhe"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
         put?: never;
         post?: never;
         delete?: never;
@@ -6976,6 +7003,30 @@ export interface components {
                 atendimentos: number;
             };
         };
+        AgendamentoDetalhe: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            dataHoraInicio: string;
+            /** Format: date-time */
+            dataHoraFim: string;
+            /** @enum {string} */
+            status: "AGENDADO" | "CANCELADO" | "REALIZADO" | "NAO_COMPARECEU";
+            /** Format: uuid */
+            servicoId: string;
+            servicoNome: string;
+            /** @enum {string} */
+            categoria: "CONSULTA" | "EXAME" | "CIRURGIA" | "VACINACAO" | "BANHO_TOSA" | "HOSPEDAGEM" | "PET_SITTER" | "CRECHE" | "OUTRO";
+            /** Format: uuid */
+            petId: string;
+            petNome: string;
+            alergias: string[];
+            tutorNome: string | null;
+            profissionalNome: string | null;
+            empresaNome: string;
+            /** @description O tutor liberou à empresa a edição clínica (vacinas, exames e receitas) deste pet. */
+            podeRegistrarSaude: boolean;
+        };
         Tokens: {
             accessToken: string;
             refreshToken: string;
@@ -7270,6 +7321,8 @@ export interface components {
             /** Format: uuid */
             id?: string;
             valido?: boolean;
+            /** @description Nome da empresa que registrou a vacina no atendimento. A carteira mostra o selo "Aplicada por" com esse nome; sem o campo, o registro foi feito pelo tutor. */
+            verificadaPor?: string;
         };
         TratamentoEntrada: {
             medicamento: string;
