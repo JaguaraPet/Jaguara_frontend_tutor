@@ -1,0 +1,28 @@
+{
+  "name": "Jaguara",
+  "short_name": "Jaguara",
+  "description": "A vida do seu pet num lugar só: vacinas, remédios, rotina e agendamentos.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#8A4B0F",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/icone-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icone-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icone-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
