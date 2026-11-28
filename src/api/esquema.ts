@@ -153,6 +153,8 @@ export interface paths {
                         email: string;
                         /** Format: password */
                         senha: string;
+                        /** @description Código do aplicativo autenticador (6 dígitos) ou de recuperação. Sem ele, quem ligou a verificação em duas etapas recebe 401 com codigo DOIS_FATORES_NECESSARIO e envia de novo com o código; código errado recebe CODIGO_DOIS_FATORES_INVALIDO e conta como tentativa. */
+                        codigo?: string;
                     };
                 };
             };
@@ -3306,6 +3308,198 @@ export interface paths {
                 422: components["responses"]["Validacao"];
             };
         };
+        trace?: never;
+    };
+    "/conta/dois-fatores": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Situação da verificação em duas etapas
+         * @description exigido é true para a conta da empresa quando a plataforma obriga a segunda etapa.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Situação. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ativo: boolean;
+                            /** Format: date-time */
+                            ativadoEm?: string;
+                            codigosRestantes: number;
+                            exigido: boolean;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conta/dois-fatores/configuracao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Começar a configuração do aplicativo autenticador
+         * @description Gera o segredo e o endereço otpauth para o QR Code. Só vale depois da ativação.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Segredo e QR Code. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            segredo: string;
+                            urlOtpauth: string;
+                        };
+                    };
+                };
+                /** @description A verificação em duas etapas já está ativa. */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conta/dois-fatores/ativacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ativar com o primeiro código */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CodigoDoisFatores"];
+                };
+            };
+            responses: {
+                /** @description Ativada. Os códigos de recuperação aparecem só agora. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            codigosRecuperacao: string[];
+                        };
+                    };
+                };
+                422: components["responses"]["Validacao"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conta/dois-fatores/desativacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Desligar a verificação em duas etapas
+         * @description Exige um código válido. A conta da empresa obrigada não desliga.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CodigoDoisFatores"];
+                };
+            };
+            responses: {
+                /** @description Desligada. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Código incorreto. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description A conta da empresa precisa da segunda etapa. */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/publico/cnpj/{cnpj}": {
@@ -8258,6 +8452,9 @@ export interface components {
                 usuarios: number;
                 descricao: string;
             }[];
+        };
+        CodigoDoisFatores: {
+            codigo: string;
         };
         ConsultaCnpj: {
             cnpj: string;
