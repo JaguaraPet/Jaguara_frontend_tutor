@@ -2955,6 +2955,123 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/empresas/{empresaId}/perfil-publico": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+            };
+            cookie?: never;
+        };
+        /** Ler o perfil público para editar */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Perfil público da empresa, com o endereço da página /e/{slug}. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PerfilPublico"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Editar o perfil público
+         * @description O que o tutor vê no app e na página pública: descrição, contatos, horário de funcionamento, formas de pagamento, política de cancelamento e o endereço curto da página.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PerfilPublicoEntrada"];
+                };
+            };
+            responses: {
+                /** @description Perfil atualizado. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PerfilPublico"];
+                    };
+                };
+                400: components["responses"]["Validacao"];
+                403: components["responses"]["SemPermissao"];
+                409: components["responses"]["Conflito"];
+            };
+        };
+        trace?: never;
+    };
+    "/publico/empresas/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Página pública da empresa
+         * @description Sem login. Dados públicos e serviços ativos com preço, para a página /e/{slug}.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Vitrine da empresa. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["VitrineEmpresa"];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/empresas/{empresaId}/servicos": {
         parameters: {
             query?: never;
@@ -7027,6 +7144,50 @@ export interface components {
             /** @description O tutor liberou à empresa a edição clínica (vacinas, exames e receitas) deste pet. */
             podeRegistrarSaude: boolean;
         };
+        /** @enum {string} */
+        FormaPagamento: "PIX" | "CARTAO_CREDITO" | "CARTAO_DEBITO" | "DINHEIRO" | "BOLETO";
+        PerfilPublicoEntrada: {
+            /** @description Endereço curto da página pública (/e/{slug}). */
+            slug?: string;
+            descricao?: string | null;
+            telefonePublico?: string | null;
+            whatsapp?: string | null;
+            instagram?: string | null;
+            horarioFuncionamento?: string | null;
+            formasPagamento?: components["schemas"]["FormaPagamento"][];
+            politicaCancelamento?: string | null;
+        };
+        PerfilPublico: {
+            /** Format: uuid */
+            id: string;
+            nomeFantasia: string;
+            /** @enum {string} */
+            tipo: "CLINICA_VETERINARIA" | "PET_SHOP" | "HOTEL_PET" | "CRECHE" | "CASA_DE_CUIDADO";
+            slug: string | null;
+            descricao: string | null;
+            telefonePublico: string | null;
+            whatsapp: string | null;
+            instagram: string | null;
+            horarioFuncionamento: string | null;
+            formasPagamento: string[];
+            politicaCancelamento: string | null;
+            enderecoLogradouro: string;
+            enderecoNumero: string;
+            enderecoBairro: string;
+            enderecoCidade: string;
+            enderecoUf: string;
+        };
+        VitrineEmpresa: components["schemas"]["PerfilPublico"] & {
+            servicos: {
+                /** Format: uuid */
+                id: string;
+                nome: string;
+                categoria: string;
+                /** @description Em reais, com duas casas. */
+                preco: string;
+                duracaoMinutos: number;
+            }[];
+        };
         Tokens: {
             accessToken: string;
             refreshToken: string;
@@ -7494,6 +7655,14 @@ export interface components {
             uf?: string;
             /** @description Categorias dos serviços ativos. */
             categorias?: string[];
+            slug?: string;
+            descricao?: string;
+            telefone?: string;
+            whatsapp?: string;
+            instagram?: string;
+            horarioFuncionamento?: string;
+            formasPagamento?: string[];
+            politicaCancelamento?: string;
         };
         PaginaEmpresas: {
             itens?: components["schemas"]["EmpresaPublica"][];
