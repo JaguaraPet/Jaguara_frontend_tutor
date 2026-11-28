@@ -2,6 +2,7 @@
   "expo": {
     "name": "Jaguara",
     "slug": "jaguara",
+    "owner": "jaguarapet",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -48,6 +49,11 @@
     "experiments": {
       "typedRoutes": false,
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8afdc5ce-cfa1-4b7d-97a9-89d46c624dc5"
+      }
     }
   }
 }

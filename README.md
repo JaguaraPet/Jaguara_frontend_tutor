@@ -188,3 +188,15 @@ Use o cliente de `src/api/cliente.ts` (openapi-fetch); o endereço vem de `EXPO_
 
 - **CI** (`.github/workflows/ci.yml`): em todo pull request, roda lint, verificação de tipos, testes e build, além da auditoria das dependências de produção. O pull request só entra com o CI verde (ADR-008).
 - **Builds do app**: feitos pelo Expo EAS (JAG-212), fora do CI.
+
+## APK para Android (EAS)
+
+O `eas.json` tem três perfis de build, um por ambiente, e todos geram um APK para instalar direto no celular (sem a Play Store): `previa`, `homologacao` e `producao`. Cada um já aponta o app para a API do ambiente.
+
+```bash
+npx eas-cli login                       # uma vez, com a conta do Expo do time
+npx eas-cli init                        # uma vez: cria o projeto e grava extra.eas.projectId no app.json
+npx eas-cli build -p android --profile previa
+```
+
+O build roda na nuvem do Expo (cerca de 15 minutos no plano gratuito) e termina com o link e o QR Code do APK. No iPhone, o tutor usa a versão no navegador (`tutor.<domínio>`).
