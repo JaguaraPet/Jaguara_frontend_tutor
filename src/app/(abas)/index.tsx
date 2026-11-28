@@ -4,6 +4,7 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { api } from '../../api/cliente';
 import { AvaliarAtendimentos } from '../../avaliacao/AvaliarAtendimentos';
 import { Comemoracoes } from '../../pets/Comemoracoes';
+import { LembretesDeServico, QuemCuidaHoje } from '../../pets/QuemCuidaHoje';
 import type { components } from '../../api/esquema';
 import { Alerta, Botao, Cartao, Tela, Texto } from '../../componentes';
 import { cores, espaco } from '../../tema/tokens';
@@ -209,6 +210,7 @@ export default function Inicio() {
 
         {selecionados.map((p) => (
           <Cartao key={p.id} titulo={`${icone(p.especie)} ${p.nome}`}>
+            <QuemCuidaHoje pet={p} aoMudar={recarregar} />
             {p.itens.length === 0 ? (
               <View style={estilos.vazio}>
                 <Texto cor={cores.textoSecundario}>Nada marcado para hoje.</Texto>
@@ -229,6 +231,8 @@ export default function Inicio() {
         <Comemoracoes celebracoes={hoje.celebracoes ?? []} />
 
         <AvaliarAtendimentos versao={versao} />
+
+        <LembretesDeServico sugestoes={(hoje.sugestoes ?? []).filter((s) => !petId || s.petId === petId)} />
 
         {agendamentos.length > 0 && (
           <Cartao titulo="Próximos agendamentos">
