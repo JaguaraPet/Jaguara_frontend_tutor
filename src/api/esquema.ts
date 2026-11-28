@@ -5093,7 +5093,10 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Remarcar agendamento (UC-24) */
+        /**
+         * Remarcar agendamento (UC-24)
+         * @description Muda horário, profissional ou recurso sem conflito (RN29). Se o horário muda, o responsável principal recebe por e-mail o horário antigo e o novo, e a confirmação de presença é apagada.
+         */
         patch: {
             parameters: {
                 query?: never;
@@ -5143,7 +5146,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Cancelar agendamento (UC-24) */
+        /**
+         * Cancelar agendamento (UC-24)
+         * @description A empresa (agenda:editar) ou um responsável pelo pet cancela. Quando é a empresa, o responsável principal recebe o aviso por e-mail com o motivo. Se o agendamento veio de uma solicitação, ela fica CANCELADA, com o autor no histórico (RN38).
+         */
         post: {
             parameters: {
                 query?: never;
@@ -10089,6 +10095,11 @@ export interface components {
                 quantidade: number;
                 observacao?: string;
             }[];
+            /**
+             * Format: date-time
+             * @description Quando o pet foi atendido de fato (não futuro, não antes do dia agendado). Sem ele, vale o horário agendado ou agora, se o pet chegou antes.
+             */
+            atendidoEm?: string;
         };
         Atendimento: {
             /** Format: uuid */

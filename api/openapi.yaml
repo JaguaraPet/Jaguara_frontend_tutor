@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Jaguara API
-  version: 1.71.0
+  version: 1.72.0
   summary: API REST da plataforma Jaguara (tutores e empresas Enterprise).
   description: |
     Contrato da API do Jaguara (tarefa JAG-68). Os recursos seguem o modelo de classes
@@ -2354,6 +2354,10 @@ paths:
     patch:
       tags: [Solicitações e agendamentos]
       summary: Remarcar agendamento (UC-24)
+      description: >-
+        Muda horário, profissional ou recurso sem conflito (RN29). Se o horário muda, o
+        responsável principal recebe por e-mail o horário antigo e o novo, e a confirmação de
+        presença é apagada.
       requestBody:
         required: true
         content:
@@ -2379,13 +2383,17 @@ paths:
     post:
       tags: [Solicitações e agendamentos]
       summary: Cancelar agendamento (UC-24)
+      description: >-
+        A empresa (agenda:editar) ou um responsável pelo pet cancela. Quando é a empresa, o
+        responsável principal recebe o aviso por e-mail com o motivo. Se o agendamento veio de
+        uma solicitação, ela fica CANCELADA, com o autor no histórico (RN38).
       requestBody:
         content:
           application/json:
             schema:
               type: object
               properties:
-                motivo: { type: string }
+                motivo: { type: string, maxLength: 500 }
       responses:
         '204': { description: "Agendamento CANCELADO." }
   /agendamentos/{agendamentoId}/confirmacao:
@@ -5532,6 +5540,12 @@ components:
               servicoId: { type: string, format: uuid }
               quantidade: { type: integer, minimum: 1 }
               observacao: { type: string }
+        atendidoEm:
+          type: string
+          format: date-time
+          description: >-
+            Quando o pet foi atendido de fato (não futuro, não antes do dia agendado). Sem ele, vale
+            o horário agendado ou agora, se o pet chegou antes.
     Atendimento:
       type: object
       properties:
