@@ -52,3 +52,26 @@ export function duracao(minutos: number): string {
   if (horas === 0) return `${resto} min`;
   return resto ? `${horas} h ${resto} min` : `${horas} h`;
 }
+
+/** "1,2 km" ou "350 m". */
+export function textoDistancia(km?: number): string | undefined {
+  if (km === undefined) return undefined;
+  if (km < 1) return `${Math.max(50, Math.round((km * 1000) / 50) * 50)} m`;
+  return `${km.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} km`;
+}
+
+/** "★ 4,8 (23) · 1,2 km · a partir de R$ 60", só com o que a empresa tem. */
+export function destaques(empresa: EmpresaPublica): string {
+  const partes: string[] = [];
+  if (empresa.notaMedia !== undefined && (empresa.totalAvaliacoes ?? 0) > 0) {
+    partes.push(`★ ${empresa.notaMedia.toLocaleString('pt-BR', { minimumFractionDigits: 1 })} (${empresa.totalAvaliacoes})`);
+  }
+  const distancia = textoDistancia(empresa.distanciaKm);
+  if (distancia) partes.push(distancia);
+  if (empresa.precoAPartirDe !== undefined) {
+    partes.push(
+      `a partir de ${empresa.precoAPartirDe.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}`,
+    );
+  }
+  return partes.join(' · ');
+}

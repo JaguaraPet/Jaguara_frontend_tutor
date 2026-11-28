@@ -4,7 +4,13 @@ import { router } from 'expo-router';
 import { api } from '../api/cliente';
 import Servicos from '../app/(abas)/servicos';
 import PerfilEmpresa from '../app/empresa/[empresaId]';
-import { duracao, local, preco, rotuloCategoria, rotuloTipo } from './catalogo';
+import { destaques, duracao, local, preco, rotuloCategoria, rotuloTipo, textoDistancia } from './catalogo';
+
+jest.mock('expo-location', () => ({
+  Accuracy: { Balanced: 3 },
+  requestForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ granted: true })),
+  getCurrentPositionAsync: jest.fn(() => Promise.resolve({ coords: { latitude: -23.56, longitude: -46.65 } })),
+}));
 
 jest.mock('expo-router', () => ({
   router: { push: jest.fn(), back: jest.fn() },
@@ -66,6 +72,40 @@ describe('UC-33 · Busca de empresas e catálogo no app', () => {
     await fireEvent.press(screen.getByText('Buscar'));
     await fireEvent.press(await screen.findByLabelText('Clínica Patas, Clínica veterinária. Ver serviços'));
     expect(router.push).toHaveBeenCalledWith('/empresa/e1');
+  });
+
+  it('deve mostrar nota, distância e preço "a partir de"', () => {
+    expect(textoDistancia(0.32)).toBe('300 m');
+    expect(textoDistancia(2.46)).toBe('2,5 km');
+    expect(
+      destaques({ ...clinica, notaMedia: 4.8, totalAvaliacoes: 23, distanciaKm: 1.2, precoAPartirDe: 60 }).replace(/ /g, ' '),
+    ).toBe(
+      '★ 4,8 (23) · 1,2 km · a partir de R$ 60',
+    );
+    expect(destaques({ ...clinica, totalAvaliacoes: 0 })).toBe('');
+  });
+
+  it('deve buscar perto da localização do aparelho', async () => {
+    const get = jest
+      .spyOn(api, 'GET')
+      .mockImplementation(() => ok({ itens: [{ ...clinica, distanciaKm: 0.8, totalAvaliacoes: 0 }], total: 1 }));
+    await render(<Servicos />);
+    await screen.findByText('Clínica Patas');
+    await fireEvent.press(screen.getByText('📍 Perto de mim'));
+    expect(await screen.findByText('800 m')).toBeOnTheScreen();
+    expect(get).toHaveBeenLastCalledWith('/empresas', {
+      params: {
+        query: {
+          busca: undefined,
+          categoria: undefined,
+          pagina: 1,
+          tamanho: 30,
+          perto: true,
+          latitude: -23.56,
+          longitude: -46.65,
+        },
+      },
+    });
   });
 
   it('deve avisar quando a busca falha', async () => {

@@ -1,8 +1,9 @@
+import * as Localizacao from 'expo-location';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { api } from '../../api/cliente';
-import { CATEGORIAS, local, rotuloCategoria, rotuloTipo } from '../../catalogo/catalogo';
+import { CATEGORIAS, destaques, local, rotuloCategoria, rotuloTipo } from '../../catalogo/catalogo';
 import type { Categoria, EmpresaPublica } from '../../catalogo/catalogo';
 import { Filtro } from '../../catalogo/Filtro';
 import { Alerta, Botao, Campo, Cartao, Tela, Texto } from '../../componentes';
@@ -10,10 +11,13 @@ import { cores, espaco } from '../../tema/tokens';
 
 const FALHA = 'Não deu para buscar agora. Confira a internet e tente de novo.';
 
-/** Empresas com serviços ativos que combinam com o texto e a categoria. */
-async function consultar(texto: string, categoria?: Categoria): Promise<EmpresaPublica[]> {
+type Origem = { latitude: number; longitude: number } | 'cadastro';
+
+/** Empresas com serviços ativos que combinam com o texto e a categoria; por perto, da mais próxima. */
+async function consultar(texto: string, categoria?: Categoria, origem?: Origem): Promise<EmpresaPublica[]> {
+  const perto = origem === 'cadastro' ? { perto: true } : origem ? { perto: true, ...origem } : {};
   const { data, error } = await api.GET('/empresas', {
-    params: { query: { busca: texto.trim() || undefined, categoria, pagina: 1, tamanho: 30 } },
+    params: { query: { busca: texto.trim() || undefined, categoria, pagina: 1, tamanho: 30, ...perto } },
   });
   if (error || !data) throw new Error('Busca indisponível');
   return data.itens ?? [];
@@ -29,12 +33,14 @@ export default function Servicos() {
   const [empresas, setEmpresas] = useState<EmpresaPublica[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [origem, setOrigem] = useState<Origem | undefined>();
+  const [aviso, setAviso] = useState<string | null>(null);
 
-  const buscar = useCallback(async (texto: string, filtro?: Categoria) => {
+  const buscar = useCallback(async (texto: string, filtro?: Categoria, de?: Origem) => {
     setCarregando(true);
     setErro(null);
     try {
-      setEmpresas(await consultar(texto, filtro));
+      setEmpresas(await consultar(texto, filtro, de));
     } catch {
       setErro(FALHA);
     } finally {
@@ -57,8 +63,31 @@ export default function Servicos() {
   const escolherCategoria = (valor: Categoria) => {
     const nova = categoria === valor ? undefined : valor;
     setCategoria(nova);
-    void buscar(busca, nova);
+    void buscar(busca, nova, origem);
   };
+
+  /** Pede a localização só agora, quando o tutor toca em "Perto de mim". Sem ela, usa o CEP do cadastro. */
+  async function pertoDeMim() {
+    if (origem) {
+      setOrigem(undefined);
+      setAviso(null);
+      void buscar(busca, categoria);
+      return;
+    }
+    let nova: Origem = 'cadastro';
+    try {
+      const { granted } = await Localizacao.requestForegroundPermissionsAsync();
+      if (granted) {
+        const posicao = await Localizacao.getCurrentPositionAsync({ accuracy: Localizacao.Accuracy.Balanced });
+        nova = { latitude: posicao.coords.latitude, longitude: posicao.coords.longitude };
+      }
+    } catch {
+      // Sem GPS ou sem permissão: segue com o CEP do cadastro.
+    }
+    setAviso(nova === 'cadastro' ? 'Sem a localização, usamos o CEP do seu cadastro.' : null);
+    setOrigem(nova);
+    void buscar(busca, categoria, nova);
+  }
 
   return (
     <Tela titulo="Serviços" subtitulo="Encontre clínicas, pet shops, hotéis e creches.">
@@ -69,9 +98,20 @@ export default function Servicos() {
           value={busca}
           onChangeText={setBusca}
           returnKeyType="search"
-          onSubmitEditing={() => void buscar(busca, categoria)}
+          onSubmitEditing={() => void buscar(busca, categoria, origem)}
         />
-        <Botao titulo="Buscar" onPress={() => void buscar(busca, categoria)} larguraTotal />
+        <Botao titulo="Buscar" onPress={() => void buscar(busca, categoria, origem)} larguraTotal />
+        <Botao
+          titulo={origem ? 'Ver todas, sem distância' : '📍 Perto de mim'}
+          variante="secundaria"
+          onPress={() => void pertoDeMim()}
+          larguraTotal
+        />
+        {aviso && (
+          <Texto variante="legenda" cor={cores.textoSecundario}>
+            {aviso}
+          </Texto>
+        )}
       </View>
 
       <ScrollView
@@ -112,6 +152,7 @@ export default function Servicos() {
                 rotuloAcessivel={`${empresa.nomeFantasia}, ${rotuloTipo(empresa.tipo)}. Ver serviços`}
                 aoTocar={() => router.push(`/empresa/${empresa.id}`)}
               >
+                {!!destaques(empresa) && <Texto negrito>{destaques(empresa)}</Texto>}
                 {!!empresa.categorias?.length && (
                   <Texto variante="legenda">
                     {empresa.categorias.map(rotuloCategoria).join(', ')}
