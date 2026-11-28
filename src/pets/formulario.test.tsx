@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react-nativ
 import { router } from 'expo-router';
 import { api } from '../api/cliente';
 import NovoPet from '../app/pets/novo';
-import { dataBr, dataIso, mascararData, paraEntrada, validar, VAZIO } from './formulario';
+import { dataBr, dataIso, filtrarRacas, mascararData, ordenarEspecies, paraEntrada, validar, VAZIO } from './formulario';
 
 jest.mock('expo-router', () => ({
   router: { replace: jest.fn(), push: jest.fn(), back: jest.fn() },
@@ -71,25 +71,70 @@ describe('UC-04 · Cadastro e edição do pet no app', () => {
     });
   });
 
-  it('deve cadastrar o pet escolhendo espécie, raça e sexo', async () => {
+  // Percorre as três etapas: com a máquina carregada passa dos 5 s padrão do Jest.
+  it('deve cadastrar o pet em três etapas: quem é, raça e sexo, detalhes', async () => {
     jest.spyOn(api, 'GET').mockImplementation(() => ok(especies));
     const post = jest
       .spyOn(api, 'POST')
       .mockImplementation(() => ok({ id: 'p9' }) as unknown as ReturnType<typeof api.POST>);
     await render(<NovoPet />);
     await screen.findByText('Cachorro');
-    await fireEvent.press(screen.getByRole('button', { name: 'Cadastrar pet' }));
+    expect(screen.getByText('Etapa 1 de 3')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole('button', { name: 'Continuar' }));
     expect(await screen.findByText('Informe o nome do pet.')).toBeOnTheScreen();
-    expect(post).not.toHaveBeenCalled();
+    // O erro da raça e do sexo só aparece na etapa deles.
+    expect(screen.queryByText('Escolha o sexo.')).toBeNull();
 
     await fireEvent.changeText(screen.getByLabelText('Nome'), 'Thor');
     await fireEvent.press(screen.getByLabelText('Cachorro'));
+    await fireEvent.press(screen.getByRole('button', { name: 'Continuar' }));
+    expect(screen.getByText('Etapa 2 de 3')).toBeOnTheScreen();
     await fireEvent.press(screen.getByLabelText('Labrador'));
     await fireEvent.press(screen.getByLabelText('Macho'));
+    await fireEvent.press(screen.getByRole('button', { name: 'Continuar' }));
+    expect(screen.getByText('Etapa 3 de 3')).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('button', { name: 'Cadastrar pet' }));
     expect(post).toHaveBeenCalledWith('/pets', {
       body: { nome: 'Thor', racaId: 'lab', sexo: 'MACHO', castrado: false },
     });
     expect(router.replace).toHaveBeenCalledWith('/pets/p9/editar?novo=1');
+  }, 15000);
+
+  it('deve voltar uma etapa sem perder o que foi escolhido', async () => {
+    jest.spyOn(api, 'GET').mockImplementation(() => ok(especies));
+    await render(<NovoPet />);
+    await screen.findByText('Cachorro');
+    await fireEvent.changeText(screen.getByLabelText('Nome'), 'Mia');
+    await fireEvent.press(screen.getByLabelText('Gato'));
+    await fireEvent.press(screen.getByRole('button', { name: 'Continuar' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Voltar' }));
+    expect(screen.getByLabelText('Nome').props.value).toBe('Mia');
+    expect(screen.getByLabelText('Gato').props.accessibilityState).toMatchObject({ checked: true });
+  });
+
+  it('deve mostrar as espécies mais comuns primeiro e Outro no fim', () => {
+    const nomes = ['Outro', 'Alpaca e lhama', 'Gato', 'Ave', 'Cachorro', 'Anfíbio'].map((nome) => ({ nome }));
+    expect(ordenarEspecies(nomes).map((e) => e.nome)).toEqual([
+      'Cachorro',
+      'Gato',
+      'Ave',
+      'Alpaca e lhama',
+      'Anfíbio',
+      'Outro',
+    ]);
+  });
+});
+
+describe('raça digitada e busca de raça', () => {
+  it('deve achar a raça sem acento nem caixa e manter sempre a opção Outra', () => {
+    const racas = [{ nome: 'Pastor Alemão' }, { nome: 'Pug' }, { nome: 'Outra (digitar)' }];
+    expect(filtrarRacas(racas, 'alemao').map((r) => r.nome)).toEqual(['Pastor Alemão', 'Outra (digitar)']);
+    expect(filtrarRacas(racas, '')).toHaveLength(3);
+  });
+
+  it('deve pedir a raça escrita quando a escolhida é Outra', () => {
+    const v = { ...VAZIO, nome: 'Rex', especieId: 'e', racaId: 'r', sexo: 'MACHO' as const };
+    expect(validar(v, '2026-11-22', true).racaDescricao).toBe('Escreva a raça do pet.');
+    expect(paraEntrada({ ...v, racaDescricao: ' Mestiço de pug ' }, true).racaDescricao).toBe('Mestiço de pug');
   });
 });

@@ -35,6 +35,7 @@ export default function EditarPet() {
         nome: p.nome,
         especieId: especie?.id ?? '',
         racaId: p.racaId,
+        racaDescricao: p.racaDescricao ?? '',
         sexo: p.sexo,
         nascimento: dataBr(p.dataNascimento),
         peso: p.pesoKg ? String(p.pesoKg).replace('.', ',') : '',
@@ -70,6 +71,7 @@ export default function EditarPet() {
       )}
       {salvo && <Alerta tipo="sucesso" titulo="Alterações salvas" />}
       <FormularioPet
+        edicao
         inicial={inicial}
         tituloBotao="Salvar alterações"
         aoSalvar={async (pet) => {

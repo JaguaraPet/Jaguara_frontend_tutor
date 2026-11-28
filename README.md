@@ -91,7 +91,7 @@ No login, "Esqueci minha senha" abre `/recuperar-senha`, que pede o e-mail e mos
 
 ## Cadastro e edição do pet (UC-04)
 
-Na aba Pets, "Cadastrar pet" abre `/pets/novo`; a edição fica em `/pets/[petId]/editar`. O formulário (`src/pets/FormularioPet.tsx`) traz espécies e raças do catálogo (`GET /especies`, RN07), sexo, data de nascimento com máscara DD/MM/AAAA, peso, cor, microchip e castração, e valida no aparelho antes de enviar, dizendo o que corrigir. Quem cadastra fica como responsável principal (RN09).
+Na aba Pets, "Cadastrar pet" abre `/pets/novo`; a edição fica em `/pets/[petId]/editar`. No cadastro, o formulário (`src/pets/FormularioPet.tsx`) vem em três etapas curtas (quem é o pet, raça e sexo, detalhes opcionais), com as espécies mais comuns primeiro; a edição fica numa tela só. Ele traz espécies e raças do catálogo (`GET /especies`, RN07), sexo, data de nascimento com máscara DD/MM/AAAA, peso, cor, microchip e castração, e valida no aparelho antes de enviar, dizendo o que corrigir. Quem cadastra fica como responsável principal (RN09).
 
 ## Lista de pets (UC-04)
 

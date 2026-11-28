@@ -5,6 +5,7 @@ import { api } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
 import { Alerta, Botao, Cartao, Tela, Texto } from '../../../componentes';
 import { DesarquivarPet } from '../../../pets/ArquivarPet';
+import { FotoPet } from '../../../pets/FotoPet';
 import { GRAVIDADE, SEXO, TIPO_ALERGIA, dataCurta, proximaDose, textoIdade } from '../../../pets/perfil';
 import { cores, coresSuaves, espaco, raio } from '../../../tema/tokens';
 
@@ -37,6 +38,8 @@ export default function PerfilPet() {
   const [vacinas, setVacinas] = useState<Vacina[]>([]);
   const [erro, setErro] = useState(false);
   const [hoje] = useState(hojeIso);
+  const [versao, setVersao] = useState(0);
+  const [erroFoto, setErroFoto] = useState<string | null>(null);
 
   useEffect(() => {
     let ativo = true;
@@ -58,7 +61,7 @@ export default function PerfilPet() {
     return () => {
       ativo = false;
     };
-  }, [petId]);
+  }, [petId, versao]);
 
   if (erro) {
     return (
@@ -92,6 +95,18 @@ export default function PerfilPet() {
 
   return (
     <Tela titulo={pet.nome} subtitulo={[pet.especie, pet.raca].filter(Boolean).join(' · ')}>
+      <FotoPet
+        petId={pet.id!}
+        nome={pet.nome}
+        especie={pet.especie}
+        fotoUrl={pet.fotoUrl}
+        tamanho={112}
+        aoTrocar={(e) => {
+          setErroFoto(e);
+          if (!e) setVersao((n) => n + 1);
+        }}
+      />
+      {erroFoto && <Alerta tipo="erro" titulo="Foto não enviada" mensagem={erroFoto} />}
       {pet.status !== 'ATIVO' && (
         <Alerta
           tipo="info"
@@ -175,7 +190,6 @@ export default function PerfilPet() {
       {pet.status === 'ATIVO' && (
         <Botao titulo="Editar dados" larguraTotal onPress={() => router.push(`/pets/${pet.id}/editar`)} />
       )}
-      <Botao titulo="Memorial" variante="texto" larguraTotal onPress={() => router.push(`/pets/${pet.id}/memorial`)} />
       <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );

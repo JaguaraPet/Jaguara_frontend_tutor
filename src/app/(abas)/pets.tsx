@@ -1,11 +1,12 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { api } from '../../api/cliente';
 import type { components } from '../../api/esquema';
 import { Botao, Cartao, Opcoes, Tela, Texto } from '../../componentes';
+import { FotoPet } from '../../pets/FotoPet';
 import { textoIdade } from '../../pets/perfil';
-import { cores, coresSuaves, espaco } from '../../tema/tokens';
+import { cores, espaco } from '../../tema/tokens';
 
 type Pet = components['schemas']['Pet'];
 type Status = components['schemas']['StatusPet'];
@@ -13,13 +14,12 @@ type Status = components['schemas']['StatusPet'];
 const FILTROS: { valor: Status; rotulo: string }[] = [
   { valor: 'ATIVO', rotulo: 'Ativos' },
   { valor: 'ARQUIVADO', rotulo: 'Arquivados' },
-  { valor: 'FALECIDO', rotulo: 'Memorial' },
 ];
 
 const VAZIO: Record<Status, string> = {
   ATIVO: 'Você ainda não cadastrou pets.',
   ARQUIVADO: 'Nenhum pet arquivado.',
-  FALECIDO: 'Nenhum pet no memorial.',
+  FALECIDO: 'Nenhum pet aqui.',
 };
 
 /** Detalhe de cada pet na lista: espécie, raça e idade. */
@@ -75,15 +75,7 @@ export default function Pets() {
             aoTocar={() => router.push(`/pets/${p.id}`)}
           >
             <View style={estilos.linha}>
-              {p.fotoUrl ? (
-                <Image source={{ uri: p.fotoUrl }} style={estilos.foto} accessibilityIgnoresInvertColors />
-              ) : (
-                <View style={[estilos.foto, estilos.semFoto]}>
-                  <Texto negrito cor={cores.primaria}>
-                    {p.nome.charAt(0).toUpperCase()}
-                  </Texto>
-                </View>
-              )}
+              <FotoPet petId={p.id!} nome={p.nome} especie={p.especie} fotoUrl={p.fotoUrl} tamanho={48} />
               <View style={estilos.textos}>
                 <Texto negrito>{p.nome}</Texto>
                 <Texto variante="legenda" cor={cores.textoSecundario}>
@@ -100,7 +92,5 @@ export default function Pets() {
 
 const estilos = StyleSheet.create({
   linha: { flexDirection: 'row', alignItems: 'center', gap: espaco.md },
-  foto: { width: 48, height: 48, borderRadius: 24 },
-  semFoto: { backgroundColor: coresSuaves.alerta, alignItems: 'center', justifyContent: 'center' },
   textos: { flex: 1, gap: espaco.xs },
 });
