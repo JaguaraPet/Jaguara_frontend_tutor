@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Jaguara API
-  version: 1.73.0
+  version: 1.74.0
   summary: API REST da plataforma Jaguara (tutores e empresas Enterprise).
   description: |
     Contrato da API do Jaguara (tarefa JAG-68). Os recursos seguem o modelo de classes
@@ -2622,19 +2622,23 @@ paths:
         schema: { type: string, format: uuid }
     patch:
       tags: [Empresa]
-      summary: Alterar perfil de acesso do funcionário (UC-16)
+      summary: Alterar nome, cargo ou perfil de acesso do funcionário (UC-19 FA01, UC-16)
+      description: >-
+        Mande só o que muda. Trocar o perfil encerra as sessões, para valer na hora (RN20);
+        nome e cargo não. Cargo vazio apaga o cargo. Funcionário desligado não muda (409).
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [perfilId]
               properties:
                 perfilId: { type: string, format: uuid }
+                nome: { type: string, maxLength: 255 }
+                cargo: { type: string, maxLength: 255 }
       responses:
         '200':
-          description: Perfil alterado com efeito imediato (RN20).
+          description: Funcionário alterado.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Funcionario' }
