@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 import { api } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
-import { Alerta, Botao, Cartao, Icone, Tela, Texto } from '../../../componentes';
-import type { NomeIcone } from '../../../componentes';
+import { Abas, Alerta, Botao, Cartao, Icone, PainelDaAba, Tela, Texto } from '../../../componentes';
+import type { Aba, NomeIcone } from '../../../componentes';
 import { DesarquivarPet } from '../../../pets/ArquivarPet';
 import { FotoPet } from '../../../pets/FotoPet';
 import { GRAVIDADE, SEXO, TIPO_ALERGIA, dataCurta, proximaDose, textoIdade } from '../../../pets/perfil';
@@ -18,22 +18,30 @@ type Vacina = components['schemas']['Vacinacao'];
 const hojeIso = () => new Date().toISOString().slice(0, 10);
 
 /** Perfil do pet (UC-04): dados, alergias graves em destaque (UC-37) e vacinas (UC-12). */
-/** Seções do pet numa grade de atalhos, no lugar de uma lista de botões. */
+/** Seções do pet numa grade de atalhos, separadas em abas para a tela não ficar comprida. */
 const SECOES = [
-  { titulo: 'Rotinas', caminho: 'rotinas', icone: 'repeat' },
-  { titulo: 'Vacinas', caminho: 'vacinas', icone: 'needle' },
-  { titulo: 'Medicamentos', caminho: 'medicamentos', icone: 'pill' },
-  { titulo: 'Exames', caminho: 'exames', icone: 'flask-outline' },
-  { titulo: 'Alergias e restrições', caminho: 'alergias', icone: 'alert-outline' },
-  { titulo: 'Alimentação', caminho: 'alimentacao', icone: 'bowl-mix-outline' },
-  { titulo: 'Linha do tempo', caminho: 'linha-do-tempo', icone: 'timeline-clock-outline' },
-  { titulo: 'Álbum', caminho: 'album', icone: 'image-multiple-outline' },
-  { titulo: 'Documentos', caminho: 'documentos', icone: 'file-document-outline' },
-  { titulo: 'Despesas', caminho: 'despesas', icone: 'receipt-text-outline' },
-  { titulo: 'Responsáveis', caminho: 'responsaveis', icone: 'account-group-outline' },
-  { titulo: 'Compartilhar perfil', caminho: 'compartilhar', icone: 'share-variant-outline' },
-  { titulo: 'Meu pet se perdeu', caminho: 'perdido', icone: 'map-search-outline' },
-] as const satisfies readonly { titulo: string; caminho: string; icone: NomeIcone }[];
+  { titulo: 'Rotinas', caminho: 'rotinas', grupo: 'dia', icone: 'repeat' },
+  { titulo: 'Vacinas', caminho: 'vacinas', grupo: 'saude', icone: 'needle' },
+  { titulo: 'Medicamentos', caminho: 'medicamentos', grupo: 'saude', icone: 'pill' },
+  { titulo: 'Exames', caminho: 'exames', grupo: 'saude', icone: 'flask-outline' },
+  { titulo: 'Alergias e restrições', caminho: 'alergias', grupo: 'saude', icone: 'alert-outline' },
+  { titulo: 'Alimentação', caminho: 'alimentacao', grupo: 'dia', icone: 'bowl-mix-outline' },
+  { titulo: 'Linha do tempo', caminho: 'linha-do-tempo', grupo: 'saude', icone: 'timeline-clock-outline' },
+  { titulo: 'Álbum', caminho: 'album', grupo: 'dia', icone: 'image-multiple-outline' },
+  { titulo: 'Documentos', caminho: 'documentos', grupo: 'saude', icone: 'file-document-outline' },
+  { titulo: 'Despesas', caminho: 'despesas', grupo: 'dia', icone: 'receipt-text-outline' },
+  { titulo: 'Responsáveis', caminho: 'responsaveis', grupo: 'familia', icone: 'account-group-outline' },
+  { titulo: 'Compartilhar perfil', caminho: 'compartilhar', grupo: 'familia', icone: 'share-variant-outline' },
+  { titulo: 'Meu pet se perdeu', caminho: 'perdido', grupo: 'familia', icone: 'map-search-outline' },
+] as const satisfies readonly { titulo: string; caminho: string; grupo: AbaDoPet; icone: NomeIcone }[];
+
+type AbaDoPet = 'resumo' | 'saude' | 'dia' | 'familia';
+const ABAS: Aba<AbaDoPet>[] = [
+  { chave: 'resumo', rotulo: 'Resumo' },
+  { chave: 'saude', rotulo: 'Saúde' },
+  { chave: 'dia', rotulo: 'Dia a dia' },
+  { chave: 'familia', rotulo: 'Família' },
+];
 
 export default function PerfilPet() {
   const { petId } = useLocalSearchParams<{ petId: string }>();
@@ -44,6 +52,7 @@ export default function PerfilPet() {
   const [hoje] = useState(hojeIso);
   const [versao, setVersao] = useState(0);
   const [erroFoto, setErroFoto] = useState<string | null>(null);
+  const [aba, setAba] = useState<AbaDoPet>('resumo');
 
   useEffect(() => {
     let ativo = true;
@@ -131,69 +140,77 @@ export default function PerfilPet() {
         </View>
       ))}
 
-      <View style={estilos.grade}>
-        {SECOES.map((secao) => (
-          <Pressable
-            key={secao.caminho}
-            accessibilityRole="button"
-            accessibilityLabel={secao.titulo}
-            onPress={() => router.push(`/pets/${pet.id}/${secao.caminho}`)}
-            style={({ pressed }) => [estilos.secao, pressed && { backgroundColor: cores.superficie }]}
-          >
-            <Icone nome={secao.icone} tamanho={24} cor={cores.secundaria} />
-            <Texto style={estilos.secaoTitulo}>{secao.titulo}</Texto>
-          </Pressable>
-        ))}
-      </View>
+      <Abas abas={ABAS} ativa={aba} aoMudar={setAba} rotulo="Partes do perfil" />
 
-      <Cartao titulo="Dados">
-        {dados
-          .filter(([, valor]) => valor)
-          .map(([rotulo, valor]) => (
-            <View key={rotulo} style={estilos.linha}>
-              <Texto variante="legenda" cor={cores.textoSecundario}>
-                {rotulo}
-              </Texto>
-              <Texto>{valor}</Texto>
-            </View>
-          ))}
-      </Cartao>
+      <PainelDaAba chave={aba}>
+        {aba === 'resumo' ? (
+          <>
+            <Cartao titulo="Dados">
+              {dados
+                .filter(([, valor]) => valor)
+                .map(([rotulo, valor]) => (
+                  <View key={rotulo} style={estilos.linha}>
+                    <Texto variante="legenda" cor={cores.textoSecundario}>
+                      {rotulo}
+                    </Texto>
+                    <Texto>{valor}</Texto>
+                  </View>
+                ))}
+            </Cartao>
 
-      <Cartao titulo="Alergias e restrições">
-        {alergias.length === 0 ? (
-          <Texto cor={cores.textoSecundario}>Nenhuma registrada.</Texto>
+            <Cartao titulo="Alergias e restrições">
+              {alergias.length === 0 ? (
+                <Texto cor={cores.textoSecundario}>Nenhuma registrada.</Texto>
+              ) : (
+                alergias.map((a) => (
+                  <Texto key={a.id}>
+                    {TIPO_ALERGIA[a.tipo]}: {a.descricao} ({GRAVIDADE[a.gravidade]})
+                  </Texto>
+                ))
+              )}
+            </Cartao>
+
+            <Cartao titulo="Vacinas">
+              {proxima && (
+                <Texto negrito>
+                  Próxima dose: {proxima.nomeVacina} em {dataCurta(proxima.data)}
+                </Texto>
+              )}
+              {vacinas.length === 0 ? (
+                <Texto cor={cores.textoSecundario}>Nenhuma vacina registrada.</Texto>
+              ) : (
+                vacinas
+                  .slice(-3)
+                  .reverse()
+                  .map((v) => (
+                    <Texto key={v.id}>
+                      {v.nomeVacina} · {dataCurta(v.dataAplicacao)}
+                    </Texto>
+                  ))
+              )}
+            </Cartao>
+
+            {pet.status === 'ATIVO' && (
+              <Botao titulo="Editar dados" larguraTotal onPress={() => router.push(`/pets/${pet.id}/editar`)} />
+            )}
+          </>
         ) : (
-          alergias.map((a) => (
-            <Texto key={a.id}>
-              {TIPO_ALERGIA[a.tipo]}: {a.descricao} ({GRAVIDADE[a.gravidade]})
-            </Texto>
-          ))
+          <View style={estilos.grade}>
+            {SECOES.filter((s) => s.grupo === aba).map((secao) => (
+              <Pressable
+                key={secao.caminho}
+                accessibilityRole="button"
+                accessibilityLabel={secao.titulo}
+                onPress={() => router.push(`/pets/${pet.id}/${secao.caminho}`)}
+                style={({ pressed }) => [estilos.secao, pressed && { backgroundColor: cores.superficie }]}
+              >
+                <Icone nome={secao.icone} tamanho={24} cor={cores.secundaria} />
+                <Texto style={estilos.secaoTitulo}>{secao.titulo}</Texto>
+              </Pressable>
+            ))}
+          </View>
         )}
-      </Cartao>
-
-      <Cartao titulo="Vacinas">
-        {proxima && (
-          <Texto negrito>
-            Próxima dose: {proxima.nomeVacina} em {dataCurta(proxima.data)}
-          </Texto>
-        )}
-        {vacinas.length === 0 ? (
-          <Texto cor={cores.textoSecundario}>Nenhuma vacina registrada.</Texto>
-        ) : (
-          vacinas
-            .slice(-3)
-            .reverse()
-            .map((v) => (
-              <Texto key={v.id}>
-                {v.nomeVacina} · {dataCurta(v.dataAplicacao)}
-              </Texto>
-            ))
-        )}
-      </Cartao>
-
-      {pet.status === 'ATIVO' && (
-        <Botao titulo="Editar dados" larguraTotal onPress={() => router.push(`/pets/${pet.id}/editar`)} />
-      )}
+      </PainelDaAba>
       <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );

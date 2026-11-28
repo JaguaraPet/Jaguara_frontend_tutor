@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
-import { Image, Share, View } from 'react-native';
+import { useState } from 'react';
+import { Image, ScrollView, Share, View } from 'react-native';
 import type { components } from '../api/esquema';
 import { Botao, Texto } from '../componentes';
 import { criarEstilos } from '../tema/estilos';
@@ -43,39 +44,57 @@ interface Props {
  * pelagem de onça no canto e os atalhos para compartilhar e para o álbum.
  */
 export function Comemoracoes({ celebracoes, fotos = {} }: Props) {
+  const [largura, setLargura] = useState(0);
   if (celebracoes.length === 0) return null;
-  return (
-    <>
-      {celebracoes.map((c) => {
-        const t = textoDaComemoracao(c);
-        return (
-          <View key={`${c.petId}-${c.tipo}`} style={estilos.cartao}>
-            <Image source={CANTO} style={estilos.canto} accessibilityElementsHidden importantForAccessibility="no" />
-            <View style={estilos.topo} accessible accessibilityLabel={`${t.titulo} ${t.detalhe}`}>
-              <View style={estilos.foto}>
-                <FotoPet petId={c.petId} nome={c.petNome} fotoUrl={fotos[c.petId] ?? undefined} tamanho={58} />
-              </View>
-              <View style={estilos.textos}>
-                <Texto variante="legenda" negrito cor={cores.destaque}>
-                  {t.chamada}
-                </Texto>
-                <Texto variante="titulo2" style={estilos.destaque}>
-                  {t.destaque}
-                </Texto>
-              </View>
-            </View>
-            <View style={estilos.acoes}>
-              <Botao titulo="Compartilhar" onPress={() => void Share.share({ message: t.mensagem })} />
-              <Botao
-                titulo="Ver o álbum"
-                variante="secundaria"
-                onPress={() => router.push({ pathname: '/pets/[petId]/album', params: { petId: c.petId } })}
-              />
-            </View>
+
+  const cartao = (c: Celebracao) => {
+    const t = textoDaComemoracao(c);
+    return (
+      <View key={`${c.petId}-${c.tipo}`} style={[estilos.cartao, celebracoes.length > 1 && { width: largura * 0.86 }]}>
+        <Image source={CANTO} style={estilos.canto} accessibilityElementsHidden importantForAccessibility="no" />
+        <View style={estilos.topo} accessible accessibilityLabel={`${t.titulo} ${t.detalhe}`}>
+          <View style={estilos.foto}>
+            <FotoPet petId={c.petId} nome={c.petNome} fotoUrl={fotos[c.petId] ?? undefined} tamanho={58} />
           </View>
-        );
-      })}
-    </>
+          <View style={estilos.textos}>
+            <Texto variante="legenda" negrito cor={cores.destaque}>
+              {t.chamada}
+            </Texto>
+            <Texto variante="titulo2" style={estilos.destaque}>
+              {t.destaque}
+            </Texto>
+          </View>
+        </View>
+        <View style={estilos.acoes}>
+          <Botao titulo="Compartilhar" onPress={() => void Share.share({ message: t.mensagem })} />
+          <Botao
+            titulo="Ver o álbum"
+            variante="secundaria"
+            onPress={() => router.push({ pathname: '/pets/[petId]/album', params: { petId: c.petId } })}
+          />
+        </View>
+      </View>
+    );
+  };
+
+  if (celebracoes.length === 1) return cartao(celebracoes[0]);
+
+  // Mais de uma festa no dia: os cartões passam de lado, para não empurrar o resto da tela.
+  return (
+    <View onLayout={(e) => setLargura(e.nativeEvent.layout.width)}>
+      {largura > 0 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={largura * 0.86 + espaco.md}
+          decelerationRate="fast"
+          contentContainerStyle={{ gap: espaco.md }}
+          accessibilityLabel="Comemorações de hoje"
+        >
+          {celebracoes.map(cartao)}
+        </ScrollView>
+      )}
+    </View>
   );
 }
 

@@ -30,11 +30,21 @@ export default function Compartilhar() {
   const [link, setLink] = useState<string | null>(null);
   const [aviso, setAviso] = useState<{ tipo: 'sucesso' | 'erro'; titulo: string; mensagem?: string } | null>(null);
   const [versao, setVersao] = useState(0);
+  // O nome de cada empresa da lista, para o tutor saber com quem compartilhou.
+  const [nomes, setNomes] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let ativo = true;
     void api.GET('/pets/{petId}/compartilhamentos', { params: { path: { petId } } }).then(({ data }) => {
       if (ativo) setLista(data ?? []);
+      const ids = [...new Set((data ?? []).map((c) => c.empresaId).filter((id): id is string => !!id))];
+      void Promise.all(
+        ids.map((empresaId) =>
+          api.GET('/empresas/{empresaId}', { params: { path: { empresaId } } }).then(({ data: e }) => [empresaId, e?.nomeFantasia ?? ''] as const),
+        ),
+      ).then((pares) => {
+        if (ativo) setNomes(Object.fromEntries(pares.filter(([, nome]) => nome)));
+      });
     });
     return () => {
       ativo = false;
@@ -144,18 +154,21 @@ export default function Compartilhar() {
       ) : lista.length === 0 ? (
         <Texto cor={cores.textoSecundario}>O perfil ainda não foi compartilhado.</Texto>
       ) : (
-        lista.map((c) => (
-          <Cartao
-            key={c.id}
-            titulo={c.destinatarioEmail ?? 'Empresa'}
-            subtitulo={`${SITUACAO[c.status ?? ''] ?? c.status}${c.dataExpiracao ? ` · até ${new Date(c.dataExpiracao).toLocaleDateString('pt-BR')}` : ''}`}
-          >
-            <Texto variante="legenda">{c.escopos.map(rotuloEscopo).join(', ')}</Texto>
-            {c.status === 'ATIVO' && (
-              <Botao titulo="Revogar" variante="texto" accessibilityLabel={`Revogar acesso de ${c.destinatarioEmail ?? 'empresa'}`} onPress={() => void revogar(c)} />
-            )}
-          </Cartao>
-        ))
+        lista.map((c) => {
+          const quem = c.destinatarioEmail ?? (c.empresaId ? nomes[c.empresaId] : undefined) ?? 'Empresa';
+          return (
+            <Cartao
+              key={c.id}
+              titulo={quem}
+              subtitulo={`${SITUACAO[c.status ?? ''] ?? c.status}${c.dataExpiracao ? ` · até ${new Date(c.dataExpiracao).toLocaleDateString('pt-BR')}` : ''}`}
+            >
+              <Texto variante="legenda">{c.escopos.map(rotuloEscopo).join(', ')}</Texto>
+              {c.status === 'ATIVO' && (
+                <Botao titulo="Revogar" variante="texto" accessibilityLabel={`Revogar acesso de ${quem}`} onPress={() => void revogar(c)} />
+              )}
+            </Cartao>
+          );
+        })
       )}
       <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
