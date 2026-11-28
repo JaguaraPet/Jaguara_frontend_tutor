@@ -3569,6 +3569,61 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/empresas/{empresaId}/atividade": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Atividade da equipe
+         * @description Quem fez o quê na Enterprise: cada ação que muda dados, feita pela conta da empresa ou por um funcionário, com data e hora. As 500 mais recentes do filtro. A conta da empresa vê sempre; funcionário, com a permissão funcionario:ler.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    autorId?: string;
+                    de?: string;
+                    ate?: string;
+                };
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Atividade. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            itens: components["schemas"]["ItemAtividade"][];
+                            pessoas: {
+                                /** Format: uuid */
+                                id: string;
+                                nome: string;
+                            }[];
+                        };
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/empresas/{empresaId}/perfil-publico": {
         parameters: {
             query?: never;
@@ -9398,6 +9453,17 @@ export interface components {
             dataValidade?: string;
             /** Format: date-time */
             dataUpload: string;
+        };
+        ItemAtividade: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            dataHora: string;
+            /** Format: uuid */
+            autorId?: string;
+            autorNome: string;
+            /** @description Frase como "Aceitou um pedido de agendamento". */
+            descricao: string;
         };
         MinhaConta: {
             /** Format: uuid */
