@@ -27,7 +27,7 @@ function aparencia(variante: Variante): { fundo: string; pressionado: string; te
     case 'perigo':
       return { fundo: cores.erro, pressionado: cores.erroEscuro, texto: cores.sobreCor };
     default:
-      return { fundo: 'transparent', pressionado: cores.superficie, texto: cores.destaque };
+      return { fundo: cores.elevado, pressionado: cores.superficie, texto: cores.destaque, borda: cores.cartaoBorda };
   }
 }
 
@@ -65,6 +65,7 @@ export function Botao({
           borderColor: inativo ? cores.desabilitado : (a.borda ?? 'transparent'),
         },
         foco && estilos.foco,
+        pressed && !inativo && estilos.pressionado,
       ]}
       {...props}
     >
@@ -94,4 +95,5 @@ const estilos = criarEstilos(() => ({
   larguraTotal: { alignSelf: 'stretch' },
   conteudo: { flexDirection: 'row', alignItems: 'center', gap: espaco.sm },
   foco: { borderWidth: 2, borderColor: cores.secundaria },
+  pressionado: { transform: [{ scale: 0.97 }] },
 }));

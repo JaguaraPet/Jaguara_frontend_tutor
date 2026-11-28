@@ -72,5 +72,55 @@
   <body>
     <noscript>Ative o JavaScript para usar o Jaguara.</noscript>
     <div id="root"></div>
+    <script>
+      // No computador, clicar e arrastar rola a tela e os carrosséis como o dedo no celular.
+      // Só para o mouse: toque e caneta seguem o comportamento normal do navegador.
+      (function () {
+        var LIMIAR = 6;
+        var arrasto = null;
+        function rolavel(el) {
+          for (; el && el !== document.body; el = el.parentElement) {
+            var estilo = getComputedStyle(el);
+            var y = /(auto|scroll)/.test(estilo.overflowY) && el.scrollHeight > el.clientHeight;
+            var x = /(auto|scroll)/.test(estilo.overflowX) && el.scrollWidth > el.clientWidth;
+            if (x || y) return { el: el, x: x, y: y };
+          }
+          return null;
+        }
+        document.addEventListener('pointerdown', function (e) {
+          if (e.pointerType !== 'mouse' || e.button !== 0) return;
+          if (e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+          var alvo = rolavel(e.target);
+          if (!alvo) return;
+          arrasto = { alvo: alvo, x: e.clientX, y: e.clientY, esquerda: alvo.el.scrollLeft, topo: alvo.el.scrollTop, moveu: false };
+        });
+        document.addEventListener('pointermove', function (e) {
+          if (!arrasto) return;
+          var dx = e.clientX - arrasto.x;
+          var dy = e.clientY - arrasto.y;
+          if (!arrasto.moveu && Math.abs(dx) < LIMIAR && Math.abs(dy) < LIMIAR) return;
+          arrasto.moveu = true;
+          document.body.style.userSelect = 'none';
+          if (arrasto.alvo.x) arrasto.alvo.el.scrollLeft = arrasto.esquerda - dx;
+          if (arrasto.alvo.y) arrasto.alvo.el.scrollTop = arrasto.topo - dy;
+        });
+        document.addEventListener('pointerup', function () {
+          if (!arrasto) return;
+          var moveu = arrasto.moveu;
+          arrasto = null;
+          document.body.style.userSelect = '';
+          if (!moveu) return;
+          // Um arrasto não vale como toque no botão onde o mouse foi solto.
+          var cancelar = function (ev) {
+            ev.stopPropagation();
+            ev.preventDefault();
+          };
+          window.addEventListener('click', cancelar, true);
+          setTimeout(function () {
+            window.removeEventListener('click', cancelar, true);
+          }, 0);
+        });
+      })();
+    </script>
   </body>
 </html>

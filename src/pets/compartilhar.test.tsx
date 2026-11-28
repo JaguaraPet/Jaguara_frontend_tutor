@@ -76,4 +76,14 @@ describe('UC-11 · Compartilhar perfil no app', () => {
     expect(corpo).toMatchObject({ empresaId: 'e1', escopos: ['PERFIL_BASICO', 'EDICAO_CLINICA'] });
     expect(typeof corpo.dataExpiracao).toBe('string');
   });
+
+  it('mostra o nome da empresa com quem o perfil foi compartilhado', async () => {
+    jest.spyOn(api, 'GET').mockImplementation(((caminho: string) =>
+      caminho === '/empresas/{empresaId}'
+        ? resposta({ id: 'e1', nomeFantasia: 'Clínica Patas' })
+        : resposta([{ id: 'c0', empresaId: 'e1', escopos: ['VACINAS'], status: 'ATIVO' }])) as never);
+    await render(<Compartilhar />);
+    expect(await screen.findByText('Clínica Patas')).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Revogar acesso de Clínica Patas' })).toBeOnTheScreen();
+  });
 });

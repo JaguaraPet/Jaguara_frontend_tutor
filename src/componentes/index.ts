@@ -1,3 +1,5 @@
+export { Abas, PainelDaAba } from './Abas';
+export type { Aba } from './Abas';
 export { Alerta } from './Alerta';
 export { Botao } from './Botao';
 export { Campo } from './Campo';

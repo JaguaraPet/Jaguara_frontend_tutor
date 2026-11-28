@@ -7,8 +7,8 @@ const ESTAMPA = {
 };
 
 /**
- * Estampa de onça tom sobre tom atrás das telas (identidade Selvagem). É decorativa: fica
- * escondida do leitor de tela e não recebe toque.
+ * Estampa de onça tom sobre tom atrás das telas (identidade Selvagem), bem apagada para não
+ * atrapalhar a leitura. É decorativa: fica escondida do leitor de tela e não recebe toque.
  */
 export function FundoOnca() {
   return (
@@ -23,4 +23,4 @@ export function FundoOnca() {
   );
 }
 
-const estilo = StyleSheet.create({ imagem: { width: '100%', height: '100%' } });
+const estilo = StyleSheet.create({ imagem: { width: '100%', height: '100%', opacity: 0.22 } });

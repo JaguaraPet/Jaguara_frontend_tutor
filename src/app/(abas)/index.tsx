@@ -1,20 +1,20 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, View } from 'react-native';
+import { ActivityIndicator, Animated, Pressable, View } from 'react-native';
 import { api } from '../../api/cliente';
 import { AvaliarAtendimentos } from '../../avaliacao/AvaliarAtendimentos';
 import { Comemoracoes } from '../../pets/Comemoracoes';
-import { FotoPet } from '../../pets/FotoPet';
+import { EscolhaDePet } from '../../pets/EscolhaDePet';
 import { LembretesDeServico, QuemCuidaHoje } from '../../pets/QuemCuidaHoje';
 import type { components } from '../../api/esquema';
-import { Alerta, Botao, Cartao, Icone, Tela, Texto } from '../../componentes';
-import type { NomeIcone } from '../../componentes';
+import { Abas, Alerta, Botao, Cartao, Icone, PainelDaAba, Tela, Texto } from '../../componentes';
+import type { Aba, NomeIcone } from '../../componentes';
 import { cores, espaco } from '../../tema/tokens';
 import { criarEstilos } from '../../tema/estilos';
 
 type Hoje = components['schemas']['HojeTutor'];
-type PetDoDia = Hoje['pets'][number];
 type Item = components['schemas']['ItemDoDia'];
+type AbaDoInicio = 'rotina' | 'agenda' | 'vacinas';
 
 const hora = (iso: string) =>
   new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
@@ -142,6 +142,7 @@ export default function Inicio() {
   const [petId, setPetId] = useState<string>('');
   const [versao, setVersao] = useState(0);
   const [mais, setMais] = useState(false);
+  const [aba, setAba] = useState<AbaDoInicio>('rotina');
   const recarregar = () => setVersao((v) => v + 1);
 
   useFocusEffect(useCallback(() => setVersao((v) => v + 1), []));
@@ -188,6 +189,12 @@ export default function Inicio() {
   }
 
   const fotos = Object.fromEntries(hoje.pets.map((p) => [p.id, p.fotoUrl]));
+  const vacinasAtrasadas = vacinas.filter((v) => v.atrasada).length;
+  const abas: Aba<AbaDoInicio>[] = [
+    { chave: 'rotina', rotulo: 'Rotina', contador: pendentes },
+    { chave: 'agenda', rotulo: 'Agenda', contador: agendamentos.filter((a) => !a.confirmado).length },
+    { chave: 'vacinas', rotulo: 'Vacinas', contador: vacinasAtrasadas },
+  ];
 
   return (
     <View style={estilos.raiz}>
@@ -206,157 +213,227 @@ export default function Inicio() {
           </Pressable>
         }
       >
-        {hoje.pets.length > 1 && (
-          <View style={estilos.pets} accessibilityRole="radiogroup" accessibilityLabel="Pet">
-            {[{ id: '', nome: 'Todos', especie: '', fotoUrl: null } as Pick<PetDoDia, 'id' | 'nome' | 'especie' | 'fotoUrl'>, ...hoje.pets].map((p) => {
-              const ativo = petId === p.id;
-              return (
-                <Pressable
-                  key={p.id || 'todos'}
-                  accessibilityRole="radio"
-                  accessibilityLabel={p.nome}
-                  accessibilityState={{ checked: ativo }}
-                  onPress={() => setPetId(p.id)}
-                  style={[estilos.chip, p.id !== '' && estilos.chipComFoto, ativo && estilos.chipAtivo]}
-                >
-                  {p.id !== '' && <FotoPet petId={p.id} nome={p.nome} fotoUrl={p.fotoUrl ?? undefined} tamanho={34} />}
-                  <Texto style={[estilos.chipTexto, ativo && { color: cores.sobrePrimaria }]}>{p.nome}</Texto>
-                </Pressable>
-              );
-            })}
-          </View>
-        )}
+        {hoje.pets.length > 1 && <EscolhaDePet pets={hoje.pets} petId={petId} aoMudar={setPetId} />}
 
         <Comemoracoes
           celebracoes={(hoje.celebracoes ?? []).filter((c) => !petId || c.petId === petId)}
           fotos={fotos}
         />
 
-        {selecionados.map((p) => (
-          <Cartao key={p.id} titulo={p.nome}>
-            <QuemCuidaHoje pet={p} aoMudar={recarregar} />
-            {p.itens.length === 0 ? (
-              <View style={estilos.vazio}>
-                <Texto cor={cores.textoSecundario}>Nada marcado para hoje.</Texto>
-                <Botao
-                  titulo="Criar uma rotina"
-                  variante="texto"
-                  onPress={() => router.push({ pathname: '/pets/[petId]/rotinas', params: { petId: p.id } })}
-                />
-              </View>
-            ) : (
-              p.itens.map((i) => (
-                <LinhaDoDia key={`${i.tipo}-${i.id}-${i.horario ?? ''}`} item={i} aoMudar={recarregar} />
-              ))
-            )}
-          </Cartao>
-        ))}
+        <Abas abas={abas} ativa={aba} aoMudar={setAba} rotulo="Partes do dia" />
 
-        <AvaliarAtendimentos versao={versao} />
-
-        <LembretesDeServico sugestoes={(hoje.sugestoes ?? []).filter((s) => !petId || s.petId === petId)} />
-
-        {agendamentos.length > 0 && (
-          <Cartao titulo="Próximos agendamentos">
-            {agendamentos.map((a) => (
-              <View key={a.id} style={estilos.agendamento}>
-                <View style={estilos.linhaCorpo}>
-                  <Texto>
-                    {a.servicoNome} · {a.petNome}
-                  </Texto>
-                  <Texto variante="legenda" cor={cores.textoSecundario}>
-                    {diaHora(a.inicio)} · {a.empresaNome}
-                  </Texto>
-                </View>
-                {a.confirmado ? (
-                  <View style={estilos.comIcone}>
-                    <Icone nome="check-circle" tamanho={16} cor={cores.sucesso} />
-                    <Texto variante="legenda" cor={cores.sucesso}>
-                      Confirmado
-                    </Texto>
+        <PainelDaAba chave={aba}>
+          {aba === 'rotina' &&
+            selecionados.map((p) => (
+              <Cartao key={p.id} titulo={p.nome}>
+                <QuemCuidaHoje pet={p} aoMudar={recarregar} />
+                {p.itens.length === 0 ? (
+                  <View style={estilos.vazio}>
+                    <Texto cor={cores.textoSecundario}>Nada marcado para hoje.</Texto>
+                    <Botao
+                      titulo="Criar uma rotina"
+                      variante="texto"
+                      icone="plus"
+                      onPress={() => router.push({ pathname: '/pets/[petId]/rotinas', params: { petId: p.id } })}
+                    />
                   </View>
                 ) : (
-                  <Botao titulo="Confirmar" variante="secundaria" onPress={() => void confirmar(a.id)} />
+                  p.itens.map((i) => (
+                    <LinhaDoDia key={`${i.tipo}-${i.id}-${i.horario ?? ''}`} item={i} aoMudar={recarregar} />
+                  ))
                 )}
-              </View>
+              </Cartao>
             ))}
-          </Cartao>
-        )}
 
-        {vacinas.length > 0 && (
-          <Cartao titulo="Vacinas">
-            {vacinas.map((v) => (
-              <Pressable
-                key={`${v.petId}-${v.vacina}`}
-                accessibilityRole="link"
-                onPress={() => router.push({ pathname: '/pets/[petId]/vacinas', params: { petId: v.petId } })}
-                style={estilos.vacina}
-              >
-                <View style={estilos.comIcone}>
-                  <Icone nome="needle" tamanho={16} cor={cores.secundaria} />
-                  <Texto>
-                    {v.vacina} · {nomePet(v.petId)}
-                  </Texto>
-                </View>
-                <Texto variante="legenda" cor={v.atrasada ? cores.erro : cores.alerta}>
-                  {v.atrasada ? `Atrasada desde ${dataCurta(v.proximaDose)}` : `Vence em ${dataCurta(v.proximaDose)}`}
-                </Texto>
-              </Pressable>
-            ))}
-          </Cartao>
-        )}
+          {aba === 'agenda' && (
+            <>
+              {agendamentos.length > 0 ? (
+                <Cartao titulo="Próximos agendamentos">
+                  {agendamentos.map((a) => (
+                    <View key={a.id} style={estilos.agendamento}>
+                      <View style={estilos.linhaCorpo}>
+                        <Texto>
+                          {a.servicoNome} · {a.petNome}
+                        </Texto>
+                        <Texto variante="legenda" cor={cores.textoSecundario}>
+                          {diaHora(a.inicio)} · {a.empresaNome}
+                        </Texto>
+                      </View>
+                      {a.confirmado ? (
+                        <View style={estilos.comIcone}>
+                          <Icone nome="check-circle" tamanho={16} cor={cores.sucesso} />
+                          <Texto variante="legenda" cor={cores.sucesso}>
+                            Confirmado
+                          </Texto>
+                        </View>
+                      ) : (
+                        <Botao titulo="Confirmar" variante="secundaria" onPress={() => void confirmar(a.id)} />
+                      )}
+                    </View>
+                  ))}
+                </Cartao>
+              ) : (
+                <Cartao titulo="Nenhum agendamento por vir" subtitulo="Agende banho, consulta ou vacina pela aba Serviços.">
+                  <Botao titulo="Agendar um serviço" icone="calendar-plus" variante="secundaria" onPress={() => router.push('/servicos')} />
+                </Cartao>
+              )}
+              <LembretesDeServico sugestoes={(hoje.sugestoes ?? []).filter((s) => !petId || s.petId === petId)} />
+              <AvaliarAtendimentos versao={versao} />
+            </>
+          )}
 
-        {vacinas.some((v) => v.atrasada) && (
-          <Alerta
-            tipo="alerta"
-            titulo="Tem vacina atrasada"
-            mensagem="Agende pela aba Serviços. A clínica registra a vacina e ela chega aqui com o selo."
-          />
-        )}
-        <View style={{ height: 72 }} />
+          {aba === 'vacinas' && (
+            <>
+              {vacinasAtrasadas > 0 && (
+                <Alerta
+                  tipo="alerta"
+                  titulo="Tem vacina atrasada"
+                  mensagem="Agende pela aba Serviços. A clínica registra a vacina e ela chega aqui com o selo."
+                />
+              )}
+              {vacinas.length > 0 ? (
+                <Cartao titulo="Vacinas">
+                  {vacinas.map((v) => (
+                    <Pressable
+                      key={`${v.petId}-${v.vacina}`}
+                      accessibilityRole="button"
+                      onPress={() => router.push({ pathname: '/pets/[petId]/vacinas', params: { petId: v.petId } })}
+                      style={({ pressed }) => [estilos.vacina, pressed && { opacity: 0.7 }]}
+                    >
+                      <View style={estilos.linhaCorpo}>
+                        <View style={estilos.comIcone}>
+                          <Icone nome="needle" tamanho={16} cor={cores.secundaria} />
+                          <Texto>
+                            {v.vacina} · {nomePet(v.petId)}
+                          </Texto>
+                        </View>
+                        <Texto variante="legenda" cor={v.atrasada ? cores.erro : cores.alerta}>
+                          {v.atrasada ? `Atrasada desde ${dataCurta(v.proximaDose)}` : `Vence em ${dataCurta(v.proximaDose)}`}
+                        </Texto>
+                      </View>
+                      <Icone nome="chevron-right" tamanho={20} cor={cores.textoSecundario} />
+                    </Pressable>
+                  ))}
+                </Cartao>
+              ) : (
+                <Cartao titulo="Vacinas em dia" subtitulo="Nenhuma vacina vence neste mês." />
+              )}
+            </>
+          )}
+        </PainelDaAba>
+        <View style={{ height: 88 }} />
       </Tela>
 
-      {mais && (
-        <Pressable style={estilos.fundoMenu} accessibilityLabel="Fechar atalhos" onPress={() => setMais(false)}>
+      <BotaoMais
+        aberto={mais}
+        aoAlternar={() => setMais((m) => !m)}
+        nomePet={nomePet(petDoAtalho)}
+        aoEscolher={(destino) => {
+          setMais(false);
+          if (destino === 'servicos') router.push('/servicos');
+          else if (destino === 'novo-pet') router.push('/pets/novo');
+          else router.push({ pathname: `/pets/[petId]/${destino}`, params: { petId: petDoAtalho } });
+        }}
+      />
+    </View>
+  );
+}
+
+type Destino = (typeof ATALHOS)[number]['destino'] | 'servicos' | 'novo-pet';
+
+const GERAIS = [
+  { rotulo: 'Agendar um serviço', destino: 'servicos', icone: 'calendar-plus' },
+  { rotulo: 'Cadastrar outro pet', destino: 'novo-pet', icone: 'paw' },
+] as const satisfies readonly { rotulo: string; destino: Destino; icone: NomeIcone }[];
+
+/**
+ * Botão de + fixo no canto: abre as ações principais. O + gira e vira um X, e os atalhos sobem
+ * um a um.
+ */
+function BotaoMais({
+  aberto,
+  aoAlternar,
+  aoEscolher,
+  nomePet,
+}: {
+  aberto: boolean;
+  aoAlternar: () => void;
+  aoEscolher: (destino: Destino) => void;
+  nomePet: string;
+}) {
+  const [giro] = useState(() => new Animated.Value(0));
+  const itens = [...ATALHOS, ...GERAIS];
+  const [entradas] = useState(() => itens.map(() => new Animated.Value(0)));
+
+  useEffect(() => {
+    Animated.spring(giro, { toValue: aberto ? 1 : 0, useNativeDriver: true, friction: 6 }).start();
+    if (aberto) {
+      entradas.forEach((e) => e.setValue(0));
+      Animated.stagger(
+        35,
+        [...entradas].reverse().map((e) => Animated.timing(e, { toValue: 1, duration: 180, useNativeDriver: true })),
+      ).start();
+    }
+  }, [aberto, giro, entradas]);
+
+  const item = (a: (typeof itens)[number], i: number) => (
+    <Animated.View
+      key={a.destino}
+      style={{
+        opacity: entradas[i],
+        transform: [{ translateY: entradas[i].interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }],
+      }}
+    >
+      <Pressable
+        accessibilityRole="button"
+        style={({ pressed }) => [estilos.menuItem, pressed && { backgroundColor: cores.superficie }]}
+        onPress={() => aoEscolher(a.destino)}
+      >
+        <View style={estilos.menuIcone}>
+          <Icone nome={a.icone} tamanho={20} cor={cores.secundaria} />
+        </View>
+        <Texto negrito>{a.rotulo}</Texto>
+      </Pressable>
+    </Animated.View>
+  );
+
+  return (
+    <>
+      {aberto && (
+        <Pressable style={estilos.fundoMenu} accessibilityLabel="Fechar atalhos" onPress={aoAlternar}>
           <View style={estilos.menu}>
-            <Texto variante="legenda" cor={cores.textoSecundario}>
-              Registrar para {nomePet(petDoAtalho)}
+            <Texto variante="legenda" cor={cores.textoSecundario} style={estilos.menuGrupo}>
+              Registrar para {nomePet}
             </Texto>
-            {ATALHOS.map((a) => (
-              <Pressable
-                key={a.destino}
-                accessibilityRole="button"
-                style={({ pressed }) => [estilos.menuItem, pressed && { backgroundColor: cores.superficie }]}
-                onPress={() => {
-                  setMais(false);
-                  router.push({ pathname: `/pets/[petId]/${a.destino}`, params: { petId: petDoAtalho } });
-                }}
-              >
-                <View style={estilos.comIcone}>
-                  <Icone nome={a.icone} tamanho={20} cor={cores.secundaria} />
-                  <Texto>{a.rotulo}</Texto>
-                </View>
-              </Pressable>
-            ))}
+            {ATALHOS.map((a, i) => item(a, i))}
+            <View style={estilos.menuDivisor} />
+            {GERAIS.map((a, i) => item(a, ATALHOS.length + i))}
           </View>
         </Pressable>
       )}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Registrar algo"
-        onPress={() => setMais((m) => !m)}
-        style={({ pressed }) => [estilos.mais, pressed && { backgroundColor: cores.primariaEscura }]}
+      <Animated.View
+        style={[
+          estilos.mais,
+          { transform: [{ rotate: giro.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '135deg'] }) }] },
+        ]}
       >
-        <Icone nome={mais ? 'close' : 'plus'} tamanho={28} cor={cores.sobrePrimaria} />
-      </Pressable>
-    </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={aberto ? 'Fechar atalhos' : 'Ações principais'}
+          accessibilityState={{ expanded: aberto }}
+          onPress={aoAlternar}
+          style={({ pressed }) => [estilos.maisToque, pressed && { backgroundColor: cores.primariaEscura }]}
+        >
+          <Icone nome="plus" tamanho={30} cor={cores.sobrePrimaria} />
+        </Pressable>
+      </Animated.View>
+    </>
   );
 }
 
 const estilos = criarEstilos(() => ({
   raiz: { flex: 1 },
   comIcone: { flexDirection: 'row', alignItems: 'center', gap: espaco.xs },
-  pets: { flexDirection: 'row', flexWrap: 'wrap', gap: espaco.sm },
   sino: {
     width: 44,
     height: 44,
@@ -367,20 +444,6 @@ const estilos = criarEstilos(() => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  chip: {
-    minHeight: 42,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: espaco.sm,
-    paddingHorizontal: espaco.lg,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: cores.cartaoBorda,
-    backgroundColor: cores.cartao,
-  },
-  chipComFoto: { paddingLeft: 4 },
-  chipAtivo: { backgroundColor: cores.primaria, borderColor: cores.primaria },
-  chipTexto: { fontWeight: '600' },
   linha: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -414,7 +477,14 @@ const estilos = criarEstilos(() => ({
     borderTopWidth: 1,
     borderTopColor: cores.cartaoBorda,
   },
-  vacina: { paddingVertical: espaco.sm, borderTopWidth: 1, borderTopColor: cores.cartaoBorda, gap: 2 },
+  vacina: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: espaco.md,
+    paddingVertical: espaco.sm,
+    borderTopWidth: 1,
+    borderTopColor: cores.cartaoBorda,
+  },
   mais: {
     position: 'absolute',
     right: espaco.xl,
@@ -422,16 +492,19 @@ const estilos = criarEstilos(() => ({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: cores.primaria,
-    alignItems: 'center',
-    justifyContent: 'center',
     shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
     elevation: 6,
   },
-  maisTexto: { color: cores.sobrePrimaria, fontSize: 30, lineHeight: 34, fontWeight: '600' },
+  maisToque: {
+    flex: 1,
+    borderRadius: 30,
+    backgroundColor: cores.primaria,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   fundoMenu: {
     position: 'absolute',
     top: 0,
@@ -445,12 +518,31 @@ const estilos = criarEstilos(() => ({
     paddingBottom: 96,
   },
   menu: {
-    minWidth: 220,
+    minWidth: 240,
     padding: espaco.md,
-    gap: espaco.xs,
-    borderRadius: 16,
+    gap: 2,
+    borderRadius: 20,
     backgroundColor: cores.elevado,
+    borderWidth: 1,
+    borderColor: cores.cartaoBorda,
   },
-  menuItem: { paddingVertical: espaco.md, paddingHorizontal: espaco.sm, borderRadius: 8 },
+  menuGrupo: { paddingHorizontal: espaco.sm, paddingBottom: espaco.xs },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: espaco.md,
+    minHeight: 48,
+    paddingHorizontal: espaco.sm,
+    borderRadius: 12,
+  },
+  menuIcone: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: cores.superficie,
+  },
+  menuDivisor: { height: 1, marginVertical: espaco.xs, backgroundColor: cores.cartaoBorda },
 }));
 
