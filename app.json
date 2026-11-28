@@ -44,7 +44,13 @@
           "color": "#8A4B0F"
         }
       ],
-      "expo-apple-authentication"
+      "expo-apple-authentication",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O Jaguara usa a sua localização só para mostrar as clínicas e pet shops mais perto de você."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false,

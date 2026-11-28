@@ -3159,6 +3159,13 @@ export interface paths {
                     /** @description Categoria de serviço oferecida. */
                     categoria?: "CONSULTA" | "EXAME" | "CIRURGIA" | "VACINACAO" | "BANHO_TOSA" | "HOSPEDAGEM" | "PET_SITTER" | "CRECHE" | "OUTRO";
                     cidade?: string;
+                    /** @description Ordena pela distância. Sem latitude e longitude nem CEP, usa o CEP do cadastro do tutor. */
+                    perto?: boolean;
+                    /** @description Localização do aparelho; ordena da mais perto à mais longe. */
+                    latitude?: number;
+                    longitude?: number;
+                    /** @description Ordena pela distância até este CEP. */
+                    cep?: string;
                     pagina?: components["parameters"]["Pagina"];
                     tamanho?: components["parameters"]["Tamanho"];
                 };
@@ -8433,6 +8440,13 @@ export interface components {
             horarioFuncionamento?: string;
             formasPagamento?: string[];
             politicaCancelamento?: string;
+            /** @description Distância em linha reta até o tutor, na busca por perto. */
+            distanciaKm?: number;
+            /** @description Média das avaliações, com uma casa. */
+            notaMedia?: number;
+            totalAvaliacoes?: number;
+            /** @description Menor preço entre os serviços ativos, em reais. */
+            precoAPartirDe?: number;
         };
         PaginaEmpresas: {
             itens?: components["schemas"]["EmpresaPublica"][];
