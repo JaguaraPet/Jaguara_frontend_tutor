@@ -4887,9 +4887,14 @@ export interface paths {
                         meioConsentimento: "ASSINATURA_PRESENCIAL" | "LINK_DIGITAL";
                         /**
                          * Format: uri
-                         * @description Cópia digitalizada do termo assinado, enviada por URL assinada. Obrigatória com ASSINATURA_PRESENCIAL.
+                         * @description Link externo da cópia do termo (cadastros antigos). Prefira evidenciaArquivo.
                          */
                         evidenciaArquivoUrl?: string;
+                        /** @description Cópia do termo assinado (PDF ou foto, até 10 MB). A resposta traz urlEnvioTermo para enviar o arquivo com PUT. Com ASSINATURA_PRESENCIAL, informe este campo ou evidenciaArquivoUrl. */
+                        evidenciaArquivo?: {
+                            nomeArquivo: string;
+                            tamanhoBytes: number;
+                        };
                     };
                 };
             };
@@ -4949,6 +4954,96 @@ export interface paths {
                     content: {
                         "application/json": components["schemas"]["Pet"];
                     };
+                };
+                422: components["responses"]["Validacao"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/empresas/{empresaId}/clientes/{clienteId}/consentimento/termo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+                clienteId: string;
+            };
+            cookie?: never;
+        };
+        /** Abrir a cópia do termo assinado */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                    clienteId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Link de download, válido por 5 minutos. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** Format: uri */
+                            url: string;
+                        };
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+            };
+        };
+        put?: never;
+        /**
+         * Anexar ou trocar a cópia do termo assinado
+         * @description Só no consentimento presencial vigente. Devolve a URL para enviar o arquivo com PUT.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                    clienteId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        nomeArquivo: string;
+                        tamanhoBytes: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description URL de envio. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** Format: uri */
+                            urlEnvio: string;
+                        };
+                    };
+                };
+                /** @description O consentimento não é presencial ou não está vigente. */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
                 };
                 422: components["responses"]["Validacao"];
             };
@@ -8288,6 +8383,13 @@ export interface components {
              * @description Link do termo para o cliente aceitar (só enquanto pendente).
              */
             linkTermo?: string;
+            /** @description A cópia do termo assinado está anexada. */
+            possuiTermoAnexado?: boolean;
+            /**
+             * Format: uri
+             * @description URL para enviar a cópia do termo com PUT (só na resposta do cadastro com evidenciaArquivo).
+             */
+            urlEnvioTermo?: string;
         };
         Especie: {
             /** Format: uuid */
