@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Linking, StyleSheet, View } from 'react-native';
 import { api } from '../../api/cliente';
 import { duracao, local, preco, rotuloCategoria, rotuloTipo } from '../../catalogo/catalogo';
 import type { EmpresaPublica, Servico } from '../../catalogo/catalogo';
@@ -8,6 +8,15 @@ import { Alerta, Botao, Cartao, Tela, Texto } from '../../componentes';
 import { cores, espaco } from '../../tema/tokens';
 
 const FALHA = 'Não deu para abrir a empresa agora. Tente de novo.';
+
+const PAGAMENTO: Record<string, string> = {
+  PIX: 'PIX',
+  CARTAO_CREDITO: 'cartão de crédito',
+  CARTAO_DEBITO: 'cartão de débito',
+  DINHEIRO: 'dinheiro',
+  BOLETO: 'boleto',
+};
+const rotuloPagamento = (forma: string) => PAGAMENTO[forma] ?? forma;
 
 /** Perfil público da empresa e catálogo de serviços ativos (UC-33). */
 export default function PerfilEmpresa() {
@@ -72,6 +81,29 @@ export default function PerfilEmpresa() {
         }
       />
       <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
+      {empresa.descricao ? <Texto>{empresa.descricao}</Texto> : null}
+      {(empresa.horarioFuncionamento || empresa.whatsapp || empresa.telefone || empresa.formasPagamento?.length) && (
+        <Cartao titulo="Como funciona">
+          {empresa.horarioFuncionamento ? <Texto>🕒 {empresa.horarioFuncionamento}</Texto> : null}
+          {empresa.whatsapp ? (
+            <Texto
+              cor={cores.secundaria}
+              accessibilityRole="link"
+              onPress={() => void Linking.openURL(`https://wa.me/55${empresa.whatsapp!.replace(/\D/g, '')}`)}
+            >
+              💬 WhatsApp {empresa.whatsapp}
+            </Texto>
+          ) : empresa.telefone ? (
+            <Texto>📞 {empresa.telefone}</Texto>
+          ) : null}
+          {empresa.formasPagamento?.length ? (
+            <Texto variante="legenda">Aceita: {empresa.formasPagamento.map(rotuloPagamento).join(', ')}</Texto>
+          ) : null}
+        </Cartao>
+      )}
+      {empresa.politicaCancelamento ? (
+        <Alerta tipo="info" titulo="Cancelamento" mensagem={empresa.politicaCancelamento} />
+      ) : null}
       <Texto variante="titulo2">Serviços</Texto>
       {servicos.length === 0 ? (
         <Texto cor={cores.textoSecundario}>Esta empresa ainda não tem serviços ativos.</Texto>
