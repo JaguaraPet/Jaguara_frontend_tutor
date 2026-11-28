@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover" />
+    <title>Jaguara</title>
+    <meta name="description" content="A vida do seu pet num lugar só: vacinas, remédios, rotina e agendamentos." />
+    <!-- "Adicionar à tela de início" no iPhone e no Android: abre em tela cheia, como um app instalado. -->
+    <meta name="theme-color" content="#8A4B0F" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Jaguara" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <style id="expo-reset">
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        overflow: hidden;
+      }
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+
+      /*
+       * No computador, o app abre dentro de um celular no meio da tela, em vez de esticado.
+       * No celular (e no app instalado) nada disso vale: ele ocupa a tela inteira.
+       */
+      @media (min-width: 768px) and (min-height: 640px) {
+        body {
+          margin: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 16px;
+          background:
+            radial-gradient(900px 520px at 0% 0%, rgb(31 92 74 / 22%), transparent 60%),
+            radial-gradient(800px 480px at 100% 100%, rgb(138 75 15 / 20%), transparent 60%),
+            #f3ebd6;
+          font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        #root {
+          flex: none;
+          width: 390px;
+          height: min(844px, calc(100vh - 88px));
+          border: 10px solid #1e1b18;
+          border-radius: 48px;
+          overflow: hidden;
+          background: #ffffff;
+          box-shadow:
+            0 0 0 1px rgb(30 27 24 / 30%),
+            0 30px 80px rgb(30 27 24 / 28%);
+          /* Faz o que é "fixo na tela" (botões flutuantes, avisos) ficar dentro do celular. */
+          transform: translateZ(0);
+        }
+        body::after {
+          content: 'Versão para celular. No seu telefone, o Jaguara abre em tela cheia.';
+          font-size: 13px;
+          color: #5c554e;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>Ative o JavaScript para usar o Jaguara.</noscript>
+    <div id="root"></div>
+  </body>
+</html>

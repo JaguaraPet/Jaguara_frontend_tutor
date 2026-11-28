@@ -33,12 +33,41 @@ let usuario: Usuario | null = null;
 let renovando: Promise<boolean> | null = null;
 const ouvintes = new Set<() => void>();
 
-/** No navegador (expo web) não há armazenamento seguro: a sessão vale só enquanto a página estiver aberta. */
+/**
+ * No navegador (versão web do app, para iPhone e demonstração) não há Keychain: o refresh token
+ * fica no localStorage, como na web Enterprise, para a sessão sobreviver a recarregar a página.
+ */
+const web = {
+  ler: (): Promise<string | null> => {
+    try {
+      return Promise.resolve(globalThis.localStorage?.getItem(CHAVE_REFRESH) ?? null);
+    } catch {
+      return Promise.resolve(null);
+    }
+  },
+  gravar: (valor: string): Promise<void> => {
+    try {
+      globalThis.localStorage?.setItem(CHAVE_REFRESH, valor);
+    } catch {
+      // navegação privada: a sessão vale só enquanto a página estiver aberta
+    }
+    return Promise.resolve();
+  },
+  apagar: (): Promise<void> => {
+    try {
+      globalThis.localStorage?.removeItem(CHAVE_REFRESH);
+    } catch {
+      // ignora
+    }
+    return Promise.resolve();
+  },
+};
+
 const armazenamento = {
-  ler: () => (Platform.OS === 'web' ? Promise.resolve(null) : SecureStore.getItemAsync(CHAVE_REFRESH)),
+  ler: () => (Platform.OS === 'web' ? web.ler() : SecureStore.getItemAsync(CHAVE_REFRESH)),
   gravar: (valor: string) =>
-    Platform.OS === 'web' ? Promise.resolve() : SecureStore.setItemAsync(CHAVE_REFRESH, valor),
-  apagar: () => (Platform.OS === 'web' ? Promise.resolve() : SecureStore.deleteItemAsync(CHAVE_REFRESH)),
+    Platform.OS === 'web' ? web.gravar(valor) : SecureStore.setItemAsync(CHAVE_REFRESH, valor),
+  apagar: () => (Platform.OS === 'web' ? web.apagar() : SecureStore.deleteItemAsync(CHAVE_REFRESH)),
 };
 
 function avisar() {
@@ -128,6 +157,14 @@ export const sessao = {
   /** UC-02: entra com e-mail e senha. Só tutores usam o app. */
   async entrar(email: string, senha: string): Promise<Usuario> {
     const resposta = await postar('/auth/login', { email, senha });
+    if (!resposta.ok) throw new ErroApi((await resposta.json()) as Problema);
+    await aceitarTokensDeTutor((await resposta.json()) as Tokens);
+    return usuario!;
+  },
+
+  /** Entra como a tutora de uma demonstração, pelo código do "Ver como tutor" da Enterprise. */
+  async entrarNaDemonstracao(codigo: string): Promise<Usuario> {
+    const resposta = await postar('/demonstracao/tutor', { codigo });
     if (!resposta.ok) throw new ErroApi((await resposta.json()) as Problema);
     await aceitarTokensDeTutor((await resposta.json()) as Tokens);
     return usuario!;
