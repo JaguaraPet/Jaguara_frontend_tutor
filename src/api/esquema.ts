@@ -3569,6 +3569,82 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/empresas/{empresaId}/logo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preparar o envio da logo
+         * @description Devolve a URL assinada para a web enviar a imagem (JPG, PNG, WEBP ou HEIC, até 8 MB) direto ao armazenamento.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        nomeArquivo: string;
+                        tamanhoBytes: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description URL de envio. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** Format: uri */
+                            urlEnvio: string;
+                        };
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                422: components["responses"]["Validacao"];
+            };
+        };
+        /** Tirar a logo */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Logo removida; a página volta a mostrar só o nome. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                403: components["responses"]["SemPermissao"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/empresas/{empresaId}/atividade": {
         parameters: {
             query?: never;
@@ -8943,6 +9019,11 @@ export interface components {
         };
         PerfilPublico: {
             /**
+             * Format: uri
+             * @description Logo da empresa (URL de leitura que vale 6 horas); sem logo, null.
+             */
+            logoUrl?: string | null;
+            /**
              * @description Só empresa verificada aparece na busca e na página pública.
              * @enum {string}
              */
@@ -9747,6 +9828,11 @@ export interface components {
             empresaId?: string;
         };
         EmpresaPublica: {
+            /**
+             * Format: uri
+             * @description Logo da empresa (URL de leitura que vale 6 horas).
+             */
+            logoUrl?: string;
             /** Format: uuid */
             id?: string;
             nomeFantasia?: string;
