@@ -165,7 +165,6 @@ export default function SolicitarAgendamento() {
         maxLength={500}
       />
       <Botao titulo="Enviar solicitação" larguraTotal carregando={enviando} onPress={() => void enviar()} />
-      <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );
 }

@@ -80,7 +80,6 @@ export default function PerfilEmpresa() {
           })
         }
       />
-      <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
       {empresa.descricao ? <Texto>{empresa.descricao}</Texto> : null}
       {(empresa.horarioFuncionamento || empresa.whatsapp || empresa.telefone || empresa.formasPagamento?.length) && (
         <Cartao titulo="Como funciona">

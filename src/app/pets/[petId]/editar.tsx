@@ -83,7 +83,6 @@ export default function EditarPet() {
       />
       {!novo && <ArquivarPet petId={petId} nome={inicial.nome} />}
       <Botao titulo="Ver perfil do pet" variante="secundaria" onPress={() => router.replace(`/pets/${petId}`)} />
-      <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );
 }

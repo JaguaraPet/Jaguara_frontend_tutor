@@ -153,7 +153,6 @@ export default function Responsaveis() {
           <Botao titulo="Adicionar" larguraTotal carregando={salvando} onPress={() => void convidar()} />
         </Cartao>
       )}
-      <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );
 }

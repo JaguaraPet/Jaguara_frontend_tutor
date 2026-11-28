@@ -42,7 +42,7 @@ export function Alerta({ tipo, titulo, mensagem }: Props) {
       accessibilityRole={urgente ? 'alert' : 'summary'}
       accessibilityLiveRegion={urgente ? 'assertive' : 'polite'}
       accessibilityLabel={`${v.rotulo}: ${titulo}${mensagem ? `. ${mensagem}` : ''}`}
-      style={[estilos.alerta, { backgroundColor: v.fundo, borderLeftColor: v.cor }]}
+      style={[estilos.alerta, { backgroundColor: v.fundo, borderColor: v.cor + '4D' }]}
     >
       <View style={[estilos.icone, { backgroundColor: v.cor }]}>
         <Icone nome={v.icone} tamanho={18} cor={cores.sobreCor} />
@@ -62,14 +62,15 @@ const estilos = criarEstilos(() => ({
     flexDirection: 'row',
     gap: espaco.md,
     padding: espaco.lg,
+    // Contorno inteiro e fino, com o ícone num quadrado arredondado: sem faixa colorida de lado.
     borderRadius: raio.cartao - 4,
-    borderLeftWidth: 4,
+    borderWidth: 1,
     alignSelf: 'stretch',
   },
   icone: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },

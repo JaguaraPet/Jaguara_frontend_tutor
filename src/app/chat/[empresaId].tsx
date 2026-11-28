@@ -135,7 +135,6 @@ export default function ChatEmpresa() {
         disabled={!texto.trim()}
         onPress={() => void enviar()}
       />
-      <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );
 }

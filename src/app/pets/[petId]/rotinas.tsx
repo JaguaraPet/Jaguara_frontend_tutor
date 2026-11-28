@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 import { api } from '../../../api/cliente';
@@ -227,7 +227,6 @@ export default function Rotinas() {
       <Texto variante="legenda" cor={cores.textoSecundario}>
         Os modelos são só atalhos. A frequência de antipulgas, vermífugo e banho é a que o veterinário do seu pet indicar.
       </Texto>
-      <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );
 }

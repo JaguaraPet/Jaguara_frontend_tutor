@@ -9343,6 +9343,8 @@ export interface components {
             sexo: string;
             idade?: number;
             status: string;
+            /** @description Nome do cliente na empresa ou, sem cadastro, do tutor responsável no app. */
+            tutorNome?: string;
             motivos: ("COMPARTILHAMENTO" | "AGENDAMENTO" | "CLIENTE")[];
             secoes: ("vacinas" | "exames" | "medicamentos" | "alergias")[];
         };

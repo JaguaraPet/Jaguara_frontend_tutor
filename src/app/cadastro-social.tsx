@@ -96,7 +96,6 @@ export default function CadastroSocial() {
         </Texto>
       )}
       <Botao titulo="Criar conta" larguraTotal carregando={enviando} onPress={() => void criar()} />
-      <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );
 }

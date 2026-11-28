@@ -54,7 +54,6 @@ export default function RecuperarSenha() {
         erro={erro ?? undefined}
       />
       <Botao titulo="Enviar link" larguraTotal carregando={enviando} onPress={() => void enviar()} />
-      <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );
 }

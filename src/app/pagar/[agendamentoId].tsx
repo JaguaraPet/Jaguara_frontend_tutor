@@ -60,7 +60,6 @@ export default function Pagar() {
         {pagamento.qrCode && (
           <Alerta tipo="info" titulo="Aguardando o banco" mensagem="Esta tela atualiza sozinha quando o PIX for confirmado." />
         )}
-        <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
       </Tela>
     );
   }
@@ -75,7 +74,6 @@ export default function Pagar() {
           setPagamento(novo);
         }}
       />
-      <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
   );
 }
