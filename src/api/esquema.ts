@@ -1566,6 +1566,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/pets/{petId}/cuidador-hoje": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                petId: components["parameters"]["PetId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Definir quem cuida do pet hoje
+         * @description Sem tutorId, o próprio tutor fica com o dia. Só entre os responsáveis ativos do pet.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    petId: components["parameters"]["PetId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        /** Format: uuid */
+                        tutorId?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Quem cuida hoje. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CuidadorHoje"];
+                    };
+                };
+                403: components["responses"]["SemPermissao"];
+                422: components["responses"]["Validacao"];
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/pets/{petId}/rotinas": {
         parameters: {
             query?: never;
@@ -8798,6 +8850,13 @@ export interface components {
             /** @description Primeiro nome de quem enviou. */
             enviadaPor: string;
         };
+        CuidadorHoje: {
+            /** Format: uuid */
+            tutorId: string;
+            /** @description Primeiro nome. */
+            nome: string;
+            souEu: boolean;
+        };
         /** @enum {string} */
         TipoRotina: "PASSEIO" | "BANHO" | "ANTIPULGAS" | "VERMIFUGO" | "ESCOVACAO" | "AREIA" | "ALIMENTACAO" | "OUTRO";
         /** @enum {string} */
@@ -8863,6 +8922,12 @@ export interface components {
                 especie: string;
                 fotoUrl: string | null;
                 itens: components["schemas"]["ItemDoDia"][];
+                responsaveis?: {
+                    /** Format: uuid */
+                    tutorId: string;
+                    nome: string;
+                }[];
+                cuidadorHoje?: components["schemas"]["CuidadorHoje"] | null;
             }[];
             agendamentos: {
                 /** Format: uuid */
@@ -8883,6 +8948,18 @@ export interface components {
                 /** Format: date */
                 proximaDose: string;
                 atrasada: boolean;
+            }[];
+            /** @description Lembretes do tipo "faz 2 meses do último banho", a partir dos serviços já feitos (banho e tosa depois de 45 dias, consulta depois de 330), quando não há outro agendado. Não é recomendação veterinária. */
+            sugestoes?: {
+                /** Format: uuid */
+                petId: string;
+                petNome: string;
+                /** Format: uuid */
+                servicoId: string;
+                servicoNome: string;
+                empresaNome: string;
+                diasDesde: number;
+                texto: string;
             }[];
             /** @description Aniversário do pet e aniversário dele no Jaguara, no dia. */
             celebracoes?: {
