@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Jaguara API
-  version: 1.72.0
+  version: 1.73.0
   summary: API REST da plataforma Jaguara (tutores e empresas Enterprise).
   description: |
     Contrato da API do Jaguara (tarefa JAG-68). Os recursos seguem o modelo de classes
@@ -2752,6 +2752,40 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Cliente' }
         '422': { $ref: '#/components/responses/Validacao' }
+  /empresas/{empresaId}/clientes/{clienteId}:
+    parameters:
+      - $ref: '#/components/parameters/EmpresaId'
+      - in: path
+        name: clienteId
+        required: true
+        schema: { type: string, format: uuid }
+    patch:
+      tags: [Empresa]
+      summary: Alterar dados do cliente (UC-21)
+      description: >-
+        Corrige nome, telefone, e-mail e observações. Campo vazio apaga o valor (menos o nome).
+        Observações só com o consentimento vigente; o pré-cadastro precisa manter o e-mail
+        (RN41). O CPF não muda. Cliente que revogou não pode ser alterado.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome: { type: string, maxLength: 255 }
+                telefone: { type: string, maxLength: 20 }
+                email: { type: string, maxLength: 255 }
+                observacoes: { type: string, maxLength: 2000 }
+      responses:
+        '200':
+          description: Cliente alterado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cliente' }
+        '404': { $ref: '#/components/responses/NaoEncontrado' }
+        '409': { $ref: '#/components/responses/Conflito' }
+        '422': { $ref: '#/components/responses/Validacao' }
   /empresas/{empresaId}/clientes/{clienteId}/pets:
     parameters:
       - $ref: '#/components/parameters/EmpresaId'
@@ -5376,6 +5410,7 @@ components:
           format: uri
           description: Link do termo para o cliente aceitar (só enquanto pendente).
         possuiTermoAnexado: { type: boolean, description: "A cópia do termo assinado está anexada." }
+        observacoes: { type: string, description: "Só com o consentimento vigente (RN41)." }
         urlEnvioTermo:
           type: string
           format: uri

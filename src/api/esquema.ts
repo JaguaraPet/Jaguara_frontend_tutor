@@ -5873,6 +5873,63 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/empresas/{empresaId}/clientes/{clienteId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                empresaId: components["parameters"]["EmpresaId"];
+                clienteId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Alterar dados do cliente (UC-21)
+         * @description Corrige nome, telefone, e-mail e observações. Campo vazio apaga o valor (menos o nome). Observações só com o consentimento vigente; o pré-cadastro precisa manter o e-mail (RN41). O CPF não muda. Cliente que revogou não pode ser alterado.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    empresaId: components["parameters"]["EmpresaId"];
+                    clienteId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        nome?: string;
+                        telefone?: string;
+                        email?: string;
+                        observacoes?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Cliente alterado. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Cliente"];
+                    };
+                };
+                404: components["responses"]["NaoEncontrado"];
+                409: components["responses"]["Conflito"];
+                422: components["responses"]["Validacao"];
+            };
+        };
+        trace?: never;
+    };
     "/empresas/{empresaId}/clientes/{clienteId}/pets": {
         parameters: {
             query?: never;
@@ -9943,6 +10000,8 @@ export interface components {
             linkTermo?: string;
             /** @description A cópia do termo assinado está anexada. */
             possuiTermoAnexado?: boolean;
+            /** @description Só com o consentimento vigente (RN41). */
+            observacoes?: string;
             /**
              * Format: uri
              * @description URL para enviar a cópia do termo com PUT (só na resposta do cadastro com evidenciaArquivo).
