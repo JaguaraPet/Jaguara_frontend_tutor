@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Redirect, Tabs } from 'expo-router';
 import { useEffect, useState } from 'react';
 import type { ComponentProps } from 'react';
@@ -8,15 +8,15 @@ import { useUsuario } from '../../sessao/useUsuario';
 import { familiaPorPeso } from '../../tema/fontes';
 import { cores } from '../../tema/tokens';
 
-type NomeIcone = ComponentProps<typeof Ionicons>['name'];
+type NomeIcone = ComponentProps<typeof MaterialCommunityIcons>['name'];
 
 /** Abas do app do tutor (UX-01, seção 3). */
 const abas: { nome: string; titulo: string; icone: NomeIcone }[] = [
   { nome: 'index', titulo: 'Início', icone: 'home' },
   { nome: 'pets', titulo: 'Pets', icone: 'paw' },
-  { nome: 'agenda', titulo: 'Agenda', icone: 'calendar' },
+  { nome: 'agenda', titulo: 'Agenda', icone: 'calendar-month' },
   { nome: 'servicos', titulo: 'Serviços', icone: 'storefront' },
-  { nome: 'perfil', titulo: 'Perfil', icone: 'person-circle' },
+  { nome: 'perfil', titulo: 'Perfil', icone: 'account-circle' },
 ];
 
 /** As abas exigem login: sem sessão, o tutor vai para as boas-vindas. */
@@ -42,10 +42,10 @@ export default function LayoutAbas() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: cores.primaria,
+        tabBarActiveTintColor: cores.destaque,
         tabBarInactiveTintColor: cores.textoSecundario,
         tabBarLabelStyle: { fontFamily: familiaPorPeso('600'), fontSize: 12 },
-        tabBarStyle: { minHeight: 60, borderTopColor: cores.borda },
+        tabBarStyle: { minHeight: 64, backgroundColor: cores.barra, borderTopColor: cores.borda },
       }}
     >
       {abas.map((aba) => (
@@ -56,7 +56,7 @@ export default function LayoutAbas() {
             title: aba.titulo,
             tabBarAccessibilityLabel: aba.titulo,
             tabBarIcon: ({ color, size, focused }) => (
-              <Ionicons
+              <MaterialCommunityIcons
                 name={focused ? aba.icone : (`${aba.icone}-outline` as NomeIcone)}
                 size={size}
                 color={color as string}

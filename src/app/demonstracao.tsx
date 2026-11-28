@@ -34,7 +34,7 @@ export default function EntrarNaDemonstracao() {
           <Botao titulo="Ir para o início" variante="secundaria" onPress={() => router.replace('/')} />
         </>
       ) : (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Entrando na demonstração" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Entrando na demonstração" />
       )}
     </Tela>
   );

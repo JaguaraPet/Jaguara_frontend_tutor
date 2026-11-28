@@ -1,4 +1,5 @@
-import { StyleSheet, Text, TextProps } from 'react-native';
+import { Text, TextProps } from 'react-native';
+import { criarEstilos } from '../tema/estilos';
 import { familiaPorPeso } from '../tema/fontes';
 import { cores, fonte } from '../tema/tokens';
 
@@ -10,27 +11,26 @@ interface Props extends TextProps {
   negrito?: boolean;
 }
 
-/** Texto com a tipografia do UX-02. Respeita a fonte ampliada do sistema (WCAG 1.4.4). */
-export function Texto({
-  variante = 'corpo',
-  cor = cores.texto,
-  negrito = false,
-  style,
-  ...props
-}: Props) {
+/**
+ * Texto com a tipografia do UX-02: títulos em Bricolage Grotesque, o resto em Inter.
+ * Respeita a fonte ampliada do sistema (WCAG 1.4.4).
+ */
+export function Texto({ variante = 'corpo', cor, negrito = false, style, ...props }: Props) {
   const t = fonte[variante];
-  const peso = negrito ? '600' : t.peso;
+  const titulo = variante.startsWith('titulo');
+  const peso = titulo ? '800' : negrito ? '600' : (t.peso as '400');
   return (
     <Text
-      accessibilityRole={variante.startsWith('titulo') ? 'header' : undefined}
+      accessibilityRole={titulo ? 'header' : undefined}
       style={[
         estilos.base,
         {
           fontSize: t.tamanho,
           lineHeight: t.alturaLinha,
           fontFamily: familiaPorPeso(peso),
-          color: cor,
+          color: cor ?? cores.texto,
         },
+        titulo && estilos.titulo,
         style,
       ]}
       {...props}
@@ -38,6 +38,7 @@ export function Texto({
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   base: { flexShrink: 1 },
-});
+  titulo: { letterSpacing: -0.2 },
+}));

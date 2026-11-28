@@ -1,5 +1,6 @@
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable } from 'react-native';
 import { alvoToqueMinimo, cores, espaco, raio } from '../tema/tokens';
+import { criarEstilos } from '../tema/estilos';
 import { Texto } from '../componentes';
 
 interface Props {
@@ -18,14 +19,14 @@ export function Filtro({ rotulo, ativo, aoTocar }: Props) {
       onPress={aoTocar}
       style={[estilos.filtro, ativo && estilos.ativo]}
     >
-      <Texto variante="legenda" negrito cor={ativo ? cores.branco : cores.texto}>
+      <Texto variante="legenda" negrito cor={ativo ? cores.sobrePrimaria : cores.texto}>
         {rotulo}
       </Texto>
     </Pressable>
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   filtro: {
     minHeight: alvoToqueMinimo,
     justifyContent: 'center',
@@ -36,4 +37,4 @@ const estilos = StyleSheet.create({
     backgroundColor: cores.fundo,
   },
   ativo: { backgroundColor: cores.primaria, borderColor: cores.primaria },
-});
+}));

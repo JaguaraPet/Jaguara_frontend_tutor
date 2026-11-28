@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 import { horaBrasilia, proximosDias, rotuloDia } from '../../agendamento/solicitar';
 import { api } from '../../api/cliente';
 import type { components } from '../../api/esquema';
@@ -8,6 +8,7 @@ import { Alerta, Botao, Campo, Tela, Texto } from '../../componentes';
 import { hojeBrasilia } from '../../pets/datas';
 import { mensagemDaApi } from '../../pets/erros';
 import { alvoToqueMinimo, cores, espaco, raio } from '../../tema/tokens';
+import { criarEstilos } from '../../tema/estilos';
 
 type Pet = components['schemas']['Pet'];
 
@@ -21,7 +22,7 @@ function Opcao({ rotulo, escolhida, aoEscolher }: { rotulo: string; escolhida: b
       onPress={aoEscolher}
       style={[estilos.opcao, escolhida && estilos.escolhida]}
     >
-      <Texto negrito={escolhida} cor={escolhida ? cores.branco : cores.texto}>
+      <Texto negrito={escolhida} cor={escolhida ? cores.sobrePrimaria : cores.texto}>
         {rotulo}
       </Texto>
     </Pressable>
@@ -121,7 +122,7 @@ export default function SolicitarAgendamento() {
 
       <Texto variante="titulo2">Pet</Texto>
       {pets === null ? (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando os pets" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando os pets" />
       ) : pets.length === 0 ? (
         <Alerta tipo="info" titulo="Cadastre um pet primeiro" mensagem="A solicitação é sempre para um dos seus pets." />
       ) : (
@@ -143,7 +144,7 @@ export default function SolicitarAgendamento() {
         <>
           <Texto variante="titulo2">Horário</Texto>
           {horarios === null ? (
-            <ActivityIndicator color={cores.primaria} accessibilityLabel="Buscando horários" />
+            <ActivityIndicator color={cores.destaque} accessibilityLabel="Buscando horários" />
           ) : horarios.length === 0 ? (
             <Texto cor={cores.textoSecundario}>Nenhum horário livre neste dia. Escolha outro dia.</Texto>
           ) : (
@@ -169,7 +170,7 @@ export default function SolicitarAgendamento() {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   grupo: { flexDirection: 'row', flexWrap: 'wrap', gap: espaco.sm },
   opcao: {
     minHeight: alvoToqueMinimo,
@@ -181,4 +182,4 @@ const estilos = StyleSheet.create({
     backgroundColor: cores.fundo,
   },
   escolhida: { backgroundColor: cores.primaria, borderColor: cores.primaria },
-});
+}));

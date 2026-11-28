@@ -60,7 +60,7 @@ export default function EditarPet() {
   if (!inicial) {
     return (
       <Tela titulo="Editar pet">
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando o pet" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando o pet" />
       </Tela>
     );
   }

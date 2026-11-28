@@ -26,7 +26,7 @@ describe('Álbum e comemorações no app', () => {
 
   it('deve montar os textos do aniversário e do tempo no Jaguara', () => {
     expect(textoDaComemoracao({ petId: 'p1', petNome: 'Thor', tipo: 'ANIVERSARIO', anos: 5 }).titulo).toBe(
-      'Hoje é aniversário de Thor! 🎂',
+      'Hoje é aniversário de Thor!',
     );
     expect(
       textoDaComemoracao({ petId: 'p1', petNome: 'Mel', tipo: 'ANIVERSARIO_JAGUARA', anos: 1 }).detalhe,

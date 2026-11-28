@@ -46,7 +46,7 @@ export default function TermosPendentes() {
   if (termos === null) {
     return (
       <Tela titulo="Termos atualizados">
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando os termos" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando os termos" />
       </Tela>
     );
   }

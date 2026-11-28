@@ -1,11 +1,12 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Linking, Share, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Linking, Share, View } from 'react-native';
 import { api } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
 import { Alerta, Botao, Campo, Tela, Texto } from '../../../componentes';
 import { mensagemDaApi } from '../../../pets/erros';
 import { cores, coresSuaves, espaco } from '../../../tema/tokens';
+import { criarEstilos } from '../../../tema/estilos';
 
 type Aviso = components['schemas']['AvisoPetPerdido'];
 
@@ -59,7 +60,7 @@ export default function PetPerdido() {
   if (!aviso) {
     return (
       <Tela titulo="Pet perdido">
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando" />
       </Tela>
     );
   }
@@ -78,11 +79,11 @@ export default function PetPerdido() {
         <Botao
           titulo="Compartilhar no WhatsApp e redes"
           larguraTotal
-          onPress={() => void Share.share({ message: `Me ajude a encontrar meu pet! 🐾 ${url}` })}
+          onPress={() => void Share.share({ message: `Me ajude a encontrar meu pet! ${url}` })}
         />
         <Botao titulo="Abrir o cartaz para imprimir" variante="secundaria" larguraTotal onPress={() => void Linking.openURL(url)} />
         <Botao titulo="Atualizar os dados do aviso" variante="texto" onPress={() => setAviso({ ...aviso, perdido: false, url: undefined })} />
-        <Botao titulo="Encontrei! 🎉" variante="secundaria" larguraTotal onPress={() => void encontrado()} />
+        <Botao titulo="Encontrei meu pet" icone="heart-outline" variante="secundaria" larguraTotal onPress={() => void encontrado()} />
       </Tela>
     );
   }
@@ -108,6 +109,6 @@ export default function PetPerdido() {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   destaque: { backgroundColor: coresSuaves.erro, borderRadius: 12, padding: espaco.md, gap: espaco.xs },
-});
+}));

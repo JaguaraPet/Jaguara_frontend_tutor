@@ -1,11 +1,12 @@
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { api } from '../api/cliente';
 import type { components } from '../api/esquema';
 import { Alerta, Botao, Campo, Tela, Texto } from '../componentes';
 import { useUsuario } from '../sessao/useUsuario';
 import { cores, espaco, raio } from '../tema/tokens';
+import { criarEstilos } from '../tema/estilos';
 
 type Mensagem = components['schemas']['Mensagem'];
 
@@ -84,7 +85,7 @@ export default function Assistente() {
   if (estado.tipo === 'carregando') {
     return (
       <Tela titulo="Assistente virtual">
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Abrindo o assistente" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Abrindo o assistente" />
       </Tela>
     );
   }
@@ -115,10 +116,10 @@ export default function Assistente() {
           const minha = m.remetenteId === usuario?.id;
           return (
             <View key={m.id} style={[estilos.balao, minha ? estilos.minha : estilos.dele]}>
-              <Texto variante="legenda" negrito cor={minha ? cores.branco : cores.textoSecundario}>
+              <Texto variante="legenda" negrito cor={minha ? cores.sobrePrimaria : cores.textoSecundario}>
                 {minha ? 'Você' : 'Assistente'}
               </Texto>
-              <Texto cor={minha ? cores.branco : cores.texto}>{m.conteudo}</Texto>
+              <Texto cor={minha ? cores.sobrePrimaria : cores.texto}>{m.conteudo}</Texto>
             </View>
           );
         })}
@@ -141,9 +142,9 @@ export default function Assistente() {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   conversa: { gap: espaco.sm },
   balao: { padding: espaco.md, borderRadius: raio.padrao, gap: espaco.xs, maxWidth: '88%' },
   minha: { alignSelf: 'flex-end', backgroundColor: cores.primaria },
   dele: { alignSelf: 'flex-start', backgroundColor: cores.superficie },
-});
+}));

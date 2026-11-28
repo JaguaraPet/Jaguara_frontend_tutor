@@ -1,13 +1,14 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { api } from '../api/cliente';
 import type { components } from '../api/esquema';
-import { Alerta, Botao, Campo, Tela, Texto } from '../componentes';
+import { Alerta, Botao, Campo, Icone, Tela, Texto } from '../componentes';
 import { mensagemDaApi } from '../pets/erros';
 import { errosDoCadastro, somenteNumeros } from '../sessao/cadastro';
 import type { DadosCadastro } from '../sessao/cadastro';
 import { alvoToqueMinimo, cores, espaco, raio } from '../tema/tokens';
+import { criarEstilos } from '../tema/estilos';
 
 type Termo = components['schemas']['Termo'];
 
@@ -22,7 +23,7 @@ function TermoExpansivel({ termo }: { termo: Termo }) {
         onPress={() => setAberto(!aberto)}
         style={estilos.linhaToque}
       >
-        <Texto negrito cor={cores.primaria}>
+        <Texto negrito cor={cores.destaque}>
           {aberto ? '▾' : '▸'} {termo.titulo} (versão {termo.versao})
         </Texto>
       </Pressable>
@@ -145,7 +146,7 @@ export default function Cadastro() {
         style={estilos.aceite}
       >
         <View style={[estilos.caixa, dados.aceite && estilos.caixaMarcada]}>
-          {dados.aceite && <Texto cor={cores.branco}>✓</Texto>}
+          {dados.aceite && <Icone nome="check" tamanho={16} cor={cores.sobrePrimaria} />}
         </View>
         <Texto style={estilos.textoAceite}>Li e aceito os termos de uso e a política de privacidade</Texto>
       </Pressable>
@@ -161,7 +162,7 @@ export default function Cadastro() {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   termo: { gap: espaco.xs, alignSelf: 'stretch' },
   linhaToque: { minHeight: alvoToqueMinimo, justifyContent: 'center' },
   aceite: { flexDirection: 'row', alignItems: 'center', gap: espaco.sm, minHeight: alvoToqueMinimo },
@@ -176,4 +177,4 @@ const estilos = StyleSheet.create({
   },
   caixaMarcada: { backgroundColor: cores.primaria, borderColor: cores.primaria },
   textoAceite: { flex: 1 },
-});
+}));

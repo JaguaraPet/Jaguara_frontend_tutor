@@ -114,7 +114,7 @@ export default function Documentos() {
       </Cartao>
 
       {lista === null ? (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando os documentos" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando os documentos" />
       ) : lista.length === 0 ? (
         <Texto cor={cores.textoSecundario}>Nenhum documento enviado.</Texto>
       ) : (

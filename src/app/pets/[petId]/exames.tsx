@@ -121,7 +121,7 @@ export default function Exames() {
       )}
 
       {lista === null ? (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando os exames" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando os exames" />
       ) : lista.length === 0 ? (
         <Texto cor={cores.textoSecundario}>Nenhum exame registrado.</Texto>
       ) : (

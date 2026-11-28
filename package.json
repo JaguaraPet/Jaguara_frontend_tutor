@@ -19,6 +19,7 @@
     "api:contrato": "node -e \"fetch('https://raw.githubusercontent.com/JaguaraPet/Jaguara_doc/main/docs/03-arquitetura/api/openapi.yaml').then(r=>r.text()).then(t=>require('fs').writeFileSync('api/openapi.yaml',t))\""
   },
   "dependencies": {
+    "@expo-google-fonts/bricolage-grotesque": "^0.4.1",
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo/ui": "~58.0.28",
     "@expo/vector-icons": "^15.0.2",

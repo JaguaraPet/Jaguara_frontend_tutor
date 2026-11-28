@@ -1,5 +1,8 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
+import { criarEstilos } from '../tema/estilos';
 import { cores, coresSuaves, espaco, raio } from '../tema/tokens';
+import { Icone } from './Icone';
+import type { NomeIcone } from './Icone';
 import { Texto } from './Texto';
 
 type Tipo = 'sucesso' | 'alerta' | 'erro' | 'info';
@@ -10,19 +13,28 @@ interface Props {
   mensagem?: string;
 }
 
-const visual: Record<Tipo, { cor: string; fundo: string; icone: string; rotulo: string }> = {
-  sucesso: { cor: cores.sucesso, fundo: coresSuaves.sucesso, icone: '✓', rotulo: 'Sucesso' },
-  alerta: { cor: cores.alerta, fundo: coresSuaves.alerta, icone: '!', rotulo: 'Atenção' },
-  erro: { cor: cores.erro, fundo: coresSuaves.erro, icone: '✕', rotulo: 'Erro' },
-  info: { cor: cores.secundaria, fundo: coresSuaves.info, icone: 'i', rotulo: 'Informação' },
+const ICONES: Record<Tipo, { icone: NomeIcone; rotulo: string }> = {
+  sucesso: { icone: 'check', rotulo: 'Sucesso' },
+  alerta: { icone: 'exclamation', rotulo: 'Atenção' },
+  erro: { icone: 'close', rotulo: 'Erro' },
+  info: { icone: 'information-variant', rotulo: 'Informação' },
 };
+
+/** Cores lidas a cada render, para acompanhar o modo claro ou escuro. */
+const corDo = (tipo: Tipo) =>
+  ({
+    sucesso: { cor: cores.sucesso, fundo: coresSuaves.sucesso },
+    alerta: { cor: cores.alerta, fundo: coresSuaves.alerta },
+    erro: { cor: cores.erro, fundo: coresSuaves.erro },
+    info: { cor: cores.secundaria, fundo: coresSuaves.info },
+  })[tipo];
 
 /**
  * Alerta com cor, ícone e texto: a cor nunca é o único indicador (UX-02, seção 6).
  * Erros e alertas são anunciados pelo leitor de tela.
  */
 export function Alerta({ tipo, titulo, mensagem }: Props) {
-  const v = visual[tipo];
+  const v = { ...ICONES[tipo], ...corDo(tipo) };
   const urgente = tipo === 'erro' || tipo === 'alerta';
   return (
     <View
@@ -33,9 +45,7 @@ export function Alerta({ tipo, titulo, mensagem }: Props) {
       style={[estilos.alerta, { backgroundColor: v.fundo, borderLeftColor: v.cor }]}
     >
       <View style={[estilos.icone, { backgroundColor: v.cor }]}>
-        <Texto negrito cor={cores.branco} importantForAccessibility="no">
-          {v.icone}
-        </Texto>
+        <Icone nome={v.icone} tamanho={18} cor={cores.sobreCor} />
       </View>
       <View style={estilos.textos}>
         <Texto negrito cor={v.cor}>
@@ -47,12 +57,12 @@ export function Alerta({ tipo, titulo, mensagem }: Props) {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   alerta: {
     flexDirection: 'row',
     gap: espaco.md,
     padding: espaco.lg,
-    borderRadius: raio.padrao,
+    borderRadius: raio.cartao - 4,
     borderLeftWidth: 4,
     alignSelf: 'stretch',
   },
@@ -64,4 +74,4 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   textos: { flex: 1, gap: espaco.xs },
-});
+}));

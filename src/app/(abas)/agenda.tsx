@@ -4,7 +4,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { TIPOS_EVENTO, horaDe, porDia, rotuloDoDia } from '../../agenda/agenda';
 import { api } from '../../api/cliente';
 import type { components } from '../../api/esquema';
-import { Alerta, Botao, Cartao, Opcoes, Tela, Texto } from '../../componentes';
+import { Alerta, Botao, Cartao, Icone, Opcoes, Tela, Texto } from '../../componentes';
 import { cores, espaco } from '../../tema/tokens';
 
 type Pet = components['schemas']['Pet'];
@@ -63,7 +63,7 @@ export default function Agenda() {
   if (pets === null) {
     return (
       <Tela titulo="Agenda">
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando a agenda" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando a agenda" />
       </Tela>
     );
   }
@@ -113,7 +113,7 @@ export default function Agenda() {
       )}
 
       {eventos === null ? (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando os eventos" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando os eventos" />
       ) : grupos.length === 0 ? (
         <Texto cor={cores.textoSecundario}>Nada marcado nos próximos 30 dias.</Texto>
       ) : (
@@ -133,7 +133,10 @@ export default function Agenda() {
                 {e.descricao ? <Texto>{e.descricao}</Texto> : null}
                 {e.origem === 'AGENDAMENTO' && new Date(e.dataHoraInicio) > new Date() &&
                   (e.confirmado ? (
-                    <Texto cor={cores.sucesso}>Presença confirmada ✓</Texto>
+                    <View style={estilos.confirmada}>
+                      <Icone nome="check-circle" tamanho={18} cor={cores.sucesso} />
+                      <Texto cor={cores.sucesso}>Presença confirmada</Texto>
+                    </View>
                   ) : (
                     <Botao
                       titulo="Confirmar presença"
@@ -162,4 +165,5 @@ export default function Agenda() {
 const estilos = StyleSheet.create({
   dia: { gap: espaco.sm, alignSelf: 'stretch' },
   acoes: { flexDirection: 'row', gap: espaco.sm },
+  confirmada: { flexDirection: 'row', alignItems: 'center', gap: espaco.xs },
 });

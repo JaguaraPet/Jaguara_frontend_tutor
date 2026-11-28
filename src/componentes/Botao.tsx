@@ -1,12 +1,9 @@
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  PressableProps,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, PressableProps, View } from 'react-native';
+import { criarEstilos } from '../tema/estilos';
 import { alvoToqueMinimo, cores, espaco, raio } from '../tema/tokens';
+import { Icone } from './Icone';
+import type { NomeIcone } from './Icone';
 import { Texto } from './Texto';
 
 type Variante = 'primaria' | 'secundaria' | 'perigo' | 'texto';
@@ -16,27 +13,40 @@ interface Props extends Omit<PressableProps, 'children'> {
   variante?: Variante;
   carregando?: boolean;
   larguraTotal?: boolean;
+  /** Ícone antes do título. */
+  icone?: NomeIcone;
 }
 
-const aparencia: Record<Variante, { fundo: string; pressionado: string; texto: string; borda?: string }> = {
-  primaria: { fundo: cores.primaria, pressionado: cores.primariaEscura, texto: cores.branco },
-  secundaria: { fundo: cores.fundo, pressionado: cores.superficie, texto: cores.secundaria, borda: cores.secundaria },
-  perigo: { fundo: cores.erro, pressionado: '#8C1D17', texto: cores.branco },
-  texto: { fundo: 'transparent', pressionado: cores.superficie, texto: cores.primaria },
-};
+/** Lido a cada render, para acompanhar o modo claro ou escuro. */
+function aparencia(variante: Variante): { fundo: string; pressionado: string; texto: string; borda?: string } {
+  switch (variante) {
+    case 'primaria':
+      return { fundo: cores.primaria, pressionado: cores.primariaEscura, texto: cores.sobrePrimaria };
+    case 'secundaria':
+      return { fundo: 'transparent', pressionado: cores.superficie, texto: cores.secundaria, borda: cores.secundaria };
+    case 'perigo':
+      return { fundo: cores.erro, pressionado: cores.erroEscuro, texto: cores.sobreCor };
+    default:
+      return { fundo: 'transparent', pressionado: cores.superficie, texto: cores.destaque };
+  }
+}
 
-/** Botão do UX-02 com estados padrão, pressionado, foco, desabilitado e carregando. */
+/**
+ * Botão do UX-02 em pílula, com estados padrão, pressionado, foco, desabilitado e carregando.
+ * No celular, ações aparecem como botão e não como link sublinhado.
+ */
 export function Botao({
   titulo,
   variante = 'primaria',
   carregando = false,
   larguraTotal = false,
+  icone,
   disabled,
   ...props
 }: Props) {
   const [foco, setFoco] = useState(false);
   const inativo = disabled || carregando;
-  const a = aparencia[variante];
+  const a = aparencia(variante);
 
   return (
     <Pressable
@@ -48,6 +58,7 @@ export function Botao({
       onBlur={() => setFoco(false)}
       style={({ pressed }) => [
         estilos.base,
+        variante === 'texto' && estilos.texto,
         larguraTotal && estilos.larguraTotal,
         {
           backgroundColor: inativo ? cores.desabilitado : pressed ? a.pressionado : a.fundo,
@@ -59,6 +70,7 @@ export function Botao({
     >
       <View style={estilos.conteudo}>
         {carregando && <ActivityIndicator color={cores.textoSecundario} />}
+        {icone && !carregando && <Icone nome={icone} tamanho={18} cor={inativo ? cores.textoSecundario : a.texto} />}
         <Texto negrito cor={inativo ? cores.textoSecundario : a.texto}>
           {titulo}
         </Texto>
@@ -67,18 +79,19 @@ export function Botao({
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   base: {
     minHeight: alvoToqueMinimo,
     minWidth: alvoToqueMinimo,
-    paddingHorizontal: espaco.xl,
-    paddingVertical: espaco.md,
-    borderRadius: raio.padrao,
-    borderWidth: 1,
+    paddingHorizontal: espaco.lg + 4,
+    paddingVertical: espaco.sm,
+    borderRadius: raio.pilula,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  texto: { paddingHorizontal: espaco.lg, alignSelf: 'flex-start' },
   larguraTotal: { alignSelf: 'stretch' },
   conteudo: { flexDirection: 'row', alignItems: 'center', gap: espaco.sm },
   foco: { borderWidth: 2, borderColor: cores.secundaria },
-});
+}));

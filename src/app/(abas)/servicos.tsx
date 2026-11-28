@@ -102,7 +102,8 @@ export default function Servicos() {
         />
         <Botao titulo="Buscar" onPress={() => void buscar(busca, categoria, origem)} larguraTotal />
         <Botao
-          titulo={origem ? 'Ver todas, sem distância' : '📍 Perto de mim'}
+          titulo={origem ? 'Ver todas, sem distância' : 'Perto de mim'}
+          icone={origem ? undefined : 'map-marker-outline'}
           variante="secundaria"
           onPress={() => void pertoDeMim()}
           larguraTotal
@@ -132,7 +133,7 @@ export default function Servicos() {
 
       {erro && <Alerta tipo="erro" titulo="Busca indisponível" mensagem={erro} />}
       {carregando ? (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Buscando empresas" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Buscando empresas" />
       ) : (
         !erro &&
         (empresas.length === 0 ? (

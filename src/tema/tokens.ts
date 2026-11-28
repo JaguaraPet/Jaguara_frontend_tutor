@@ -1,37 +1,45 @@
 /**
- * Tokens visuais do UX-02 (guia de estilo), os mesmos da web Enterprise.
- * Este arquivo é idêntico em Jaguara_frontend_tutor e Jaguara_frontend_enterprise:
- * mudou um, mude o outro. O contraste dos pares de texto foi verificado no UX-02 (WCAG AA).
+ * Tokens visuais da identidade Selvagem (UX-02), os mesmos da web Enterprise.
+ * As duas paletas, clara e escura, ficam em `paletas.ts`. O contraste dos pares de texto
+ * foi verificado no UX-02 (WCAG AA) nos dois modos.
+ *
+ * `cores` e `coresSuaves` guardam a paleta do modo em uso: `aplicarModo` troca os valores e o
+ * layout raiz remonta as telas. Por isso os estilos usam `criarEstilos` (tema/estilos.ts), que
+ * refaz o StyleSheet quando o modo muda.
  */
-export const cores = {
-  primaria: '#8A4B0F',
-  primariaEscura: '#5E3209',
-  secundaria: '#1F5C4A',
-  fundo: '#FFFFFF',
-  superficie: '#F7F3EE',
-  texto: '#1E1B18',
-  textoSecundario: '#5C554E',
-  sucesso: '#1E7B3A',
-  alerta: '#8A5A00',
-  erro: '#B3261E',
-  borda: '#D9D1C7',
-  branco: '#FFFFFF',
-  /** Fundo dos estados desabilitados: texto `textoSecundario` sobre ele mantém 4,5:1. */
-  desabilitado: '#ECE6DF',
-} as const;
+import { PALETAS, SUAVES } from './paletas';
+import type { Cores, CoresSuaves, Modo } from './paletas';
+
+export type { Cores, CoresSuaves, Modo } from './paletas';
+
+export const cores: Cores = { ...PALETAS.claro };
 
 /** Fundos suaves para alertas e etiquetas; o texto usa a cor cheia correspondente. */
-export const coresSuaves = {
-  sucesso: '#E6F2EA',
-  alerta: '#FBF1DD',
-  erro: '#FBE9E7',
-  info: '#E7F0ED',
-} as const;
+export const coresSuaves: CoresSuaves = { ...SUAVES.claro };
+
+let modoAtual: Modo = 'claro';
+let versao = 0;
+
+/** Troca a paleta em uso. Devolve true quando o modo mudou. */
+export function aplicarModo(modo: Modo): boolean {
+  if (modo === modoAtual) return false;
+  Object.assign(cores, PALETAS[modo]);
+  Object.assign(coresSuaves, SUAVES[modo]);
+  modoAtual = modo;
+  versao += 1;
+  return true;
+}
+
+export const modoEmUso = (): Modo => modoAtual;
+/** Muda a cada troca de modo; os estilos comparam com ela para saber se estão velhos. */
+export const versaoDoTema = (): number => versao;
 
 export const fonte = {
   familia: 'Inter',
-  titulo1: { tamanho: 28, peso: '700', alturaLinha: 36 },
-  titulo2: { tamanho: 22, peso: '600', alturaLinha: 30 },
+  /** Títulos em Bricolage Grotesque, com só a primeira letra maiúscula. */
+  familiaTitulo: 'Bricolage-ExtraBold',
+  titulo1: { tamanho: 30, peso: '800', alturaLinha: 36 },
+  titulo2: { tamanho: 20, peso: '800', alturaLinha: 26 },
   corpo: { tamanho: 16, peso: '400', alturaLinha: 24 },
   legenda: { tamanho: 14, peso: '400', alturaLinha: 20 },
 } as const;
@@ -47,7 +55,8 @@ export const espaco = {
   xxl: 32,
 } as const;
 
-export const raio = { padrao: 8 } as const;
+/** Campos ficam com o raio padrão; cartões arredondam mais e botões viram pílulas. */
+export const raio = { padrao: 10, cartao: 20, pilula: 999 } as const;
 
 /** Área mínima de toque (WCAG 2.5.8). */
 export const alvoToqueMinimo = 44;

@@ -81,7 +81,7 @@ export default function Pantera() {
         {erro ? (
           <Alerta tipo="erro" titulo="Plano indisponível" mensagem={erro} />
         ) : (
-          <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando o plano" />
+          <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando o plano" />
         )}
       </Tela>
     );

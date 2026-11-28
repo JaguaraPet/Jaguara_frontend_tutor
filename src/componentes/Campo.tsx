@@ -18,7 +18,7 @@ interface Props extends TextInputProps {
 export function Campo({ rotulo, erro, ajuda, desabilitado, style, onFocus, onBlur, ...props }: Props) {
   const [foco, setFoco] = useState(false);
   const id = useId();
-  const corBorda = erro ? cores.erro : foco ? cores.primaria : cores.textoSecundario;
+  const corBorda = erro ? cores.erro : foco ? cores.destaque : cores.textoSecundario;
 
   return (
     <View style={estilos.grupo}>
@@ -45,7 +45,7 @@ export function Campo({ rotulo, erro, ajuda, desabilitado, style, onFocus, onBlu
           {
             borderColor: corBorda,
             borderWidth: foco || erro ? 2 : 1,
-            backgroundColor: desabilitado ? cores.desabilitado : cores.fundo,
+            backgroundColor: desabilitado ? cores.desabilitado : cores.elevado,
             color: desabilitado ? cores.textoSecundario : cores.texto,
           },
           style,

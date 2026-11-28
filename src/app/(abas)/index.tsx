@@ -1,28 +1,20 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 import { api } from '../../api/cliente';
 import { AvaliarAtendimentos } from '../../avaliacao/AvaliarAtendimentos';
 import { Comemoracoes } from '../../pets/Comemoracoes';
+import { FotoPet } from '../../pets/FotoPet';
 import { LembretesDeServico, QuemCuidaHoje } from '../../pets/QuemCuidaHoje';
 import type { components } from '../../api/esquema';
-import { Alerta, Botao, Cartao, Tela, Texto } from '../../componentes';
+import { Alerta, Botao, Cartao, Icone, Tela, Texto } from '../../componentes';
+import type { NomeIcone } from '../../componentes';
 import { cores, espaco } from '../../tema/tokens';
+import { criarEstilos } from '../../tema/estilos';
 
 type Hoje = components['schemas']['HojeTutor'];
 type PetDoDia = Hoje['pets'][number];
 type Item = components['schemas']['ItemDoDia'];
-
-const ICONE: Record<string, string> = {
-  Cachorro: '🐶',
-  Gato: '🐱',
-  Ave: '🐦',
-  Roedor: '🐹',
-  Coelho: '🐰',
-  Réptil: '🦎',
-  Peixe: '🐟',
-};
-const icone = (especie: string) => ICONE[especie] ?? '🐾';
 
 const hora = (iso: string) =>
   new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
@@ -37,6 +29,18 @@ const diaHora = (iso: string) =>
   });
 const dataCurta = (data: string) => `${data.slice(8, 10)}/${data.slice(5, 7)}`;
 
+/** "Domingo, 22 de novembro", no fuso de Brasília. */
+function dataDeHoje(): string {
+  const t = new Date().toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'America/Sao_Paulo',
+  });
+  const [dia, ...resto] = t.split(', ');
+  return [dia.charAt(0).toUpperCase() + dia.slice(1), ...resto].join(', ');
+}
+
 function saudacao(): string {
   const h = Number(new Date().toLocaleString('pt-BR', { hour: '2-digit', hour12: false, timeZone: 'America/Sao_Paulo' }));
   if (h < 12) return 'Bom dia!';
@@ -45,12 +49,12 @@ function saudacao(): string {
 }
 
 const ATALHOS = [
-  { rotulo: 'Nova rotina', destino: 'rotinas', icone: '🔁' },
-  { rotulo: 'Refeição', destino: 'alimentacao', icone: '🥣' },
-  { rotulo: 'Remédio', destino: 'medicamentos', icone: '💊' },
-  { rotulo: 'Vacina', destino: 'vacinas', icone: '💉' },
-  { rotulo: 'Despesa', destino: 'despesas', icone: '🧾' },
-] as const;
+  { rotulo: 'Nova rotina', destino: 'rotinas', icone: 'repeat' },
+  { rotulo: 'Refeição', destino: 'alimentacao', icone: 'bowl-mix-outline' },
+  { rotulo: 'Remédio', destino: 'medicamentos', icone: 'pill' },
+  { rotulo: 'Vacina', destino: 'vacinas', icone: 'needle' },
+  { rotulo: 'Despesa', destino: 'despesas', icone: 'receipt-text-outline' },
+] as const satisfies readonly { rotulo: string; destino: string; icone: NomeIcone }[];
 
 /** Um item do dia: remédio ("Dei") ou rotina ("Feito"), com quem já fez. */
 function LinhaDoDia({ item, aoMudar }: { item: Item; aoMudar: () => void }) {
@@ -89,21 +93,24 @@ function LinhaDoDia({ item, aoMudar }: { item: Item; aoMudar: () => void }) {
     <View style={[estilos.linha, item.feito && estilos.linhaFeita]}>
       <Texto style={estilos.hora}>{item.horario ?? 'Hoje'}</Texto>
       <View style={estilos.linhaCorpo}>
-        <Texto style={item.feito ? estilos.tituloFeito : undefined}>
-          {remedio ? '💊 ' : ''}
-          {item.titulo}
-        </Texto>
+        <View style={estilos.comIcone}>
+          {remedio && <Icone nome="pill" tamanho={16} cor={cores.secundaria} />}
+          <Texto style={item.feito ? estilos.tituloFeito : undefined}>{item.titulo}</Texto>
+        </View>
         {item.detalhe ? (
           <Texto variante="legenda" cor={cores.textoSecundario}>
             {item.detalhe}
           </Texto>
         ) : null}
         {item.feito && (
-          <Texto variante="legenda" cor={cores.sucesso}>
-            ✓ {remedio ? 'Dado' : 'Feito'}
-            {item.feitoPor ? ` por ${item.feitoPor}` : ''}
-            {item.feitoEm ? ` às ${hora(item.feitoEm)}` : ''}
-          </Texto>
+          <View style={estilos.comIcone}>
+            <Icone nome="check" tamanho={14} cor={cores.sucesso} />
+            <Texto variante="legenda" cor={cores.sucesso}>
+              {remedio ? 'Dado' : 'Feito'}
+              {item.feitoPor ? ` por ${item.feitoPor}` : ''}
+              {item.feitoEm ? ` às ${hora(item.feitoEm)}` : ''}
+            </Texto>
+          </View>
         )}
       </View>
       <Pressable
@@ -114,11 +121,11 @@ function LinhaDoDia({ item, aoMudar }: { item: Item; aoMudar: () => void }) {
         style={({ pressed }) => [estilos.marcar, item.feito && estilos.marcarFeito, pressed && { opacity: 0.7 }]}
       >
         {enviando ? (
-          <ActivityIndicator color={item.feito ? cores.branco : cores.secundaria} />
+          <ActivityIndicator color={item.feito ? cores.sobreCor : cores.secundaria} />
+        ) : item.feito ? (
+          <Icone nome="check" tamanho={20} cor={cores.sobreCor} />
         ) : (
-          <Texto style={[estilos.marcarTexto, item.feito && { color: cores.branco }]}>
-            {item.feito ? '✓' : remedio ? 'Dei' : 'Feito'}
-          </Texto>
+          <Texto style={estilos.marcarTexto}>{remedio ? 'Dei' : 'Feito'}</Texto>
         )}
       </Pressable>
     </View>
@@ -152,7 +159,7 @@ export default function Inicio() {
   if (!hoje) {
     return (
       <Tela titulo={saudacao()}>
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando o dia" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando o dia" />
       </Tela>
     );
   }
@@ -180,36 +187,53 @@ export default function Inicio() {
     recarregar();
   }
 
+  const fotos = Object.fromEntries(hoje.pets.map((p) => [p.id, p.fotoUrl]));
+
   return (
     <View style={estilos.raiz}>
       <Tela
+        sobretitulo={dataDeHoje()}
         titulo={saudacao()}
-        subtitulo={pendentes === 0 ? 'Tudo feito por hoje. 🎉' : `${pendentes} ${pendentes === 1 ? 'coisa' : 'coisas'} para hoje.`}
+        subtitulo={pendentes === 0 ? 'Tudo feito por hoje.' : `${pendentes} ${pendentes === 1 ? 'coisa' : 'coisas'} para hoje.`}
+        acessorio={
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Notificações"
+            onPress={() => router.push('/notificacoes')}
+            style={({ pressed }) => [estilos.sino, pressed && { backgroundColor: cores.superficie }]}
+          >
+            <Icone nome="bell-outline" tamanho={22} cor={cores.destaque} />
+          </Pressable>
+        }
       >
         {hoje.pets.length > 1 && (
           <View style={estilos.pets} accessibilityRole="radiogroup" accessibilityLabel="Pet">
-            {[{ id: '', nome: 'Todos', especie: '' } as Pick<PetDoDia, 'id' | 'nome' | 'especie'>, ...hoje.pets].map((p) => {
+            {[{ id: '', nome: 'Todos', especie: '', fotoUrl: null } as Pick<PetDoDia, 'id' | 'nome' | 'especie' | 'fotoUrl'>, ...hoje.pets].map((p) => {
               const ativo = petId === p.id;
               return (
                 <Pressable
                   key={p.id || 'todos'}
                   accessibilityRole="radio"
+                  accessibilityLabel={p.nome}
                   accessibilityState={{ checked: ativo }}
                   onPress={() => setPetId(p.id)}
-                  style={[estilos.chip, ativo && estilos.chipAtivo]}
+                  style={[estilos.chip, p.id !== '' && estilos.chipComFoto, ativo && estilos.chipAtivo]}
                 >
-                  <Texto style={[estilos.chipTexto, ativo && { color: cores.branco }]}>
-                    {p.especie ? `${icone(p.especie)} ` : ''}
-                    {p.nome}
-                  </Texto>
+                  {p.id !== '' && <FotoPet petId={p.id} nome={p.nome} fotoUrl={p.fotoUrl ?? undefined} tamanho={34} />}
+                  <Texto style={[estilos.chipTexto, ativo && { color: cores.sobrePrimaria }]}>{p.nome}</Texto>
                 </Pressable>
               );
             })}
           </View>
         )}
 
+        <Comemoracoes
+          celebracoes={(hoje.celebracoes ?? []).filter((c) => !petId || c.petId === petId)}
+          fotos={fotos}
+        />
+
         {selecionados.map((p) => (
-          <Cartao key={p.id} titulo={`${icone(p.especie)} ${p.nome}`}>
+          <Cartao key={p.id} titulo={p.nome}>
             <QuemCuidaHoje pet={p} aoMudar={recarregar} />
             {p.itens.length === 0 ? (
               <View style={estilos.vazio}>
@@ -228,8 +252,6 @@ export default function Inicio() {
           </Cartao>
         ))}
 
-        <Comemoracoes celebracoes={hoje.celebracoes ?? []} />
-
         <AvaliarAtendimentos versao={versao} />
 
         <LembretesDeServico sugestoes={(hoje.sugestoes ?? []).filter((s) => !petId || s.petId === petId)} />
@@ -247,9 +269,12 @@ export default function Inicio() {
                   </Texto>
                 </View>
                 {a.confirmado ? (
-                  <Texto variante="legenda" cor={cores.sucesso}>
-                    ✓ Confirmado
-                  </Texto>
+                  <View style={estilos.comIcone}>
+                    <Icone nome="check-circle" tamanho={16} cor={cores.sucesso} />
+                    <Texto variante="legenda" cor={cores.sucesso}>
+                      Confirmado
+                    </Texto>
+                  </View>
                 ) : (
                   <Botao titulo="Confirmar" variante="secundaria" onPress={() => void confirmar(a.id)} />
                 )}
@@ -267,9 +292,12 @@ export default function Inicio() {
                 onPress={() => router.push({ pathname: '/pets/[petId]/vacinas', params: { petId: v.petId } })}
                 style={estilos.vacina}
               >
-                <Texto>
-                  💉 {v.vacina} · {nomePet(v.petId)}
-                </Texto>
+                <View style={estilos.comIcone}>
+                  <Icone nome="needle" tamanho={16} cor={cores.secundaria} />
+                  <Texto>
+                    {v.vacina} · {nomePet(v.petId)}
+                  </Texto>
+                </View>
                 <Texto variante="legenda" cor={v.atrasada ? cores.erro : cores.alerta}>
                   {v.atrasada ? `Atrasada desde ${dataCurta(v.proximaDose)}` : `Vence em ${dataCurta(v.proximaDose)}`}
                 </Texto>
@@ -304,9 +332,10 @@ export default function Inicio() {
                   router.push({ pathname: `/pets/[petId]/${a.destino}`, params: { petId: petDoAtalho } });
                 }}
               >
-                <Texto>
-                  {a.icone} {a.rotulo}
-                </Texto>
+                <View style={estilos.comIcone}>
+                  <Icone nome={a.icone} tamanho={20} cor={cores.secundaria} />
+                  <Texto>{a.rotulo}</Texto>
+                </View>
               </Pressable>
             ))}
           </View>
@@ -318,24 +347,39 @@ export default function Inicio() {
         onPress={() => setMais((m) => !m)}
         style={({ pressed }) => [estilos.mais, pressed && { backgroundColor: cores.primariaEscura }]}
       >
-        <Texto style={estilos.maisTexto}>{mais ? '×' : '+'}</Texto>
+        <Icone nome={mais ? 'close' : 'plus'} tamanho={28} cor={cores.sobrePrimaria} />
       </Pressable>
     </View>
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   raiz: { flex: 1 },
+  comIcone: { flexDirection: 'row', alignItems: 'center', gap: espaco.xs },
   pets: { flexDirection: 'row', flexWrap: 'wrap', gap: espaco.sm },
+  sino: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: cores.cartaoBorda,
+    backgroundColor: cores.cartao,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   chip: {
+    minHeight: 42,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: espaco.sm,
     paddingHorizontal: espaco.lg,
-    paddingVertical: espaco.sm,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: cores.borda,
-    backgroundColor: cores.fundo,
+    borderColor: cores.cartaoBorda,
+    backgroundColor: cores.cartao,
   },
-  chipAtivo: { backgroundColor: cores.secundaria, borderColor: cores.secundaria },
+  chipComFoto: { paddingLeft: 4 },
+  chipAtivo: { backgroundColor: cores.primaria, borderColor: cores.primaria },
   chipTexto: { fontWeight: '600' },
   linha: {
     flexDirection: 'row',
@@ -343,7 +387,7 @@ const estilos = StyleSheet.create({
     gap: espaco.md,
     paddingVertical: espaco.sm,
     borderTopWidth: 1,
-    borderTopColor: cores.borda,
+    borderTopColor: cores.cartaoBorda,
   },
   linhaFeita: { opacity: 0.75 },
   hora: { width: 48, fontWeight: '700' },
@@ -368,9 +412,9 @@ const estilos = StyleSheet.create({
     gap: espaco.md,
     paddingVertical: espaco.sm,
     borderTopWidth: 1,
-    borderTopColor: cores.borda,
+    borderTopColor: cores.cartaoBorda,
   },
-  vacina: { paddingVertical: espaco.sm, borderTopWidth: 1, borderTopColor: cores.borda, gap: 2 },
+  vacina: { paddingVertical: espaco.sm, borderTopWidth: 1, borderTopColor: cores.cartaoBorda, gap: 2 },
   mais: {
     position: 'absolute',
     right: espaco.xl,
@@ -387,14 +431,14 @@ const estilos = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 6,
   },
-  maisTexto: { color: cores.branco, fontSize: 30, lineHeight: 34, fontWeight: '600' },
+  maisTexto: { color: cores.sobrePrimaria, fontSize: 30, lineHeight: 34, fontWeight: '600' },
   fundoMenu: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(30, 27, 24, 0.25)',
+    backgroundColor: cores.veu,
     justifyContent: 'flex-end',
     alignItems: 'flex-end',
     padding: espaco.xl,
@@ -405,8 +449,8 @@ const estilos = StyleSheet.create({
     padding: espaco.md,
     gap: espaco.xs,
     borderRadius: 16,
-    backgroundColor: cores.fundo,
+    backgroundColor: cores.elevado,
   },
   menuItem: { paddingVertical: espaco.md, paddingHorizontal: espaco.sm, borderRadius: 8 },
-});
+}));
 

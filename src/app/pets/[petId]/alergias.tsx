@@ -131,7 +131,7 @@ export default function Alergias() {
       )}
 
       {lista === null ? (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando as alergias" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando as alergias" />
       ) : lista.length === 0 ? (
         <Texto cor={cores.textoSecundario}>Nenhuma alergia ou restrição registrada.</Texto>
       ) : (

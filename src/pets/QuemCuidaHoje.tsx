@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { api } from '../api/cliente';
 import type { components } from '../api/esquema';
 import { Botao, Cartao, Texto } from '../componentes';
 import { cores, coresSuaves, espaco } from '../tema/tokens';
+import { criarEstilos } from '../tema/estilos';
 
 type PetDoDia = components['schemas']['HojeTutor']['pets'][number];
 type Sugestao = NonNullable<components['schemas']['HojeTutor']['sugestoes']>[number];
@@ -45,7 +46,7 @@ export function QuemCuidaHoje({ pet, aoMudar }: { pet: PetDoDia; aoMudar: () => 
               onPress={() => void definir(r.tutorId)}
               style={[estilos.opcao, atual?.tutorId === r.tutorId && estilos.ativa]}
             >
-              <Texto cor={atual?.tutorId === r.tutorId ? cores.branco : cores.texto}>{r.nome}</Texto>
+              <Texto cor={atual?.tutorId === r.tutorId ? cores.sobrePrimaria : cores.texto}>{r.nome}</Texto>
             </Pressable>
           ))}
         </View>
@@ -78,7 +79,7 @@ export function LembretesDeServico({ sugestoes }: { sugestoes: Sugestao[] }) {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   faixa: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -99,6 +100,6 @@ const estilos = StyleSheet.create({
     minHeight: 44,
     justifyContent: 'center',
   },
-  ativa: { backgroundColor: cores.secundaria, borderColor: cores.secundaria },
+  ativa: { backgroundColor: cores.primaria, borderColor: cores.primaria },
   sugestao: { gap: espaco.sm, paddingVertical: espaco.xs },
-});
+}));

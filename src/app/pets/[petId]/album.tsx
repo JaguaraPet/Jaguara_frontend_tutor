@@ -87,7 +87,7 @@ export default function Album() {
       <Campo rotulo="Legenda (opcional)" value={legenda} onChangeText={setLegenda} maxLength={200} />
       <Botao titulo="Adicionar foto" carregando={enviando} onPress={() => void escolher()} larguraTotal />
       {fotos === null ? (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando o álbum" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando o álbum" />
       ) : fotos.length === 0 ? (
         <Texto cor={cores.textoSecundario}>Nenhuma foto ainda. Que tal a primeira?</Texto>
       ) : (

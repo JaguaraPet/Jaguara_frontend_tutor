@@ -92,7 +92,7 @@ export default function Responsaveis() {
   if (lista === null) {
     return (
       <Tela titulo="Responsáveis">
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando os responsáveis" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando os responsáveis" />
       </Tela>
     );
   }
