@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, View } from 'react-native';
 import { api } from '../api/cliente';
 import type { components } from '../api/esquema';
 import { Alerta, Botao, Campo, Cartao, Texto } from '../componentes';
 import { mensagemDaApi } from '../pets/erros';
 import { alvoToqueMinimo, cores, espaco, raio } from '../tema/tokens';
+import { criarEstilos } from '../tema/estilos';
 import { bandeira, problemaNoCartao, tokenizarCartao } from './cartao';
 
 export type Pagamento = components['schemas']['Pagamento'];
@@ -130,7 +131,7 @@ export function FormularioPagamento({
             onPress={() => setMeio(m.valor)}
             style={[estilos.meio, meio === m.valor && estilos.escolhido]}
           >
-            <Texto negrito={meio === m.valor} cor={meio === m.valor ? cores.branco : cores.texto}>
+            <Texto negrito={meio === m.valor} cor={meio === m.valor ? cores.sobrePrimaria : cores.texto}>
               {m.rotulo}
             </Texto>
           </Pressable>
@@ -194,7 +195,7 @@ export function CobrancaPendente({ pagamento }: { pagamento: Pagamento }) {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   meios: { flexDirection: 'row', flexWrap: 'wrap', gap: espaco.sm },
   meio: {
     minHeight: alvoToqueMinimo,
@@ -206,4 +207,4 @@ const estilos = StyleSheet.create({
   },
   escolhido: { backgroundColor: cores.primaria, borderColor: cores.primaria },
   codigo: { padding: espaco.md, borderRadius: raio.padrao, backgroundColor: cores.fundo, fontFamily: 'monospace' },
-});
+}));

@@ -43,7 +43,7 @@ export default function MinhasSolicitacoes() {
         aoMudar={setFiltro}
       />
       {lista === null ? (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando as solicitações" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando as solicitações" />
       ) : lista.length === 0 ? (
         <>
           <Texto cor={cores.textoSecundario}>Você ainda não possui solicitações de serviço.</Texto>

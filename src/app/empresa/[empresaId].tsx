@@ -4,7 +4,7 @@ import { ActivityIndicator, Linking, StyleSheet, View } from 'react-native';
 import { api } from '../../api/cliente';
 import { duracao, local, preco, rotuloCategoria, rotuloTipo } from '../../catalogo/catalogo';
 import type { EmpresaPublica, Servico } from '../../catalogo/catalogo';
-import { Alerta, Botao, Cartao, Tela, Texto } from '../../componentes';
+import { Alerta, Botao, Cartao, Icone, Tela, Texto } from '../../componentes';
 import { cores, espaco } from '../../tema/tokens';
 
 const FALHA = 'Não deu para abrir a empresa agora. Tente de novo.';
@@ -60,7 +60,7 @@ export default function PerfilEmpresa() {
   if (!empresa) {
     return (
       <Tela titulo="Empresa">
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando a empresa" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando a empresa" />
       </Tela>
     );
   }
@@ -84,17 +84,28 @@ export default function PerfilEmpresa() {
       {empresa.descricao ? <Texto>{empresa.descricao}</Texto> : null}
       {(empresa.horarioFuncionamento || empresa.whatsapp || empresa.telefone || empresa.formasPagamento?.length) && (
         <Cartao titulo="Como funciona">
-          {empresa.horarioFuncionamento ? <Texto>🕒 {empresa.horarioFuncionamento}</Texto> : null}
+          {empresa.horarioFuncionamento ? (
+            <View style={estilos.contato}>
+              <Icone nome="clock-outline" tamanho={18} cor={cores.textoSecundario} />
+              <Texto style={estilos.contatoTexto}>{empresa.horarioFuncionamento}</Texto>
+            </View>
+          ) : null}
           {empresa.whatsapp ? (
+            <View style={estilos.contato}>
+            <Icone nome="whatsapp" tamanho={18} cor={cores.secundaria} />
             <Texto
               cor={cores.secundaria}
               accessibilityRole="link"
               onPress={() => void Linking.openURL(`https://wa.me/55${empresa.whatsapp!.replace(/\D/g, '')}`)}
             >
-              💬 WhatsApp {empresa.whatsapp}
+              WhatsApp {empresa.whatsapp}
             </Texto>
+            </View>
           ) : empresa.telefone ? (
-            <Texto>📞 {empresa.telefone}</Texto>
+            <View style={estilos.contato}>
+              <Icone nome="phone-outline" tamanho={18} cor={cores.textoSecundario} />
+              <Texto>{empresa.telefone}</Texto>
+            </View>
           ) : null}
           {empresa.formasPagamento?.length ? (
             <Texto variante="legenda">Aceita: {empresa.formasPagamento.map(rotuloPagamento).join(', ')}</Texto>
@@ -140,4 +151,6 @@ export default function PerfilEmpresa() {
 const estilos = StyleSheet.create({
   lista: { gap: espaco.md },
   linha: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  contato: { flexDirection: 'row', alignItems: 'center', gap: espaco.sm },
+  contatoTexto: { flex: 1 },
 });

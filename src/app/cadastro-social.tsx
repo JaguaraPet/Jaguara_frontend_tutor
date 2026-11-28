@@ -1,12 +1,13 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { api } from '../api/cliente';
 import type { components } from '../api/esquema';
-import { Alerta, Botao, Campo, Cartao, Tela, Texto } from '../componentes';
+import { Alerta, Botao, Campo, Cartao, Icone, Tela, Texto } from '../componentes';
 import { cpfValido, somenteNumeros } from '../sessao/cadastro';
 import { ErroApi, sessao } from '../sessao/sessao';
 import { alvoToqueMinimo, cores, espaco, raio } from '../tema/tokens';
+import { criarEstilos } from '../tema/estilos';
 
 type Termo = components['schemas']['Termo'];
 
@@ -86,7 +87,7 @@ export default function CadastroSocial() {
         onPress={() => setAceite((a) => !a)}
         style={estilos.aceite}
       >
-        <View style={[estilos.caixa, aceite && estilos.caixaMarcada]}>{aceite && <Texto cor={cores.branco}>✓</Texto>}</View>
+        <View style={[estilos.caixa, aceite && estilos.caixaMarcada]}>{aceite && <Icone nome="check" tamanho={16} cor={cores.sobrePrimaria} />}</View>
         <Texto style={estilos.textoAceite}>Li e aceito os termos de uso e a política de privacidade</Texto>
       </Pressable>
       {erros.aceite && (
@@ -100,7 +101,7 @@ export default function CadastroSocial() {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   aceite: { flexDirection: 'row', alignItems: 'center', gap: espaco.sm, minHeight: alvoToqueMinimo },
   caixa: {
     width: 24,
@@ -113,4 +114,4 @@ const estilos = StyleSheet.create({
   },
   caixaMarcada: { backgroundColor: cores.primaria, borderColor: cores.primaria },
   textoAceite: { flex: 1 },
-});
+}));

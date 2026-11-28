@@ -1,12 +1,13 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { api } from '../../api/cliente';
 import type { components } from '../../api/esquema';
 import { Alerta, Botao, Cartao, Tela, Texto } from '../../componentes';
 import { podePagar, quandoSolicitacao, rotuloStatus, rotuloStatusSimples } from '../../agendamento/acompanhamento';
 import { mensagemDaApi } from '../../pets/erros';
 import { cores, espaco } from '../../tema/tokens';
+import { criarEstilos } from '../../tema/estilos';
 
 type Detalhe = components['schemas']['DetalheSolicitacao'];
 
@@ -64,7 +65,7 @@ export default function DetalheDaSolicitacao() {
   if (!s) {
     return (
       <Tela titulo="Solicitação">
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando a solicitação" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando a solicitação" />
       </Tela>
     );
   }
@@ -130,7 +131,7 @@ export default function DetalheDaSolicitacao() {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   acoes: { flexDirection: 'row', gap: espaco.sm },
   historico: { gap: espaco.xs, paddingBottom: espaco.sm, borderBottomWidth: 1, borderBottomColor: cores.borda, alignSelf: 'stretch' },
-});
+}));

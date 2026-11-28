@@ -79,7 +79,7 @@ export default function Privacidade() {
       {aviso && <Alerta tipo={aviso.tipo} titulo={aviso.titulo} mensagem={aviso.mensagem} />}
       <Texto variante="titulo2">Termos e consentimentos</Texto>
       {lista === null ? (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando os consentimentos" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando os consentimentos" />
       ) : (
         lista.map((c) => (
           <Cartao key={c.termoId} titulo={c.titulo} subtitulo={`Versão ${c.versao}${c.dataAceite ? ` · aceito em ${dataBr(c.dataAceite)}` : ''}`}>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Switch, View } from 'react-native';
 import { api } from '../api/cliente';
 import { Filtro } from '../catalogo/Filtro';
 import { Alerta, Botao, Campo, Texto } from '../componentes';
@@ -7,6 +7,7 @@ import { hojeBrasilia } from './datas';
 import { filtrarRacas, mascararData, ordenarEspecies, paraEntrada, RACA_OUTRA, validar } from './formulario';
 import type { ErrosPet, Especie, PetEntrada, ValoresPet } from './formulario';
 import { alvoToqueMinimo, cores, espaco, raio } from '../tema/tokens';
+import { criarEstilos } from '../tema/estilos';
 
 interface Props {
   inicial: ValoresPet;
@@ -80,7 +81,7 @@ export function FormularioPet({ inicial, tituloBotao, edicao = false, aoSalvar }
   }
 
   if (especies === null) {
-    return <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando espécies" />;
+    return <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando espécies" />;
   }
 
   const escolherEspecie = (id: string) => {
@@ -159,7 +160,7 @@ export function FormularioPet({ inicial, tituloBotao, edicao = false, aoSalvar }
           accessibilityLabel="Castrado"
           value={valores.castrado}
           onValueChange={(v) => mudar('castrado', v)}
-          trackColor={{ true: cores.primaria, false: cores.borda }}
+          trackColor={{ true: cores.destaque, false: cores.borda }}
         />
       </View>
     </>
@@ -221,7 +222,7 @@ export function FormularioPet({ inicial, tituloBotao, edicao = false, aoSalvar }
                     onPress={() => escolherEspecie(e.id ?? '')}
                     style={({ pressed }) => [estilos.opcao, ativo && estilos.opcaoAtiva, pressed && !ativo && estilos.opcaoPressionada]}
                   >
-                    <Texto negrito={ativo} cor={ativo ? cores.branco : cores.texto} style={estilos.opcaoTexto}>
+                    <Texto negrito={ativo} cor={ativo ? cores.sobrePrimaria : cores.texto} style={estilos.opcaoTexto}>
                       {e.nome}
                     </Texto>
                   </Pressable>
@@ -301,7 +302,7 @@ function Grupo({
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   formulario: { gap: espaco.lg },
   grupo: { gap: espaco.sm },
   opcoes: { gap: espaco.sm },
@@ -310,7 +311,7 @@ const estilos = StyleSheet.create({
   progresso: { gap: espaco.xs },
   barras: { flexDirection: 'row', gap: espaco.xs, marginBottom: espaco.xs },
   barra: { flex: 1, height: 4, borderRadius: 2, backgroundColor: cores.borda },
-  barraFeita: { backgroundColor: cores.secundaria },
+  barraFeita: { backgroundColor: cores.primaria },
   grade: { flexDirection: 'row', flexWrap: 'wrap', gap: espaco.sm },
   opcao: {
     flexBasis: '47%',
@@ -323,9 +324,9 @@ const estilos = StyleSheet.create({
     borderColor: cores.borda,
     backgroundColor: cores.fundo,
   },
-  opcaoAtiva: { backgroundColor: cores.secundaria, borderColor: cores.secundaria },
+  opcaoAtiva: { backgroundColor: cores.primaria, borderColor: cores.primaria },
   opcaoPressionada: { backgroundColor: cores.superficie },
   opcaoTexto: { textAlign: 'center' },
   acoes: { flexDirection: 'row', gap: espaco.sm },
   acao: { flex: 1 },
-});
+}));

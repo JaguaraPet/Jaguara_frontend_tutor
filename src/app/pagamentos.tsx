@@ -94,7 +94,7 @@ export default function Pagamentos() {
         }}
       />
       {lista === null ? (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando os pagamentos" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando os pagamentos" />
       ) : lista.length === 0 ? (
         <>
           <Texto cor={cores.textoSecundario}>Nenhum pagamento encontrado para o filtro selecionado.</Texto>

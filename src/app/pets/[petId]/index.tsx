@@ -1,13 +1,15 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 import { api } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
-import { Alerta, Botao, Cartao, Tela, Texto } from '../../../componentes';
+import { Alerta, Botao, Cartao, Icone, Tela, Texto } from '../../../componentes';
+import type { NomeIcone } from '../../../componentes';
 import { DesarquivarPet } from '../../../pets/ArquivarPet';
 import { FotoPet } from '../../../pets/FotoPet';
 import { GRAVIDADE, SEXO, TIPO_ALERGIA, dataCurta, proximaDose, textoIdade } from '../../../pets/perfil';
 import { cores, coresSuaves, espaco, raio } from '../../../tema/tokens';
+import { criarEstilos } from '../../../tema/estilos';
 
 type Pet = components['schemas']['Pet'];
 type Alergia = components['schemas']['Alergia'];
@@ -18,20 +20,20 @@ const hojeIso = () => new Date().toISOString().slice(0, 10);
 /** Perfil do pet (UC-04): dados, alergias graves em destaque (UC-37) e vacinas (UC-12). */
 /** Seções do pet numa grade de atalhos, no lugar de uma lista de botões. */
 const SECOES = [
-  { titulo: 'Rotinas', caminho: 'rotinas', icone: '🔁' },
-  { titulo: 'Vacinas', caminho: 'vacinas', icone: '💉' },
-  { titulo: 'Medicamentos', caminho: 'medicamentos', icone: '💊' },
-  { titulo: 'Exames', caminho: 'exames', icone: '🧪' },
-  { titulo: 'Alergias e restrições', caminho: 'alergias', icone: '⚠️' },
-  { titulo: 'Alimentação', caminho: 'alimentacao', icone: '🥣' },
-  { titulo: 'Linha do tempo', caminho: 'linha-do-tempo', icone: '🕒' },
-  { titulo: 'Álbum', caminho: 'album', icone: '📸' },
-  { titulo: 'Documentos', caminho: 'documentos', icone: '📄' },
-  { titulo: 'Despesas', caminho: 'despesas', icone: '🧾' },
-  { titulo: 'Responsáveis', caminho: 'responsaveis', icone: '👨‍👩‍👧' },
-  { titulo: 'Compartilhar perfil', caminho: 'compartilhar', icone: '🔗' },
-  { titulo: 'Meu pet se perdeu', caminho: 'perdido', icone: '🆘' },
-] as const;
+  { titulo: 'Rotinas', caminho: 'rotinas', icone: 'repeat' },
+  { titulo: 'Vacinas', caminho: 'vacinas', icone: 'needle' },
+  { titulo: 'Medicamentos', caminho: 'medicamentos', icone: 'pill' },
+  { titulo: 'Exames', caminho: 'exames', icone: 'flask-outline' },
+  { titulo: 'Alergias e restrições', caminho: 'alergias', icone: 'alert-outline' },
+  { titulo: 'Alimentação', caminho: 'alimentacao', icone: 'bowl-mix-outline' },
+  { titulo: 'Linha do tempo', caminho: 'linha-do-tempo', icone: 'timeline-clock-outline' },
+  { titulo: 'Álbum', caminho: 'album', icone: 'image-multiple-outline' },
+  { titulo: 'Documentos', caminho: 'documentos', icone: 'file-document-outline' },
+  { titulo: 'Despesas', caminho: 'despesas', icone: 'receipt-text-outline' },
+  { titulo: 'Responsáveis', caminho: 'responsaveis', icone: 'account-group-outline' },
+  { titulo: 'Compartilhar perfil', caminho: 'compartilhar', icone: 'share-variant-outline' },
+  { titulo: 'Meu pet se perdeu', caminho: 'perdido', icone: 'map-search-outline' },
+] as const satisfies readonly { titulo: string; caminho: string; icone: NomeIcone }[];
 
 export default function PerfilPet() {
   const { petId } = useLocalSearchParams<{ petId: string }>();
@@ -76,7 +78,7 @@ export default function PerfilPet() {
   if (!pet) {
     return (
       <Tela titulo="Pet">
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando o pet" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando o pet" />
       </Tela>
     );
   }
@@ -138,7 +140,7 @@ export default function PerfilPet() {
             onPress={() => router.push(`/pets/${pet.id}/${secao.caminho}`)}
             style={({ pressed }) => [estilos.secao, pressed && { backgroundColor: cores.superficie }]}
           >
-            <Texto style={estilos.secaoIcone}>{secao.icone}</Texto>
+            <Icone nome={secao.icone} tamanho={24} cor={cores.secundaria} />
             <Texto style={estilos.secaoTitulo}>{secao.titulo}</Texto>
           </Pressable>
         ))}
@@ -197,7 +199,7 @@ export default function PerfilPet() {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   grade: { flexDirection: 'row', flexWrap: 'wrap', gap: espaco.sm, alignSelf: 'stretch' },
   secao: {
     width: '47%',
@@ -212,7 +214,6 @@ const estilos = StyleSheet.create({
     backgroundColor: cores.fundo,
     justifyContent: 'center',
   },
-  secaoIcone: { fontSize: 22 },
   secaoTitulo: { fontWeight: '600', fontSize: 14, lineHeight: 18 },
   destaque: {
     backgroundColor: coresSuaves.erro,
@@ -228,4 +229,4 @@ const estilos = StyleSheet.create({
     justifyContent: 'space-between',
     gap: espaco.md,
   },
-});
+}));

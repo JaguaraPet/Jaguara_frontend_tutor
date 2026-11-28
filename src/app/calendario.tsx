@@ -92,7 +92,7 @@ export default function Calendario() {
     <Tela titulo="Google Agenda" subtitulo="Traga para a agenda do pet os compromissos dos próximos 30 dias.">
       {aviso && <Alerta tipo={aviso.tipo} titulo={aviso.titulo} mensagem={aviso.mensagem} />}
       {situacao === undefined ? (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando a conexão" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando a conexão" />
       ) : !situacao?.autorizado ? (
         <Cartao titulo="Não conectado" subtitulo="O Jaguara só lê a sua agenda; nada é alterado no Google.">
           <Botao titulo="Conectar Google Agenda" larguraTotal carregando={ocupado} onPress={() => void conectar()} />

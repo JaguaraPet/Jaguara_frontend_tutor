@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { api } from '../api/cliente';
-import { enviarFotoPet, iconeEspecie } from './FotoPet';
+import { enviarFotoPet, inicial } from './FotoPet';
 
 type Qualquer = Awaited<ReturnType<typeof api.POST>>;
 const resposta = (data: unknown, status = 200) =>
@@ -15,12 +15,10 @@ describe('Foto do pet', () => {
     jest.restoreAllMocks();
   });
 
-  it('deve escolher o emoji pela espécie', () => {
-    expect(iconeEspecie('Gato')).toBe('🐱');
-    expect(iconeEspecie('Cachorro')).toBe('🐶');
-    expect(iconeEspecie('Silvestre')).toBe('🐆');
-    expect(iconeEspecie('Boi e vaca')).toBe('🐄');
-    expect(iconeEspecie('Outro')).toBe('🐾');
+  it('deve usar a inicial do nome quando o pet não tem foto', () => {
+    expect(inicial('thor')).toBe('T');
+    expect(inicial(' Ênio')).toBe('Ê');
+    expect(inicial('')).toBe('?');
   });
 
   it('deve pedir a URL e enviar a foto direto ao armazenamento', async () => {

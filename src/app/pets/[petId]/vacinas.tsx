@@ -1,9 +1,9 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { api } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
-import { Alerta, Botao, Campo, Cartao, Tela, Texto } from '../../../componentes';
+import { Alerta, Botao, Campo, Cartao, Icone, Tela, Texto } from '../../../componentes';
 import { hojeBrasilia } from '../../../pets/datas';
 import { mensagemDaApi } from '../../../pets/erros';
 import { dataBr, mascararData } from '../../../pets/formulario';
@@ -11,6 +11,7 @@ import { proximaDose } from '../../../pets/perfil';
 import { montarVacina } from '../../../saude/vacina';
 import type { ValoresVacina } from '../../../saude/vacina';
 import { cores, coresSuaves, espaco } from '../../../tema/tokens';
+import { criarEstilos } from '../../../tema/estilos';
 
 type Vacina = components['schemas']['Vacinacao'];
 
@@ -119,7 +120,7 @@ export default function Vacinas() {
       )}
 
       {lista === null ? (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando as vacinas" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando as vacinas" />
       ) : lista.length === 0 ? (
         <Texto cor={cores.textoSecundario}>Nenhuma vacina registrada.</Texto>
       ) : (
@@ -131,8 +132,9 @@ export default function Vacinas() {
           >
             {x.verificadaPor && (
               <View style={estilos.selo} accessibilityLabel={`Registrada pela ${x.verificadaPor}`}>
+                <Icone nome="check-decagram" tamanho={16} cor={cores.secundaria} />
                 <Texto variante="legenda" cor={cores.secundaria}>
-                  ✓ Registrada pela {x.verificadaPor}
+                  Registrada pela {x.verificadaPor}
                 </Texto>
               </View>
             )}
@@ -149,12 +151,15 @@ export default function Vacinas() {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   selo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: espaco.xs,
     alignSelf: 'flex-start',
     paddingHorizontal: espaco.sm,
     paddingVertical: 2,
     borderRadius: 999,
     backgroundColor: coresSuaves.info,
   },
-});
+}));

@@ -4,7 +4,7 @@
   "description": "A vida do seu pet num lugar só: vacinas, remédios, rotina e agendamentos.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FFFFFF",
+  "background_color": "#1A3826",
   "theme_color": "#8A4B0F",
   "lang": "pt-BR",
   "icons": [

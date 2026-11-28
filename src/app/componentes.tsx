@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Alerta, Botao, Campo, Cartao, Texto } from '../componentes';
 import { cores, espaco } from '../tema/tokens';
+import { criarEstilos } from '../tema/estilos';
 
 /** Catálogo dos componentes base (UX-02), para conferir estados e acessibilidade. */
 export default function Componentes() {
@@ -50,8 +51,8 @@ export default function Componentes() {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   tela: { flex: 1, backgroundColor: cores.fundo },
   conteudo: { padding: espaco.xl, gap: espaco.lg },
   grupo: { gap: espaco.md },
-});
+}));

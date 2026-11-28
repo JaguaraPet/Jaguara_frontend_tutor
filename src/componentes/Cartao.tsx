@@ -1,10 +1,15 @@
 import { ReactNode } from 'react';
-import { Pressable, StyleSheet, View, ViewProps } from 'react-native';
+import { Pressable, View, ViewProps } from 'react-native';
 import { cores, espaco, raio } from '../tema/tokens';
+import { criarEstilos } from '../tema/estilos';
+import { Icone } from './Icone';
+import type { NomeIcone } from './Icone';
 import { Texto } from './Texto';
 
 interface Props extends ViewProps {
   titulo?: string;
+  /** Ícone antes do título. */
+  icone?: NomeIcone;
   subtitulo?: string;
   children?: ReactNode;
   /** Torna o cartão inteiro tocável (por exemplo, um pet na lista). */
@@ -12,11 +17,21 @@ interface Props extends ViewProps {
   rotuloAcessivel?: string;
 }
 
-/** Cartão sobre a cor de superfície do UX-02, para agrupar informações. */
-export function Cartao({ titulo, subtitulo, children, aoTocar, rotuloAcessivel, style, ...props }: Props) {
+/** Cartão translúcido da identidade Selvagem (UX-02), para agrupar informações. */
+export function Cartao({ titulo, icone, subtitulo, children, aoTocar, rotuloAcessivel, style, ...props }: Props) {
   const conteudo = (
     <>
-      {titulo && <Texto variante="titulo2">{titulo}</Texto>}
+      {titulo &&
+        (icone ? (
+          <View style={estilos.titulo}>
+            <Icone nome={icone} tamanho={22} cor={cores.secundaria} />
+            <Texto variante="titulo2" style={estilos.tituloTexto}>
+              {titulo}
+            </Texto>
+          </View>
+        ) : (
+          <Texto variante="titulo2">{titulo}</Texto>
+        ))}
       {subtitulo && (
         <Texto variante="legenda" cor={cores.textoSecundario}>
           {subtitulo}
@@ -45,13 +60,17 @@ export function Cartao({ titulo, subtitulo, children, aoTocar, rotuloAcessivel, 
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   cartao: {
-    backgroundColor: cores.superficie,
-    borderRadius: raio.padrao,
+    backgroundColor: cores.cartao,
+    borderWidth: 1,
+    borderColor: cores.cartaoBorda,
+    borderRadius: raio.cartao,
     padding: espaco.lg,
     gap: espaco.sm,
     alignSelf: 'stretch',
   },
-  pressionado: { backgroundColor: cores.borda },
-});
+  pressionado: { backgroundColor: cores.superficie },
+  titulo: { flexDirection: 'row', alignItems: 'center', gap: espaco.sm },
+  tituloTexto: { flex: 1 },
+}));

@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { mascararHora } from '../../../agenda/agenda';
 import { api } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
@@ -8,6 +8,7 @@ import { Alerta, Botao, Campo, Cartao, Tela, Texto } from '../../../componentes'
 import { hojeBrasilia } from '../../../pets/datas';
 import { mensagemDaApi } from '../../../pets/erros';
 import { cores, espaco, raio } from '../../../tema/tokens';
+import { criarEstilos } from '../../../tema/estilos';
 
 type Plano = components['schemas']['PlanoAlimentar'];
 type Resumo = components['schemas']['ResumoAlimentar'] & {
@@ -125,7 +126,7 @@ export default function Alimentacao() {
   if (plano === undefined) {
     return (
       <Tela titulo="Alimentação">
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando a alimentação" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando a alimentação" />
       </Tela>
     );
   }
@@ -207,7 +208,7 @@ export default function Alimentacao() {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   trilho: { height: 12, borderRadius: raio.padrao, backgroundColor: cores.desabilitado, overflow: 'hidden' },
   barra: { height: '100%' },
   refeicao: {
@@ -218,4 +219,4 @@ const estilos = StyleSheet.create({
     borderBottomColor: cores.borda,
     alignSelf: 'stretch',
   },
-});
+}));

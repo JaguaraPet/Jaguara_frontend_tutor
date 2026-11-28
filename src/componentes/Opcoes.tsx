@@ -1,5 +1,6 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { alvoToqueMinimo, cores, espaco, raio } from '../tema/tokens';
+import { criarEstilos } from '../tema/estilos';
 import { Texto } from './Texto';
 
 interface Props<T extends string> {
@@ -24,7 +25,7 @@ export function Opcoes<T extends string>({ rotulo, opcoes, valor, aoMudar }: Pro
             onPress={() => aoMudar(o.valor)}
             style={[estilos.opcao, escolhida && estilos.escolhida]}
           >
-            <Texto negrito={escolhida} cor={escolhida ? cores.branco : cores.texto}>
+            <Texto negrito={escolhida} cor={escolhida ? cores.sobrePrimaria : cores.texto}>
               {o.rotulo}
             </Texto>
           </Pressable>
@@ -34,7 +35,7 @@ export function Opcoes<T extends string>({ rotulo, opcoes, valor, aoMudar }: Pro
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   grupo: { flexDirection: 'row', flexWrap: 'wrap', gap: espaco.sm },
   opcao: {
     minHeight: alvoToqueMinimo,
@@ -42,8 +43,8 @@ const estilos = StyleSheet.create({
     paddingHorizontal: espaco.md,
     borderWidth: 1,
     borderColor: cores.textoSecundario,
-    borderRadius: raio.padrao,
-    backgroundColor: cores.fundo,
+    borderRadius: raio.pilula,
+    backgroundColor: cores.elevado,
   },
   escolhida: { backgroundColor: cores.primaria, borderColor: cores.primaria },
-});
+}));

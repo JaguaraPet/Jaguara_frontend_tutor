@@ -91,7 +91,7 @@ describe('UC-33 · Busca de empresas e catálogo no app', () => {
       .mockImplementation(() => ok({ itens: [{ ...clinica, distanciaKm: 0.8, totalAvaliacoes: 0 }], total: 1 }));
     await render(<Servicos />);
     await screen.findByText('Clínica Patas');
-    await fireEvent.press(screen.getByText('📍 Perto de mim'));
+    await fireEvent.press(screen.getByText('Perto de mim'));
     expect(await screen.findByText('800 m')).toBeOnTheScreen();
     expect(get).toHaveBeenLastCalledWith('/empresas', {
       params: {

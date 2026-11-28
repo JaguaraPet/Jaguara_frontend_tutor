@@ -1,11 +1,13 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 import { api } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
-import { Alerta, Botao, Campo, Cartao, Opcoes, Tela, Texto } from '../../../componentes';
+import { Alerta, Botao, Campo, Cartao, Icone, Opcoes, Tela, Texto } from '../../../componentes';
+import type { NomeIcone } from '../../../componentes';
 import { mensagemDaApi } from '../../../pets/erros';
 import { cores, espaco } from '../../../tema/tokens';
+import { criarEstilos } from '../../../tema/estilos';
 
 type Rotina = components['schemas']['Rotina'];
 type Modelo = components['schemas']['ModeloRotina'];
@@ -19,15 +21,15 @@ const FREQUENCIAS: { valor: Frequencia; rotulo: string }[] = [
   { valor: 'INTERVALO_DIAS', rotulo: 'A cada N dias' },
   { valor: 'MENSAL', rotulo: 'Todo mês' },
 ];
-const ICONE: Record<Tipo, string> = {
-  PASSEIO: '🦮',
-  BANHO: '🛁',
-  ANTIPULGAS: '🐜',
-  VERMIFUGO: '💊',
-  ESCOVACAO: '🪥',
-  AREIA: '🧹',
-  ALIMENTACAO: '🥣',
-  OUTRO: '⭐',
+const ICONE: Record<Tipo, NomeIcone> = {
+  PASSEIO: 'dog-side',
+  BANHO: 'shower-head',
+  ANTIPULGAS: 'bug-outline',
+  VERMIFUGO: 'pill',
+  ESCOVACAO: 'toothbrush',
+  AREIA: 'broom',
+  ALIMENTACAO: 'bowl-mix-outline',
+  OUTRO: 'star-outline',
 };
 
 function descreverRegra(r: Pick<Rotina, 'frequencia' | 'intervaloDias' | 'diasSemana' | 'horarios'>): string {
@@ -130,7 +132,7 @@ export default function Rotinas() {
   if (rotinas === null) {
     return (
       <Tela titulo="Rotinas">
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando as rotinas" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando as rotinas" />
       </Tela>
     );
   }
@@ -141,7 +143,7 @@ export default function Rotinas() {
         <Texto cor={cores.textoSecundario}>Nenhuma rotina ainda. Comece por um modelo abaixo.</Texto>
       )}
       {rotinas.map((r) => (
-        <Cartao key={r.id} titulo={`${ICONE[r.tipo]} ${r.titulo}`} subtitulo={descreverRegra(r)}>
+        <Cartao key={r.id} titulo={r.titulo} icone={ICONE[r.tipo]} subtitulo={descreverRegra(r)}>
           <Botao titulo="Encerrar" variante="texto" accessibilityLabel={`Encerrar ${r.titulo}`} onPress={() => void encerrar(r)} />
         </Cartao>
       ))}
@@ -180,7 +182,7 @@ export default function Rotinas() {
                     }
                     style={[estilos.dia, marcado && estilos.diaMarcado]}
                   >
-                    <Texto style={marcado ? { color: cores.branco, fontWeight: '700' } : undefined}>{d}</Texto>
+                    <Texto style={marcado ? { color: cores.sobrePrimaria, fontWeight: '700' } : undefined}>{d}</Texto>
                   </Pressable>
                 );
               })}
@@ -209,9 +211,10 @@ export default function Rotinas() {
                 onPress={() => usarModelo(m)}
                 style={({ pressed }) => [estilos.modelo, pressed && { backgroundColor: cores.superficie }]}
               >
-                <Texto style={estilos.modeloTitulo}>
-                  {ICONE[m.tipo]} {m.titulo}
-                </Texto>
+                <View style={estilos.modeloCabeca}>
+                  <Icone nome={ICONE[m.tipo]} tamanho={20} cor={cores.secundaria} />
+                  <Texto style={estilos.modeloTitulo}>{m.titulo}</Texto>
+                </View>
                 <Texto variante="legenda" cor={cores.textoSecundario}>
                   {m.descricao}
                 </Texto>
@@ -229,7 +232,7 @@ export default function Rotinas() {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   dias: { flexDirection: 'row', flexWrap: 'wrap', gap: espaco.sm },
   dia: {
     minWidth: 48,
@@ -240,7 +243,7 @@ const estilos = StyleSheet.create({
     borderWidth: 1,
     borderColor: cores.borda,
   },
-  diaMarcado: { backgroundColor: cores.secundaria, borderColor: cores.secundaria },
+  diaMarcado: { backgroundColor: cores.primaria, borderColor: cores.primaria },
   acoes: { flexDirection: 'row', gap: espaco.sm, flexWrap: 'wrap' },
   modelos: { gap: espaco.sm },
   modelo: {
@@ -251,4 +254,5 @@ const estilos = StyleSheet.create({
     gap: 2,
   },
   modeloTitulo: { fontWeight: '700' },
-});
+  modeloCabeca: { flexDirection: 'row', alignItems: 'center', gap: espaco.sm },
+}));

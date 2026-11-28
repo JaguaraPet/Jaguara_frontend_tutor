@@ -42,7 +42,7 @@ describe('Pet perdido no app', () => {
     });
     await fireEvent.press(screen.getByText('Compartilhar no WhatsApp e redes'));
     expect(compartilhar).toHaveBeenCalledWith({ message: expect.stringContaining('https://jaguarapet.com.br/perdido/abc') });
-    await fireEvent.press(screen.getByText('Encontrei! 🎉'));
+    await fireEvent.press(screen.getByText('Encontrei meu pet'));
     expect(apagar).toHaveBeenCalled();
     expect(await screen.findByText('Criar o aviso')).toBeTruthy();
   });

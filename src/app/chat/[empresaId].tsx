@@ -1,12 +1,13 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { api } from '../../api/cliente';
 import type { components } from '../../api/esquema';
 import { Alerta, Botao, Campo, Tela, Texto } from '../../componentes';
 import { mensagemDaApi } from '../../pets/erros';
 import { useUsuario } from '../../sessao/useUsuario';
 import { cores, espaco, raio } from '../../tema/tokens';
+import { criarEstilos } from '../../tema/estilos';
 
 type Mensagem = components['schemas']['Mensagem'];
 
@@ -94,7 +95,7 @@ export default function ChatEmpresa() {
   if (estado.tipo === 'carregando') {
     return (
       <Tela titulo={titulo}>
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Abrindo a conversa" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Abrindo a conversa" />
       </Tela>
     );
   }
@@ -118,10 +119,10 @@ export default function ChatEmpresa() {
           const minha = m.remetenteId === usuario?.id;
           return (
             <View key={m.id} style={[estilos.balao, minha ? estilos.minha : estilos.dela]}>
-              <Texto variante="legenda" negrito cor={minha ? cores.branco : cores.textoSecundario}>
+              <Texto variante="legenda" negrito cor={minha ? cores.sobrePrimaria : cores.textoSecundario}>
                 {minha ? 'Você' : (empresa ?? 'Empresa')} · {hora(m.dataHoraEnvio)}
               </Texto>
-              <Texto cor={minha ? cores.branco : cores.texto}>{m.conteudo}</Texto>
+              <Texto cor={minha ? cores.sobrePrimaria : cores.texto}>{m.conteudo}</Texto>
             </View>
           );
         })}
@@ -139,9 +140,9 @@ export default function ChatEmpresa() {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   conversa: { gap: espaco.sm },
   balao: { padding: espaco.md, borderRadius: raio.padrao, gap: espaco.xs, maxWidth: '88%' },
   minha: { alignSelf: 'flex-end', backgroundColor: cores.primaria },
   dela: { alignSelf: 'flex-start', backgroundColor: cores.superficie },
-});
+}));

@@ -1,37 +1,18 @@
 import { getDocumentAsync } from 'expo-document-picker';
 import { Image } from 'expo-image';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 import { api } from '../api/cliente';
-import { Texto } from '../componentes';
+import { Icone, Texto } from '../componentes';
 import { cores, coresSuaves, espaco } from '../tema/tokens';
+import { criarEstilos } from '../tema/estilos';
 import { mensagemDaApi } from './erros';
 
 const TAMANHO_MAXIMO = 8 * 1024 * 1024;
 
-/** Emoji da espécie, para o pet sem foto. */
-export function iconeEspecie(especie?: string): string {
-  const e = (especie ?? '').toLowerCase();
-  if (e.startsWith('gato')) return '🐱';
-  if (e.startsWith('cach')) return '🐶';
-  if (e.startsWith('ave')) return '🦜';
-  if (e.startsWith('coelho')) return '🐰';
-  if (e.startsWith('roedor')) return '🐹';
-  if (e.startsWith('peixe')) return '🐠';
-  if (e.startsWith('rép') || e.startsWith('rep')) return '🦎';
-  if (e.startsWith('cavalo')) return '🐴';
-  if (e.startsWith('mini porco')) return '🐷';
-  if (e.startsWith('furão') || e.startsWith('furao')) return '🦦';
-  if (e.startsWith('ouriço') || e.startsWith('ourico')) return '🦔';
-  if (e.startsWith('anfíbio') || e.startsWith('anfibio')) return '🐸';
-  if (e.startsWith('silvestre')) return '🐆';
-  if (e.startsWith('marsupial')) return '🐨';
-  if (e.startsWith('invertebrado')) return '🕷️';
-  if (e.startsWith('cabra')) return '🐐';
-  if (e.startsWith('ovelha')) return '🐑';
-  if (e.startsWith('boi')) return '🐄';
-  if (e.startsWith('alpaca')) return '🦙';
-  return '🐾';
+/** A primeira letra do nome, para o pet sem foto. */
+export function inicial(nome: string): string {
+  return (nome.trim()[0] ?? '?').toLocaleUpperCase('pt-BR');
 }
 
 /** Escolhe a imagem no aparelho e envia direto ao armazenamento. Devolve o erro, ou null. */
@@ -72,7 +53,7 @@ interface Props {
   aoTrocar?: (erro: string | null) => void;
 }
 
-/** Foto redonda do pet; sem foto, o emoji da espécie. */
+/** Foto redonda do pet; sem foto, a inicial do nome. */
 export function FotoPet({ petId, nome, especie, fotoUrl, tamanho = 96, aoTrocar }: Props) {
   const [enviando, setEnviando] = useState(false);
   const circulo = { width: tamanho, height: tamanho, borderRadius: tamanho / 2 };
@@ -81,7 +62,9 @@ export function FotoPet({ petId, nome, especie, fotoUrl, tamanho = 96, aoTrocar 
     <Image source={{ uri: fotoUrl }} style={circulo} contentFit="cover" accessibilityLabel={`Foto de ${nome}`} />
   ) : (
     <View style={[estilos.vazio, circulo]} accessibilityLabel={`${nome} ainda sem foto`}>
-      <Texto style={{ fontSize: tamanho * 0.45 }}>{iconeEspecie(especie)}</Texto>
+      <Texto negrito cor={cores.secundaria} style={{ fontSize: tamanho * 0.42, lineHeight: tamanho * 0.5 }}>
+        {inicial(nome)}
+      </Texto>
     </View>
   );
 
@@ -107,17 +90,17 @@ export function FotoPet({ petId, nome, especie, fotoUrl, tamanho = 96, aoTrocar 
       {conteudo}
       <View style={estilos.selo}>
         {enviando ? (
-          <ActivityIndicator color={cores.branco} size="small" />
+          <ActivityIndicator color={cores.sobrePrimaria} size="small" />
         ) : (
-          <Texto style={estilos.seloTexto}>📷</Texto>
+          <Icone nome="camera-outline" tamanho={16} cor={cores.sobrePrimaria} />
         )}
       </View>
     </Pressable>
   );
 }
 
-const estilos = StyleSheet.create({
-  vazio: { backgroundColor: coresSuaves.alerta, alignItems: 'center', justifyContent: 'center' },
+const estilos = criarEstilos(() => ({
+  vazio: { backgroundColor: coresSuaves.info, alignItems: 'center', justifyContent: 'center' },
   editavel: { alignSelf: 'center', marginBottom: espaco.sm },
   selo: {
     position: 'absolute',
@@ -130,7 +113,6 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: cores.branco,
+    borderColor: cores.fundo,
   },
-  seloTexto: { fontSize: 14 },
-});
+}));

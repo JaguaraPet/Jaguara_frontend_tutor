@@ -156,7 +156,7 @@ export default function Medicamentos() {
       )}
 
       {lista === null ? (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando os medicamentos" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando os medicamentos" />
       ) : (
         <>
           <Texto variante="titulo2">Em uso</Texto>

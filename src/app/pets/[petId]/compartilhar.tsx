@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, Share, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, Share, View } from 'react-native';
 import { api } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
 import { Alerta, Botao, Campo, Cartao, Opcoes, Tela, Texto } from '../../../componentes';
@@ -8,6 +8,7 @@ import { ESCOPOS, VALIDADES, dataExpiracao, problemaNoCompartilhamento, rotuloEs
 import type { Escopo } from '../../../pets/compartilhar';
 import { mensagemDaApi } from '../../../pets/erros';
 import { alvoToqueMinimo, cores, espaco, raio } from '../../../tema/tokens';
+import { criarEstilos } from '../../../tema/estilos';
 
 type Compartilhamento = components['schemas']['Compartilhamento'];
 type Empresa = components['schemas']['EmpresaPublica'];
@@ -125,7 +126,7 @@ export default function Compartilhar() {
                 onPress={() => alternar(e.valor)}
                 style={[estilos.opcao, marcado && estilos.marcada]}
               >
-                <Texto cor={marcado ? cores.branco : cores.texto}>{e.rotulo}</Texto>
+                <Texto cor={marcado ? cores.sobrePrimaria : cores.texto}>{e.rotulo}</Texto>
               </Pressable>
             );
           })}
@@ -139,7 +140,7 @@ export default function Compartilhar() {
 
       <Texto variante="titulo2">Compartilhamentos</Texto>
       {lista === null ? (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando os compartilhamentos" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando os compartilhamentos" />
       ) : lista.length === 0 ? (
         <Texto cor={cores.textoSecundario}>O perfil ainda não foi compartilhado.</Texto>
       ) : (
@@ -161,7 +162,7 @@ export default function Compartilhar() {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   grupo: { flexDirection: 'row', flexWrap: 'wrap', gap: espaco.sm },
   opcao: {
     minHeight: alvoToqueMinimo,
@@ -171,5 +172,5 @@ const estilos = StyleSheet.create({
     borderColor: cores.textoSecundario,
     borderRadius: raio.padrao,
   },
-  marcada: { backgroundColor: cores.secundaria, borderColor: cores.secundaria },
-});
+  marcada: { backgroundColor: cores.primaria, borderColor: cores.primaria },
+}));

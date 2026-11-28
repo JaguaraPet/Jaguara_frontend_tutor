@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { api } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
 import { Alerta, Botao, Campo, Cartao, Opcoes, Tela, Texto } from '../../../componentes';
@@ -9,6 +9,7 @@ import { hojeBrasilia } from '../../../pets/datas';
 import { mensagemDaApi } from '../../../pets/erros';
 import { dataBr, dataIso, mascararData } from '../../../pets/formulario';
 import { cores, espaco } from '../../../tema/tokens';
+import { criarEstilos } from '../../../tema/estilos';
 
 type Despesa = components['schemas']['Despesa'];
 type Categoria = { id?: string; nome?: string; descricao?: string };
@@ -142,7 +143,7 @@ export default function Despesas() {
       )}
 
       {despesas === null ? (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando as despesas" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando as despesas" />
       ) : despesas.length === 0 ? (
         <Texto cor={cores.textoSecundario}>Não há despesas em {periodo.rotulo}.</Texto>
       ) : (
@@ -163,7 +164,7 @@ export default function Despesas() {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   linha: { flexDirection: 'row', justifyContent: 'space-between', gap: espaco.md },
   despesa: { gap: espaco.xs, paddingVertical: espaco.sm, borderBottomWidth: 1, borderBottomColor: cores.borda, alignSelf: 'stretch' },
-});
+}));

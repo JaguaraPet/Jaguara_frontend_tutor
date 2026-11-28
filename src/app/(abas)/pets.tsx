@@ -64,7 +64,7 @@ export default function Pets() {
       {erro ? (
         <Texto cor={cores.erro}>Não foi possível carregar os pets. Puxe a tela ou tente de novo em instantes.</Texto>
       ) : lista === null ? (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando os pets" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando os pets" />
       ) : lista.length === 0 ? (
         <Texto cor={cores.textoSecundario}>{VAZIO[status]}</Texto>
       ) : (

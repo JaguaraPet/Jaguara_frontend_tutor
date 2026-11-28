@@ -1,9 +1,10 @@
 import { Redirect, router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Botao, Texto } from '../componentes';
 import { useUsuario } from '../sessao/useUsuario';
 import { cores, espaco } from '../tema/tokens';
+import { criarEstilos } from '../tema/estilos';
 
 /** Boas-vindas (UX-01, seção 3): entrar ou criar a conta. */
 export default function BoasVindas() {
@@ -30,9 +31,9 @@ export default function BoasVindas() {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   tela: { flex: 1, backgroundColor: cores.fundo, padding: espaco.xl, justifyContent: 'space-between' },
   topo: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: espaco.sm },
   centro: { textAlign: 'center' },
   acoes: { gap: espaco.md },
-});
+}));

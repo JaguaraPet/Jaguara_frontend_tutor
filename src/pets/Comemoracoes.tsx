@@ -1,10 +1,14 @@
 import { router } from 'expo-router';
-import { Share, StyleSheet, View } from 'react-native';
+import { Image, Share, View } from 'react-native';
 import type { components } from '../api/esquema';
 import { Botao, Texto } from '../componentes';
-import { coresSuaves, espaco } from '../tema/tokens';
+import { criarEstilos } from '../tema/estilos';
+import { cores, espaco, raio } from '../tema/tokens';
+import { FotoPet } from './FotoPet';
 
 type Celebracao = NonNullable<components['schemas']['HojeTutor']['celebracoes']>[number];
+
+const CANTO = require('../../assets/images/onca-canto.png');
 
 const anos = (n: number) => `${n} ${n === 1 ? 'ano' : 'anos'}`;
 
@@ -12,34 +16,59 @@ const anos = (n: number) => `${n} ${n === 1 ? 'ano' : 'anos'}`;
 export function textoDaComemoracao(c: Celebracao) {
   if (c.tipo === 'ANIVERSARIO') {
     return {
-      titulo: `Hoje é aniversário de ${c.petNome}! 🎂`,
+      chamada: 'Hoje é dia de festa',
+      destaque: `${c.petNome} faz ${anos(c.anos)}`,
+      titulo: `Hoje é aniversário de ${c.petNome}!`,
       detalhe: `${c.petNome} faz ${anos(c.anos)} hoje.`,
-      mensagem: `Hoje ${c.petNome} faz ${anos(c.anos)}! 🐾🎂 Parabéns pra essa companhia que deixa tudo melhor. #Jaguara`,
+      mensagem: `Hoje ${c.petNome} faz ${anos(c.anos)}! Parabéns pra essa companhia que deixa tudo melhor. #Jaguara`,
     };
   }
   return {
-    titulo: `${anos(c.anos)} de ${c.petNome} no Jaguara 🎉`,
+    chamada: 'Aniversário no Jaguara',
+    destaque: `${anos(c.anos)} com ${c.petNome}`,
+    titulo: `${anos(c.anos)} de ${c.petNome} no Jaguara`,
     detalhe: `Há ${anos(c.anos)} vocês cuidam de ${c.petNome} por aqui.`,
-    mensagem: `Faz ${anos(c.anos)} que cuido de ${c.petNome} com o Jaguara: vacinas, rotina e tudo no mesmo lugar. 🐾 #Jaguara`,
+    mensagem: `Faz ${anos(c.anos)} que cuido de ${c.petNome} com o Jaguara: vacinas, rotina e tudo no mesmo lugar. #Jaguara`,
   };
 }
 
-/** Cartões de aniversário na tela Hoje, com o atalho para compartilhar e para o álbum. */
-export function Comemoracoes({ celebracoes }: { celebracoes: Celebracao[] }) {
+interface Props {
+  celebracoes: Celebracao[];
+  /** Fotos dos pets, para o destaque mostrar quem faz aniversário. */
+  fotos?: Record<string, string | null | undefined>;
+}
+
+/**
+ * Destaque de aniversário na tela Hoje (identidade Selvagem): a foto do pet, um pedaço de
+ * pelagem de onça no canto e os atalhos para compartilhar e para o álbum.
+ */
+export function Comemoracoes({ celebracoes, fotos = {} }: Props) {
   if (celebracoes.length === 0) return null;
   return (
     <>
       {celebracoes.map((c) => {
         const t = textoDaComemoracao(c);
         return (
-          <View key={`${c.petId}-${c.tipo}`} style={estilos.cartao} accessible accessibilityLabel={`${t.titulo} ${t.detalhe}`}>
-            <Texto variante="titulo2">{t.titulo}</Texto>
-            <Texto>{t.detalhe}</Texto>
+          <View key={`${c.petId}-${c.tipo}`} style={estilos.cartao}>
+            <Image source={CANTO} style={estilos.canto} accessibilityElementsHidden importantForAccessibility="no" />
+            <View style={estilos.topo} accessible accessibilityLabel={`${t.titulo} ${t.detalhe}`}>
+              <View style={estilos.foto}>
+                <FotoPet petId={c.petId} nome={c.petNome} fotoUrl={fotos[c.petId] ?? undefined} tamanho={58} />
+              </View>
+              <View style={estilos.textos}>
+                <Texto variante="legenda" negrito cor={cores.destaque}>
+                  {t.chamada}
+                </Texto>
+                <Texto variante="titulo2" style={estilos.destaque}>
+                  {t.destaque}
+                </Texto>
+              </View>
+            </View>
             <View style={estilos.acoes}>
               <Botao titulo="Compartilhar" onPress={() => void Share.share({ message: t.mensagem })} />
               <Botao
                 titulo="Ver o álbum"
-                variante="texto"
+                variante="secundaria"
                 onPress={() => router.push({ pathname: '/pets/[petId]/album', params: { petId: c.petId } })}
               />
             </View>
@@ -50,7 +79,20 @@ export function Comemoracoes({ celebracoes }: { celebracoes: Celebracao[] }) {
   );
 }
 
-const estilos = StyleSheet.create({
-  cartao: { backgroundColor: coresSuaves.alerta, borderRadius: 16, padding: espaco.lg, gap: espaco.sm },
+const estilos = criarEstilos(() => ({
+  cartao: {
+    backgroundColor: cores.destaqueFundo,
+    borderWidth: 1,
+    borderColor: cores.destaqueBorda,
+    borderRadius: raio.cartao + 4,
+    padding: espaco.lg,
+    gap: espaco.md,
+    overflow: 'hidden',
+  },
+  canto: { position: 'absolute', top: 0, right: 0, width: 110, height: 56 },
+  topo: { flexDirection: 'row', alignItems: 'center', gap: espaco.md, paddingRight: 56 },
+  foto: { borderWidth: 3, borderColor: cores.primaria, borderRadius: 999 },
+  textos: { flex: 1, gap: 2 },
+  destaque: { fontSize: 22, lineHeight: 26 },
   acoes: { flexDirection: 'row', flexWrap: 'wrap', gap: espaco.sm, alignItems: 'center' },
-});
+}));

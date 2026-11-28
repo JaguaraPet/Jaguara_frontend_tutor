@@ -71,7 +71,7 @@ export default function Notificacoes() {
 
       {aba === 'AVISOS' &&
         (avisos === null ? (
-          <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando as notificações" />
+          <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando as notificações" />
         ) : (
           <>
             <Texto variante="titulo2">Próximos lembretes</Texto>

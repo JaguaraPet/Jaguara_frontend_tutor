@@ -1,24 +1,25 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import type { ComponentProps } from 'react';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { api } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
 import { Alerta, Botao, Opcoes, Tela, Texto } from '../../../componentes';
 import { cores, espaco, raio } from '../../../tema/tokens';
+import { criarEstilos } from '../../../tema/estilos';
 
 type Item = components['schemas']['ItemLinhaDoTempo'];
 type TipoItem = NonNullable<Item['tipo']>;
 type Filtro = TipoItem | 'TODOS';
 
-const ROTULO: Record<TipoItem, { rotulo: string; icone: ComponentProps<typeof Ionicons>['name'] }> = {
-  VACINACAO: { rotulo: 'Vacina', icone: 'shield-checkmark' },
+const ROTULO: Record<TipoItem, { rotulo: string; icone: ComponentProps<typeof MaterialCommunityIcons>['name'] }> = {
+  VACINACAO: { rotulo: 'Vacina', icone: 'needle' },
   EXAME: { rotulo: 'Exame', icone: 'flask' },
-  TRATAMENTO: { rotulo: 'Medicamento', icone: 'medkit' },
+  TRATAMENTO: { rotulo: 'Medicamento', icone: 'pill' },
   EVENTO: { rotulo: 'Compromisso', icone: 'calendar' },
-  ATENDIMENTO: { rotulo: 'Atendimento', icone: 'medical' },
+  ATENDIMENTO: { rotulo: 'Atendimento', icone: 'stethoscope' },
   FOTO: { rotulo: 'Foto', icone: 'image' },
 };
 
@@ -57,7 +58,7 @@ export default function LinhaDoTempo() {
       {erro && <Alerta tipo="erro" titulo="Linha do tempo indisponível" />}
       <Opcoes<Filtro> rotulo="Mostrar" opcoes={FILTROS} valor={filtro} aoMudar={setFiltro} />
       {itens === null ? (
-        <ActivityIndicator color={cores.primaria} accessibilityLabel="Carregando a linha do tempo" />
+        <ActivityIndicator color={cores.destaque} accessibilityLabel="Carregando a linha do tempo" />
       ) : visiveis.length === 0 ? (
         <Texto cor={cores.textoSecundario}>Nada registrado ainda.</Texto>
       ) : (
@@ -72,7 +73,7 @@ export default function LinhaDoTempo() {
                 accessibilityLabel={`${quando(i.data)}, ${info.rotulo}: ${i.titulo}`}
               >
                 <View style={estilos.marca}>
-                  <Ionicons name={info.icone} size={18} color={cores.branco} />
+                  <MaterialCommunityIcons name={info.icone} size={18} color={cores.sobreCor} />
                 </View>
                 <View style={estilos.texto}>
                   <Texto variante="legenda" cor={cores.textoSecundario}>
@@ -93,7 +94,7 @@ export default function LinhaDoTempo() {
   );
 }
 
-const estilos = StyleSheet.create({
+const estilos = criarEstilos(() => ({
   lista: { gap: espaco.md, alignSelf: 'stretch' },
   item: { flexDirection: 'row', gap: espaco.md, alignItems: 'flex-start' },
   marca: {
@@ -106,4 +107,4 @@ const estilos = StyleSheet.create({
   },
   texto: { flex: 1, gap: espaco.xs },
   foto: { width: '100%', aspectRatio: 4 / 3, borderRadius: raio.padrao * 2 },
-});
+}));

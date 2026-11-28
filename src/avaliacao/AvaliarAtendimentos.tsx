@@ -3,12 +3,11 @@ import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { api } from '../api/cliente';
 import type { components } from '../api/esquema';
-import { Botao, Campo, Cartao, Texto } from '../componentes';
+import { Botao, Campo, Cartao, Icone, Texto } from '../componentes';
 import { alvoToqueMinimo, cores, espaco } from '../tema/tokens';
 
 type Pendente = components['schemas']['AvaliacaoPendente'];
 
-const ESTRELA = '#C98A12';
 const ROTULOS = ['Ruim', 'Fraco', 'Ok', 'Bom', 'Excelente'];
 
 /** Cinco estrelas tocáveis, anunciadas como opções de 1 a 5. */
@@ -25,7 +24,7 @@ export function SeletorNota({ nota, aoEscolher }: { nota: number; aoEscolher: (n
           hitSlop={4}
           style={estilos.estrela}
         >
-          <Texto style={{ fontSize: 30, color: n <= nota ? ESTRELA : cores.borda }}>★</Texto>
+          <Icone nome={n <= nota ? 'star' : 'star-outline'} tamanho={32} cor={n <= nota ? cores.destaque : cores.textoSecundario} />
         </Pressable>
       ))}
     </View>
