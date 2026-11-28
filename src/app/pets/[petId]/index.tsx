@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { api } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
 import { Alerta, Botao, Cartao, Tela, Texto } from '../../../componentes';
@@ -15,6 +15,21 @@ type Vacina = components['schemas']['Vacinacao'];
 const hojeIso = () => new Date().toISOString().slice(0, 10);
 
 /** Perfil do pet (UC-04): dados, alergias graves em destaque (UC-37) e vacinas (UC-12). */
+/** Seções do pet numa grade de atalhos, no lugar de uma lista de botões. */
+const SECOES = [
+  { titulo: 'Rotinas', caminho: 'rotinas', icone: '🔁' },
+  { titulo: 'Vacinas', caminho: 'vacinas', icone: '💉' },
+  { titulo: 'Medicamentos', caminho: 'medicamentos', icone: '💊' },
+  { titulo: 'Exames', caminho: 'exames', icone: '🧪' },
+  { titulo: 'Alergias e restrições', caminho: 'alergias', icone: '⚠️' },
+  { titulo: 'Alimentação', caminho: 'alimentacao', icone: '🥣' },
+  { titulo: 'Linha do tempo', caminho: 'linha-do-tempo', icone: '🕒' },
+  { titulo: 'Documentos', caminho: 'documentos', icone: '📄' },
+  { titulo: 'Despesas', caminho: 'despesas', icone: '🧾' },
+  { titulo: 'Responsáveis', caminho: 'responsaveis', icone: '👨‍👩‍👧' },
+  { titulo: 'Compartilhar perfil', caminho: 'compartilhar', icone: '🔗' },
+] as const;
+
 export default function PerfilPet() {
   const { petId } = useLocalSearchParams<{ petId: string }>();
   const [pet, setPet] = useState<Pet | null>(null);
@@ -97,6 +112,21 @@ export default function PerfilPet() {
         </View>
       ))}
 
+      <View style={estilos.grade}>
+        {SECOES.map((secao) => (
+          <Pressable
+            key={secao.caminho}
+            accessibilityRole="button"
+            accessibilityLabel={secao.titulo}
+            onPress={() => router.push(`/pets/${pet.id}/${secao.caminho}`)}
+            style={({ pressed }) => [estilos.secao, pressed && { backgroundColor: cores.superficie }]}
+          >
+            <Texto style={estilos.secaoIcone}>{secao.icone}</Texto>
+            <Texto style={estilos.secaoTitulo}>{secao.titulo}</Texto>
+          </Pressable>
+        ))}
+      </View>
+
       <Cartao titulo="Dados">
         {dados
           .filter(([, valor]) => valor)
@@ -145,17 +175,6 @@ export default function PerfilPet() {
       {pet.status === 'ATIVO' && (
         <Botao titulo="Editar dados" larguraTotal onPress={() => router.push(`/pets/${pet.id}/editar`)} />
       )}
-      <Botao titulo="Rotinas" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/rotinas`)} />
-      <Botao titulo="Linha do tempo" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/linha-do-tempo`)} />
-      <Botao titulo="Vacinas" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/vacinas`)} />
-      <Botao titulo="Medicamentos" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/medicamentos`)} />
-      <Botao titulo="Exames" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/exames`)} />
-      <Botao titulo="Alergias e restrições" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/alergias`)} />
-      <Botao titulo="Documentos" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/documentos`)} />
-      <Botao titulo="Alimentação" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/alimentacao`)} />
-      <Botao titulo="Despesas" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/despesas`)} />
-      <Botao titulo="Responsáveis" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/responsaveis`)} />
-      <Botao titulo="Compartilhar perfil" variante="secundaria" larguraTotal onPress={() => router.push(`/pets/${pet.id}/compartilhar`)} />
       <Botao titulo="Memorial" variante="texto" larguraTotal onPress={() => router.push(`/pets/${pet.id}/memorial`)} />
       <Botao titulo="Voltar" variante="texto" onPress={() => router.back()} />
     </Tela>
@@ -163,6 +182,22 @@ export default function PerfilPet() {
 }
 
 const estilos = StyleSheet.create({
+  grade: { flexDirection: 'row', flexWrap: 'wrap', gap: espaco.sm, alignSelf: 'stretch' },
+  secao: {
+    width: '47%',
+    minWidth: 140,
+    flexGrow: 1,
+    minHeight: 84,
+    padding: espaco.md,
+    gap: espaco.xs,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: cores.borda,
+    backgroundColor: cores.fundo,
+    justifyContent: 'center',
+  },
+  secaoIcone: { fontSize: 22 },
+  secaoTitulo: { fontWeight: '600', fontSize: 14, lineHeight: 18 },
   destaque: {
     backgroundColor: coresSuaves.erro,
     borderLeftWidth: 4,
